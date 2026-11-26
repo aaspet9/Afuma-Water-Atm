@@ -17,6 +17,7 @@
     button:hover { background: #094bb0; }
     button.success { background: #15803d; }
     button.danger { background: #b91c1c; }
+    button.secondary { background: #475569; }
     button.small { width: auto; padding: 7px 12px; margin: 4px 2px 0; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
@@ -104,6 +105,23 @@
     .badge.ok { background: #dcfce7; color: #166534; }
     .badge.warn { background: #fef3c7; color: #92400e; }
     .badge.err { background: #fee2e2; color: #991b1b; }
+    .bulk-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+    .chk-inline {
+      width: auto;
+      margin: 0 0 0 8px;
+      transform: scale(1.15);
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -127,35 +145,37 @@
         <button class="danger small" onclick="adminLogout()">لاگ آؤٹ</button>
       </div>
 
+      <!-- 1. USER BALANCE REQUESTS -->
       <div class="card">
         <h3>صارفین کی بیلنس درخواستیں (Pending Requests)</h3>
         <div id="requestsList">لوڈ ہو رہا ہے...</div>
       </div>
 
-      <div class="card">
-        <h3>دکانداروں کی بنی ہوئی رقم کی درخواستیں (Send Payment)</h3>
-        <div id="payoutRequestsList">لوڈ ہو رہا ہے...</div>
+      <!-- 2. SHOPKEEPER PAYOUT REQUESTS (COLLAPSIBLE STRIP) -->
+      <div class="card" style="padding:10px;">
+        <div class="strip-btn" onclick="toggleElement('payoutStripBody', 'payoutStripArrow')">
+          <span>دکانداروں کی بنی ہوئی رقم کی درخواستیں (Send Payment)</span>
+          <span id="payoutStripArrow">▼</span>
+        </div>
+        <div id="payoutStripBody" class="strip-body hidden">
+          <div id="payoutRequestsList">لوڈ ہو رہا ہے...</div>
+        </div>
       </div>
 
+      <!-- 3. MACHINE & QR GENERATOR -->
       <div class="card">
         <h3>مشین، دکاندار پرافٹ اور الگ QR کوڈ جنریٹ کریں</h3>
         <div class="grid-2">
           <input type="text" id="mIdInput" placeholder="مشین ID (مثلاً M01)" />
-          <input type="text" id="mLocInput" placeholder="مقام / دکان کا نام (مثلاً دلاور علی)" />
-          <input type="number" id="mRateInput" step="0.1" placeholder="فی لیٹر ریٹ (مثلاً 4)" />
+          <input type="text" id="mLocInput" placeholder="مقام / دکان کا نام (مثلاً بابر علی)" />
+          <input type="number" id="mRateInput" step="0.1" placeholder="فی لیٹر ریٹ (مثلاً 3)" />
           <input type="number" id="mProfitInput" step="0.1" placeholder="دکاندار فی لیٹر پرافٹ (مثلاً 1)" />
         </div>
         <input type="tel" id="mShopPhoneInput" placeholder="دکاندار کا موبائل نمبر (مثلاً 03001234567)" />
         <button class="success" onclick="saveMachine()">مشین محفوظ کریں اور QR کوڈ بنائیں</button>
-
-        <div id="qrGeneratorResult" class="hidden" style="margin-top:12px;">
-          <div><strong>جنریٹ شدہ QR کوڈ:</strong> <span id="qrMachineTitle"></span></div>
-          <div id="qrCodeCanvasBox" class="qr-box"></div>
-          <div id="qrLinkText" style="font-size:12px;color:#475569;word-break:break-all;margin-top:6px;"></div>
-          <button class="small" onclick="downloadQrCode()">QR کوڈ ڈاؤن لوڈ کریں</button>
-        </div>
       </div>
 
+      <!-- 4. SHOPKEEPERS STRIP -->
       <div class="card" style="padding:10px;">
         <div class="strip-btn" onclick="toggleElement('shopStripBody', 'shopStripArrow')">
           <span>🏪 دکانداروں کا بیلنس، پرافٹ اور مشین QR لسٹ</span>
@@ -167,6 +187,7 @@
         </div>
       </div>
 
+      <!-- 5. CUSTOMERS STRIP -->
       <div class="card" style="padding:10px;">
         <div class="strip-btn" onclick="toggleElement('userStripBody', 'userStripArrow')">
           <span>👤 صارفین (کسٹمرز) کا مکمل ڈیٹا اور سرچ</span>
@@ -178,12 +199,21 @@
         </div>
       </div>
 
+      <!-- 6. RECENT WATER ORDERS STRIP -->
       <div class="card" style="padding:10px;">
         <div class="strip-btn" onclick="toggleElement('ordersStripBody', 'ordersStripArrow')">
           <span>💧 حالیہ پانی کے آرڈرز (پٹیوں میں)</span>
           <span id="ordersStripArrow">▼</span>
         </div>
         <div id="ordersStripBody" class="strip-body">
+          <input type="text" id="orderSearchInput" placeholder="مشین نمبر، موبائل نمبر یا نام سے آرڈر سرچ کریں..." oninput="renderOrders()" />
+          <div class="bulk-bar">
+            <label style="width:auto;margin:0;display:flex;align-items:center;cursor:pointer;font-weight:600;">
+              <input type="checkbox" id="selectAllOrdersChk" class="chk-inline" onchange="toggleSelectAllOrders(this.checked)" />
+              Select All (سب منتخب کریں)
+            </label>
+            <button class="danger small" onclick="deleteSelectedOrders()">Delete Selected (منتخب شدہ ڈیلیٹ کریں)</button>
+          </div>
           <div id="ordersList">لوڈ ہو رہا ہے...</div>
         </div>
       </div>
@@ -193,7 +223,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, updateDoc,
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
       onSnapshot, serverTimestamp, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -212,15 +242,128 @@
     const ADMIN_PASS = "921533082022";
     const IMGBB_API_KEY = "E08b8ba508ad2bfe6d3c2a783a81b832";
 
-    let allRequests = [];
-    let allPayoutRequests = [];
-    let allMachines = [];
-    let allUsers = [];
-    let allOrders = [];
+    const DUMMY_IMG = "https://i.ibb.co/21v3Y8p/sample-proof.png";
+
+    const DUMMY_REQUESTS = [
+      {
+        id: "dummy_req_1",
+        isDummy: true,
+        userName: "ڈمی صارف بلال",
+        userPhone: "03001112233",
+        amount: 200,
+        trxId: "TRX-DUMMY-101",
+        imageUrl: DUMMY_IMG,
+        status: "pending",
+        createdAt: new Date()
+      }
+    ];
+
+    const DUMMY_PAYOUT_REQUESTS = [
+      {
+        id: "dummy_payout_1",
+        isDummy: true,
+        shopkeeperName: "ڈمی دکاندار بابر علی",
+        shopkeeperPhone: "03044918885",
+        amount: 150,
+        accountInfo: "JazzCash 03044918885",
+        status: "pending",
+        createdAt: new Date()
+      }
+    ];
+
+    const DUMMY_MACHINES = [
+      {
+        id: "M01",
+        isDummy: true,
+        machineId: "M01",
+        location: "ڈمی دکان بابر علی",
+        pricePerLiter: 3,
+        shopkeeperProfitPerLiter: 1,
+        shopkeeperPhone: "03044918885"
+      }
+    ];
+
+    const DUMMY_USERS = [
+      {
+        id: "03238883319",
+        isDummy: true,
+        name: "ڈمی کسٹمر Asghar Ali",
+        phone: "03238883319",
+        balance: 500,
+        shopkeeperProfit: 150,
+        shopkeeperLiters: 50
+      }
+    ];
+
+    const DUMMY_ORDERS = [
+      {
+        id: "dummy_ord_1",
+        isDummy: true,
+        userName: "ڈمی کسٹمر Asghar Ali",
+        userPhone: "03238883319",
+        machineId: "M01",
+        dispensedLiters: 10,
+        cost: 30,
+        remainingBalance: 470,
+        status: "completed",
+        createdAt: new Date()
+      },
+      {
+        id: "dummy_ord_2",
+        isDummy: true,
+        userName: "ڈمی کسٹمر Asghar Ali",
+        userPhone: "03238883319",
+        machineId: "M01",
+        dispensedLiters: 5,
+        cost: 15,
+        remainingBalance: 455,
+        status: "completed",
+        createdAt: new Date()
+      }
+    ];
+
+    let liveRequests = [];
+    let livePayoutRequests = [];
+    let liveMachines = [];
+    let liveUsers = [];
+    let liveOrders = [];
+
+    const deletedDummyIds = new Set(JSON.parse(localStorage.getItem("water_atm_deleted_dummies") || "[]"));
     const settledOrderIds = new Set();
     const openIds = new Set();
     const payoutProofMap = {};
-    let currentQrMachineId = "";
+    const selectedOrderIds = new Set();
+    let activeShopQrMap = {};
+
+    function markDummyDeleted(id) {
+      deletedDummyIds.add(id);
+      localStorage.setItem("water_atm_deleted_dummies", JSON.stringify(Array.from(deletedDummyIds)));
+    }
+
+    function getAllRequests() {
+      return [...liveRequests, ...DUMMY_REQUESTS.filter(d => !deletedDummyIds.has(d.id))];
+    }
+    function getAllPayoutRequests() {
+      return [...livePayoutRequests, ...DUMMY_PAYOUT_REQUESTS.filter(d => !deletedDummyIds.has(d.id))];
+    }
+    function getAllMachines() {
+      const map = {};
+      DUMMY_MACHINES.filter(d => !deletedDummyIds.has(d.id)).forEach(m => { map[m.id] = m; });
+      liveMachines.forEach(m => { map[m.id] = m; });
+      return Object.values(map);
+    }
+    function getAllUsers() {
+      const map = {};
+      DUMMY_USERS.filter(d => !deletedDummyIds.has(d.id)).forEach(u => { map[normalizePhone(u.phone || u.id)] = u; });
+      liveUsers.forEach(u => { map[normalizePhone(u.phone || u.id)] = u; });
+      return Object.values(map);
+    }
+    function getAllOrders() {
+      const arr = [...liveOrders, ...DUMMY_ORDERS.filter(d => !deletedDummyIds.has(d.id))];
+      arr.sort((a, b) => (b.createdAt?.seconds || new Date(b.createdAt).getTime() / 1000 || 0) -
+                        (a.createdAt?.seconds || new Date(a.createdAt).getTime() / 1000 || 0));
+      return arr;
+    }
 
     function showAlert(text, type = "err") {
       const box = document.getElementById("alertBox");
@@ -238,33 +381,31 @@
       return `${base}${sep}machine=${encodeURIComponent(mId)}`;
     }
 
-    window.generateMachineQr = function(mId) {
-      const cleanId = (mId || "").trim().toUpperCase();
-      if (!cleanId) return;
-      currentQrMachineId = cleanId;
-      const qrUrl = getCustomerAppUrlForMachine(cleanId);
-      const box = document.getElementById("qrCodeCanvasBox");
+    window.toggleShopMachineQr = function(qrBoxId, mId) {
+      const box = document.getElementById(qrBoxId);
+      if (!box) return;
+      const isCurrentlyShown = !box.classList.contains("hidden");
+      if (isCurrentlyShown) {
+        box.classList.add("hidden");
+        box.innerHTML = "";
+        delete activeShopQrMap[qrBoxId];
+        return;
+      }
+      box.classList.remove("hidden");
       box.innerHTML = "";
+      const qrUrl = getCustomerAppUrlForMachine(mId);
       new QRCode(box, {
         text: qrUrl,
-        width: 180,
-        height: 180
+        width: 170,
+        height: 170
       });
-      document.getElementById("qrMachineTitle").textContent = cleanId;
-      document.getElementById("qrLinkText").textContent = qrUrl;
-      document.getElementById("qrGeneratorResult").classList.remove("hidden");
-    };
-
-    window.downloadQrCode = function() {
-      const box = document.getElementById("qrCodeCanvasBox");
-      const canvas = box.querySelector("canvas");
-      const img = box.querySelector("img");
-      const dataUrl = canvas ? canvas.toDataURL("image/png") : (img ? img.src : "");
-      if (!dataUrl) return;
-      const a = document.createElement("a");
-      a.href = dataUrl;
-      a.download = `WaterATM_${currentQrMachineId || "QR"}.png`;
-      a.click();
+      const caption = document.createElement("div");
+      caption.style.fontSize = "11.5px";
+      caption.style.color = "#475569";
+      caption.style.marginTop = "6px";
+      caption.textContent = `مشین ${mId} QR`;
+      box.appendChild(caption);
+      activeShopQrMap[qrBoxId] = mId;
     };
 
     function formatTime(ts) {
@@ -331,6 +472,9 @@
       const arrow = document.getElementById(`arrow_${key}`);
       if (body) body.classList.toggle("hidden", !openIds.has(key));
       if (arrow) arrow.textContent = openIds.has(key) ? "▲" : "▼";
+      if (!openIds.has(key)) {
+        renderShopkeepers();
+      }
     };
 
     window.adminLogin = function() {
@@ -349,55 +493,165 @@
     function showAdminPanel() {
       document.getElementById("adminLoginCard").classList.add("hidden");
       document.getElementById("adminPanel").classList.remove("hidden");
+      renderAll();
       listenAll();
+    }
+
+    function renderAll() {
+      renderRequests();
+      renderPayoutRequests();
+      renderShopkeepers();
+      renderCustomers();
+      renderOrders();
     }
 
     function listenAll() {
       onSnapshot(collection(db, "balanceRequests"), (qs) => {
-        allRequests = [];
-        qs.forEach(d => allRequests.push({ id: d.id, ...d.data() }));
-        allRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        liveRequests = [];
+        qs.forEach(d => liveRequests.push({ id: d.id, ...d.data() }));
+        liveRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         renderRequests();
         renderCustomers();
       });
 
       onSnapshot(collection(db, "shopkeeperPayoutRequests"), (qs) => {
-        allPayoutRequests = [];
-        qs.forEach(d => allPayoutRequests.push({ id: d.id, ...d.data() }));
-        allPayoutRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        livePayoutRequests = [];
+        qs.forEach(d => livePayoutRequests.push({ id: d.id, ...d.data() }));
+        livePayoutRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         renderPayoutRequests();
         renderShopkeepers();
       });
 
       onSnapshot(collection(db, "machines"), (qs) => {
-        allMachines = [];
-        qs.forEach(d => allMachines.push({ id: d.id.toUpperCase(), ...d.data() }));
+        liveMachines = [];
+        qs.forEach(d => liveMachines.push({ id: d.id.toUpperCase(), ...d.data() }));
         renderShopkeepers();
       });
 
       onSnapshot(collection(db, "users"), (qs) => {
-        allUsers = [];
-        qs.forEach(d => allUsers.push({ id: d.id, ...d.data() }));
+        liveUsers = [];
+        qs.forEach(d => liveUsers.push({ id: d.id, ...d.data() }));
         renderShopkeepers();
         renderCustomers();
       });
 
       onSnapshot(collection(db, "dispenseOrders"), (qs) => {
-        allOrders = [];
+        liveOrders = [];
         qs.forEach(d => {
           const item = { id: d.id, ...d.data() };
-          allOrders.push(item);
+          liveOrders.push(item);
           maybeCreditShopkeeperProfit(item);
         });
-        allOrders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        liveOrders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         renderOrders();
         renderShopkeepers();
         renderCustomers();
       });
     }
 
+    window.deleteOrderRecord = async function(orderId, isDummy = false) {
+      if (!orderId) return;
+      if (!confirm("کیا آپ واقعی یہ پانی کا آرڈر ریکارڈ ڈیلیٹ کرنا چاہتے ہیں؟")) return;
+      selectedOrderIds.delete(orderId);
+      if (isDummy || deletedDummyIds.has(orderId)) {
+        markDummyDeleted(orderId);
+        renderAll();
+      } else {
+        await deleteDoc(doc(db, "dispenseOrders", orderId));
+      }
+      showAlert("پانی کا آرڈر ریکارڈ ڈیلیٹ کر دیا گیا۔", "ok");
+    };
+
+    window.toggleOrderSelection = function(orderId, checked) {
+      if (checked) selectedOrderIds.add(orderId);
+      else selectedOrderIds.delete(orderId);
+    };
+
+    window.toggleSelectAllOrders = function(checked) {
+      const checkboxes = document.querySelectorAll(".order-row-chk");
+      checkboxes.forEach(cb => {
+        cb.checked = checked;
+        if (checked) selectedOrderIds.add(cb.value);
+        else selectedOrderIds.delete(cb.value);
+      });
+    };
+
+    window.deleteSelectedOrders = async function() {
+      if (!selectedOrderIds.size) return showAlert("پہلے کم از کم ایک آرڈر منتخب کریں۔");
+      if (!confirm(`کیا آپ منتخب شدہ (${selectedOrderIds.size}) آرڈرز ڈیلیٹ کرنا چاہتے ہیں؟`)) return;
+      const ids = Array.from(selectedOrderIds);
+      for (const id of ids) {
+        if (id.startsWith("dummy_")) {
+          markDummyDeleted(id);
+        } else {
+          await deleteDoc(doc(db, "dispenseOrders", id));
+        }
+        selectedOrderIds.delete(id);
+      }
+      document.getElementById("selectAllOrdersChk").checked = false;
+      renderAll();
+      showAlert("منتخب شدہ آرڈرز ڈیلیٹ کر دیے گئے۔", "ok");
+    };
+
+    window.deleteBalanceRequestRecord = async function(reqId, isDummy = false) {
+      if (!reqId) return;
+      if (!confirm("کیا آپ واقعی یہ بیلنس درخواست ڈیلیٹ کرنا چاہتے ہیں؟")) return;
+      if (isDummy || deletedDummyIds.has(reqId)) {
+        markDummyDeleted(reqId);
+        renderAll();
+      } else {
+        await deleteDoc(doc(db, "balanceRequests", reqId));
+      }
+      showAlert("بیلنس درخواست ڈیلیٹ کر دی گئی۔", "ok");
+    };
+
+    window.deletePayoutRequestRecord = async function(reqId, isDummy = false) {
+      if (!reqId) return;
+      if (!confirm("کیا آپ واقعی یہ پے آؤٹ درخواست ڈیلیٹ کرنا چاہتے ہیں؟")) return;
+      if (isDummy || deletedDummyIds.has(reqId)) {
+        markDummyDeleted(reqId);
+        renderAll();
+      } else {
+        await deleteDoc(doc(db, "shopkeeperPayoutRequests", reqId));
+      }
+      showAlert("دکاندار کی پے آؤٹ درخواست ڈیلیٹ کر دی گئی۔", "ok");
+    };
+
+    window.deleteShopkeeperRecord = async function(shopKey, phone, isDummy = false) {
+      if (!confirm("کیا آپ واقعی اس دکاندار کا ریکارڈ ڈیلیٹ کرنا چاہتے ہیں؟")) return;
+      if (isDummy) {
+        markDummyDeleted("dummy_payout_1");
+        markDummyDeleted("M01");
+      }
+      const cleanPhone = normalizePhone(phone);
+      if (cleanPhone && liveUsers.some(u => normalizePhone(u.phone || u.id) === cleanPhone)) {
+        await deleteDoc(doc(db, "users", cleanPhone));
+      }
+      renderShopkeepers();
+      showAlert("دکاندار کا ریکارڈ ڈیلیٹ کر دیا گیا۔", "ok");
+    };
+
+    window.deleteCustomerRecord = async function(phone, isDummy = false) {
+      const cleanPhone = normalizePhone(phone);
+      if (!confirm("کیا آپ واقعی اس کسٹمر کا مکمل ڈیٹا ڈیلیٹ کرنا چاہتے ہیں؟")) return;
+      if (isDummy) {
+        markDummyDeleted("03238883319");
+        markDummyDeleted("dummy_ord_1");
+        markDummyDeleted("dummy_ord_2");
+      }
+      const uOrders = liveOrders.filter(o => normalizePhone(o.userPhone) === cleanPhone);
+      for (const o of uOrders) await deleteDoc(doc(db, "dispenseOrders", o.id));
+      const uReqs = liveRequests.filter(r => normalizePhone(r.userPhone) === cleanPhone);
+      for (const r of uReqs) await deleteDoc(doc(db, "balanceRequests", r.id));
+      if (cleanPhone && liveUsers.some(u => normalizePhone(u.phone || u.id) === cleanPhone)) {
+        await deleteDoc(doc(db, "users", cleanPhone));
+      }
+      renderAll();
+      showAlert("کسٹمر کا مکمل ڈیٹا ڈیلیٹ کر دیا گیا۔", "ok");
+    };
+
     async function maybeCreditShopkeeperProfit(order) {
-      if (!order || !order.id || order.profitCredited) return;
+      if (!order || !order.id || order.isDummy || order.profitCredited) return;
       const doneStatuses = ["completed", "stopped_by_user", "stopped_power_or_machine", "stopped"];
       if (!doneStatuses.includes(order.status)) return;
       if (settledOrderIds.has(order.id)) return;
@@ -406,7 +660,7 @@
       if (liters <= 0) return;
 
       const mId = (order.machineId || "").toUpperCase();
-      const machine = allMachines.find(m => m.id === mId);
+      const machine = getAllMachines().find(m => m.id === mId);
       const profitPerLiter = Number(machine?.shopkeeperProfitPerLiter || 0);
       const shopPhone = normalizePhone(machine?.shopkeeperPhone || "");
       const profitAmount = Number((liters * profitPerLiter).toFixed(2));
@@ -455,7 +709,7 @@
 
     function renderRequests() {
       const box = document.getElementById("requestsList");
-      const pending = allRequests.filter(x => x.status === "pending");
+      const pending = getAllRequests().filter(x => x.status === "pending");
       if (!pending.length) {
         box.innerHTML = "کوئی نئی بیلنس درخواست زیرِ التواء نہیں ہے۔";
         return;
@@ -468,8 +722,9 @@
             <div><strong>مطلوبہ رقم:</strong> Rs. ${Number(r.amount || 0).toFixed(2)} | <strong>Trx ID:</strong> ${r.trxId || "-"}</div>
             ${imgSrc ? `<img src="${imgSrc}" class="req-img" alt="اسکرین شاٹ" />` : ""}
             <div style="margin-top:8px;">
-              <button class="success small" onclick="approveRequest('${r.id}', '${r.userPhone}', ${Number(r.amount || 0)})">منظور کریں</button>
-              <button class="danger small" onclick="rejectRequest('${r.id}')">مسترد کریں</button>
+              <button class="success small" onclick="approveRequest('${r.id}', '${r.userPhone}', ${Number(r.amount || 0)}, ${!!r.isDummy})">منظور کریں</button>
+              <button class="danger small" onclick="rejectRequest('${r.id}', ${!!r.isDummy})">مسترد کریں</button>
+              <button class="danger small" onclick="deleteBalanceRequestRecord('${r.id}', ${!!r.isDummy})">ڈیلیٹ کریں</button>
             </div>
           </div>
         `;
@@ -500,7 +755,7 @@
 
     function renderPayoutRequests() {
       const box = document.getElementById("payoutRequestsList");
-      const pending = allPayoutRequests.filter(x => x.status === "pending");
+      const pending = getAllPayoutRequests().filter(x => x.status === "pending");
       if (!pending.length) {
         box.innerHTML = "دکانداروں کی طرف سے کوئی نئی رقم کی درخواست نہیں ہے۔";
         return;
@@ -519,21 +774,29 @@
             <input type="file" accept="image/*" onchange="onPayoutProofChange('${r.id}', this)" />
             <img id="payoutPrev_${r.id}" src="${existingProof}" class="req-img" style="${existingProof ? "" : "display:none;"}" alt="پیمنٹ ثبوت" />
             <div style="margin-top:8px;">
-              <button class="success small" onclick="sendShopkeeperPayment('${r.id}', '${shopPhone}', ${reqAmt})">Send Payment (پیمنٹ بھیجیں)</button>
-              <button class="danger small" onclick="rejectPayoutRequest('${r.id}')">مسترد کریں</button>
+              <button class="success small" onclick="sendShopkeeperPayment('${r.id}', '${shopPhone}', ${reqAmt}, ${!!r.isDummy})">Send Payment (پیمنٹ بھیجیں)</button>
+              <button class="danger small" onclick="rejectPayoutRequest('${r.id}', ${!!r.isDummy})">مسترد کریں</button>
+              <button class="danger small" onclick="deletePayoutRequestRecord('${r.id}', ${!!r.isDummy})">ڈیلیٹ کریں</button>
             </div>
           </div>
         `;
       }).join("");
     }
 
-    window.sendShopkeeperPayment = async function(reqId, shopPhone, reqAmount) {
+    window.sendShopkeeperPayment = async function(reqId, shopPhone, reqAmount, isDummy = false) {
       const cleanPhone = normalizePhone(shopPhone);
       const sentTrxId = (document.getElementById(`sendTrx_${reqId}`)?.value || "").trim();
       const proofUrl = payoutProofMap[reqId] || "";
 
       if (!sentTrxId) {
         return showAlert("براہِ کرم بھیجی گئی رقم کی ٹرانزیکشن ID لکھیں۔");
+      }
+
+      if (isDummy || String(reqId).startsWith("dummy_")) {
+        markDummyDeleted(reqId);
+        delete payoutProofMap[reqId];
+        renderPayoutRequests();
+        return showAlert(`ڈمی پیمنٹ (Rs. ${Number(reqAmount).toFixed(2)}) ریکارڈ مکمل ہو گیا۔`, "ok");
       }
 
       try {
@@ -571,7 +834,13 @@
       }
     };
 
-    window.rejectPayoutRequest = async function(reqId) {
+    window.rejectPayoutRequest = async function(reqId, isDummy = false) {
+      if (isDummy || String(reqId).startsWith("dummy_")) {
+        markDummyDeleted(reqId);
+        delete payoutProofMap[reqId];
+        renderPayoutRequests();
+        return showAlert("ڈمی درخواست مسترد کر دی گئی۔", "ok");
+      }
       await updateDoc(doc(db, "shopkeeperPayoutRequests", reqId), {
         status: "rejected",
         rejectedAt: serverTimestamp()
@@ -580,7 +849,12 @@
       showAlert("دکاندار کی درخواست مسترد کر دی گئی۔", "ok");
     };
 
-    window.approveRequest = async function(reqId, phone, amount) {
+    window.approveRequest = async function(reqId, phone, amount, isDummy = false) {
+      if (isDummy || String(reqId).startsWith("dummy_")) {
+        markDummyDeleted(reqId);
+        renderRequests();
+        return showAlert("ڈمی بیلنس درخواست منظور کر دی گئی۔", "ok");
+      }
       const cleanPhone = normalizePhone(phone);
       try {
         await runTransaction(db, async (tx) => {
@@ -606,7 +880,12 @@
       }
     };
 
-    window.rejectRequest = async function(reqId) {
+    window.rejectRequest = async function(reqId, isDummy = false) {
+      if (isDummy || String(reqId).startsWith("dummy_")) {
+        markDummyDeleted(reqId);
+        renderRequests();
+        return showAlert("ڈمی درخواست مسترد کر دی گئی۔", "ok");
+      }
       await updateDoc(doc(db, "balanceRequests", reqId), {
         status: "rejected",
         rejectedAt: serverTimestamp()
@@ -632,8 +911,7 @@
         updatedAt: serverTimestamp()
       }, { merge: true });
 
-      generateMachineQr(mId);
-      showAlert(`مشین ${mId} محفوظ ہو گئی اور اس کا الگ QR کوڈ تیار ہو گیا ہے۔`, "ok");
+      showAlert(`مشین ${mId} محفوظ ہو گئی۔ دکاندار لسٹ سے اس کا QR کوڈ دیکھا جا سکتا ہے۔`, "ok");
     };
 
     function renderShopkeepers() {
@@ -641,9 +919,12 @@
       const q = (document.getElementById("shopSearchInput")?.value || "").trim().toLowerCase();
       const qDigits = normalizePhone(q);
 
+      const machines = getAllMachines();
+      const users = getAllUsers();
+      const payouts = getAllPayoutRequests();
       const mapByKey = {};
 
-      allMachines.forEach(m => {
+      machines.forEach(m => {
         const sp = normalizePhone(m.shopkeeperPhone || "");
         const key = sp || `MACHINE_${m.id}`;
         if (!mapByKey[key]) {
@@ -653,13 +934,14 @@
             name: m.location || "دکاندار",
             machines: [],
             profitEarned: 0,
-            litersDispensed: 0
+            litersDispensed: 0,
+            isDummy: !!m.isDummy
           };
         }
         mapByKey[key].machines.push(m);
       });
 
-      allUsers.forEach(u => {
+      users.forEach(u => {
         const up = normalizePhone(u.phone || u.id);
         const hasShopFlag = Number(u.shopkeeperProfit || 0) > 0 || !!mapByKey[up];
         if (hasShopFlag) {
@@ -670,7 +952,8 @@
               name: u.name || "دکاندار",
               machines: [],
               profitEarned: 0,
-              litersDispensed: 0
+              litersDispensed: 0,
+              isDummy: !!u.isDummy
             };
           }
           if (u.name) mapByKey[up].name = u.name;
@@ -697,12 +980,13 @@
       box.innerHTML = list.map(s => {
         const stripKey = `shop_${s.key.replace(/[^a-zA-Z0-9_]/g, "_")}`;
         const isOpen = openIds.has(stripKey);
-        const shopPayouts = allPayoutRequests.filter(p => normalizePhone(p.shopkeeperPhone || p.phone || "") === s.phone);
+        const shopPayouts = payouts.filter(p => normalizePhone(p.shopkeeperPhone || p.phone || "") === s.phone);
 
         const machineStrips = s.machines.length
           ? s.machines.map(m => {
               const mKey = `sm_${stripKey}_${m.id}`;
               const mOpen = openIds.has(mKey);
+              const qrBoxId = `shop_qr_${stripKey}_${m.id}`;
               return `
                 <div class="sub-strip">
                   <div class="sub-strip-header" onclick="toggleRowStrip('${mKey}')">
@@ -713,7 +997,8 @@
                     <div>ریٹ: <strong>Rs. ${m.pricePerLiter ?? 5}/L</strong></div>
                     <div>دکاندار پرافٹ: <strong>Rs. ${m.shopkeeperProfitPerLiter ?? 0}/L</strong></div>
                     <div>دکاندار نمبر: <strong>${m.shopkeeperPhone || "-"}</strong></div>
-                    <button class="small" onclick="generateMachineQr('${m.id}')">اس مشین کا QR کوڈ دکھائیں</button>
+                    <button class="small" onclick="toggleShopMachineQr('${qrBoxId}', '${m.id}')">QR کوڈ دکھائیں / چھپائیں</button>
+                    <div id="${qrBoxId}" class="qr-box hidden"></div>
                   </div>
                 </div>
               `;
@@ -728,6 +1013,7 @@
                   <div>رقم: <strong>Rs. ${Number(p.amount || 0).toFixed(2)}</strong> | <span class="badge ${p.status === "paid" ? "ok" : p.status === "rejected" ? "err" : "warn"}">${p.status || "pending"}</span></div>
                   <div>Sent Trx ID: <strong>${p.sentTrxId || "-"}</strong> | وقت: ${formatTime(p.paidAt || p.createdAt)}</div>
                   ${proofSrc ? `<img src="${proofSrc}" class="req-img" alt="پیمنٹ اسکرین شاٹ" />` : ""}
+                  <button class="danger small" onclick="deletePayoutRequestRecord('${p.id}', ${!!p.isDummy})">ڈیلیٹ کریں</button>
                 </div>
               `;
             }).join("")
@@ -746,7 +1032,8 @@
               <span id="arrow_${stripKey}">${isOpen ? "▲" : "▼"}</span>
             </div>
             <div id="body_${stripKey}" class="row-strip-body ${isOpen ? "" : "hidden"}">
-              <div><strong>مشینیں:</strong>${machineStrips}</div>
+              <button class="danger small" onclick="deleteShopkeeperRecord('${stripKey}', '${s.phone}', ${!!s.isDummy})">دکاندار ریکارڈ ڈیلیٹ کریں</button>
+              <div style="margin-top:6px;"><strong>مشینیں:</strong>${machineStrips}</div>
               <div style="margin-top:8px;"><strong>پیمنٹ کی درخواستیں و ثبوت:</strong>${payoutHistoryHtml}</div>
             </div>
           </div>
@@ -759,7 +1046,11 @@
       const q = (document.getElementById("userSearchInput")?.value || "").trim().toLowerCase();
       const qDigits = normalizePhone(q);
 
-      const filtered = allUsers.filter(u => {
+      const users = getAllUsers();
+      const reqs = getAllRequests();
+      const orders = getAllOrders();
+
+      const filtered = users.filter(u => {
         if (!q) return true;
         const p = normalizePhone(u.phone || u.id);
         const phoneMatch = qDigits && p.includes(qDigits);
@@ -777,8 +1068,8 @@
         const custKey = `cust_${p || u.id}`;
         const isOpen = openIds.has(custKey);
 
-        const userReqs = allRequests.filter(r => normalizePhone(r.userPhone) === p);
-        const userOrders = allOrders.filter(o => normalizePhone(o.userPhone) === p);
+        const userReqs = reqs.filter(r => normalizePhone(r.userPhone) === p);
+        const userOrders = orders.filter(o => normalizePhone(o.userPhone) === p);
 
         const totalApprovedPayment = userReqs
           .filter(r => r.status === "approved")
@@ -805,6 +1096,7 @@
                     <div><strong>Trx ID:</strong> ${r.trxId || "-"}</div>
                     <div><strong>اسٹیٹس:</strong> ${r.status || "pending"}</div>
                     ${imgSrc ? `<img src="${imgSrc}" class="req-img" alt="اسکرین شاٹ" />` : ""}
+                    <button class="danger small" onclick="deleteBalanceRequestRecord('${r.id}', ${!!r.isDummy})">ڈیلیٹ کریں</button>
                   </div>
                 </div>
               `;
@@ -829,6 +1121,7 @@
                     <div><strong>پانی لیا:</strong> ${litersVal} لیٹر | <strong>رقم:</strong> Rs. ${costVal}</div>
                     <div><strong>بقایا بیلنس:</strong> Rs. ${remVal}</div>
                     <div><strong>اسٹیٹس / تفصیل:</strong> ${o.status || "-"}${o.endedAt ? " (ختم: " + formatTime(o.endedAt) + ")" : ""}</div>
+                    <button class="danger small" onclick="deleteOrderRecord('${o.id}', ${!!o.isDummy})">ڈیلیٹ کریں</button>
                   </div>
                 </div>
               `;
@@ -852,6 +1145,7 @@
                 <strong>منظور شدہ پیمنٹ:</strong> Rs. ${totalApprovedPayment.toFixed(2)} |
                 <strong>کل خرچ رقم:</strong> Rs. ${totalSpentOnWater.toFixed(2)}
               </div>
+              <button class="danger small" onclick="deleteCustomerRecord('${p}', ${!!u.isDummy})">کسٹمر کا سارا ڈیٹا ڈیلیٹ کریں</button>
               <div style="margin-top:6px;"><strong>پیمنٹ درخواستیں و اسکرین شاٹ:</strong>${reqStrips}</div>
               <div style="margin-top:8px;"><strong>پانی لینے کی پٹیاں (وقت و تفصیل):</strong>${orderStrips}</div>
             </div>
@@ -862,21 +1156,45 @@
 
     function renderOrders() {
       const box = document.getElementById("ordersList");
-      if (!allOrders.length) {
+      const q = (document.getElementById("orderSearchInput")?.value || "").trim().toLowerCase();
+      const qDigits = normalizePhone(q);
+
+      const filtered = getAllOrders().filter(o => {
+        if (!q) return true;
+        const phoneMatch = qDigits && normalizePhone(o.userPhone || "").includes(qDigits);
+        const mMatch = (o.machineId || "").toLowerCase().includes(q);
+        const nameMatch = (o.userName || "").toLowerCase().includes(q);
+        return phoneMatch || mMatch || nameMatch;
+      }).slice(0, 50);
+
+      if (!filtered.length) {
         box.innerHTML = "کوئی آرڈر موجود نہیں۔";
         return;
       }
-      box.innerHTML = allOrders.slice(0, 40).map((o, idx) => {
+
+      box.innerHTML = filtered.map((o, idx) => {
         const key = `ord_${o.id || idx}`;
         const isOpen = openIds.has(key);
         const litersVal = Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2);
         const costVal = Number(o.cost ?? o.liveCost ?? 0).toFixed(2);
         const remVal = Number(o.remainingBalance ?? 0).toFixed(2);
+        const checkedAttr = selectedOrderIds.has(o.id) ? "checked" : "";
+
         return `
           <div class="row-strip">
-            <div class="row-strip-header" onclick="toggleRowStrip('${key}')">
-              <span>مشین ${o.machineId || "-"} | ${o.userPhone || "-"} | ${litersVal} L | ${formatTime(o.createdAt)}</span>
-              <span class="badge">${o.status || "-"}</span>
+            <div class="row-strip-header">
+              <div style="display:flex;align-items:center;flex:1;" onclick="toggleRowStrip('${key}')">
+                <input type="checkbox" class="chk-inline order-row-chk" value="${o.id}" ${checkedAttr} onclick="event.stopPropagation(); toggleOrderSelection('${o.id}', this.checked)" />
+                <div>
+                  <div>مشین ${o.machineId || "-"} | ${o.userPhone || "-"} | ${litersVal} L</div>
+                  <div style="font-size:12px;font-weight:500;color:#475569;">${formatTime(o.createdAt)}</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="badge">${o.status || "-"}</span>
+                <button class="danger small" style="margin:0;padding:5px 9px;" onclick="event.stopPropagation(); deleteOrderRecord('${o.id}', ${!!o.isDummy})">ڈیلیٹ کریں</button>
+                <span onclick="toggleRowStrip('${key}')" id="arrow_${key}">${isOpen ? "▲" : "▼"}</span>
+              </div>
             </div>
             <div id="body_${key}" class="row-strip-body ${isOpen ? "" : "hidden"}">
               <div><strong>صارف:</strong> ${o.userName || "-"} (${o.userPhone || "-"})</div>
