@@ -19,7 +19,17 @@
     button.secondary { background: #475569; }
     button.success { background: #15803d; }
     button.danger { background: #b91c1c; }
-    button.small { width: auto; padding: 7px 12px; font-size: 13px; margin: 4px 2px 0; }
+
+    @keyframes blinkConfirm {
+      0%, 100% { background: #15803d; transform: scale(1); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.75); }
+      50% { background: #dc2626; transform: scale(1.02); box-shadow: 0 0 16px rgba(220, 38, 38, 0.8); }
+    }
+    .blink-confirm-btn {
+      animation: blinkConfirm 1.1s infinite;
+      color: #fff !important;
+      font-weight: 800;
+      padding: 13px 14px;
+    }
 
     /* Top Header with Round Logo + Live Date & Time + Red Title & Side Lang Buttons */
     .top-brand-card {
@@ -126,6 +136,21 @@
     .msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
     .hidden { display: none; }
     .preview-img { max-width: 100%; max-height: 180px; border-radius: 8px; margin-top: 8px; display: none; border: 1px solid #cbd5e1; }
+    .qr-preview-box {
+      text-align: center;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    .qr-preview-img {
+      max-width: 210px;
+      max-height: 210px;
+      border-radius: 10px;
+      border: 2px solid #0284c7;
+      display: inline-block;
+    }
 
     .install-banner {
       background: #fffbeb;
@@ -172,15 +197,6 @@
       border-radius: 10px;
       font-weight: 700;
       margin-bottom: 10px;
-    }
-    .confirmed-box {
-      background: #dcfce7;
-      border: 1px solid #86efac;
-      color: #166534;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-weight: 800;
-      margin: 8px 0;
     }
 
     .live-box {
@@ -356,7 +372,7 @@
         <button id="btnLogout" class="secondary" onclick="logoutUser()">Logout</button>
       </div>
 
-      <!-- STEP 1: ALWAYS STARTS ON QR SCAN PAGE ON OPEN / REFRESH / REOPEN -->
+      <!-- STEP 1: ALWAYS STARTS ON QR SCAN PAGE ON OPEN / REFRESH / STOP / REOPEN -->
       <div id="scanCard" class="card">
         <h3 id="hScanQr">Scan Machine QR Code</h3>
         <p id="pScanHint" style="margin:0 0 8px;font-size:14px;color:#475569;">Scan the QR code attached on the water machine.</p>
@@ -367,24 +383,34 @@
         <div id="qrReaderBox" style="margin-top:10px;"></div>
       </div>
 
-      <!-- STEP 2: CONFIRM SCAN -> THEN SHOW START MACHINE BUTTON -->
-      <div id="dispenseFormCard" class="card hidden">
-        <h3 id="hGetWater">Get Water</h3>
+      <!-- STEP 2A: QR PREVIEW + BLINKING CONFIRM SCAN BUTTON (SHOWN BEFORE LITERS STEP) -->
+      <div id="confirmScanCard" class="card hidden">
+        <h3 id="hConfirmScan">Confirm Scanned QR</h3>
         <div class="machine-badge">
           <span id="lblSelectedMachine">Selected Machine</span>: <span id="scannedMachineLabel">-</span>
           <span id="scannedMachineLoc" style="font-weight:500;"></span>
         </div>
 
-        <input type="number" id="litersInput" min="0.5" step="0.5" placeholder="How many liters of water? (e.g. 5)" oninput="onLitersOrRateChanged()" />
-        <p id="estimateText" style="margin:8px 0;font-weight:700;color:#0b5ed7;">Rate: Rs. 5/Liter | Total Amount: Rs. 0.00</p>
-
-        <button id="btnConfirmScan" onclick="confirmScanStep()">Confirm Scan</button>
-
-        <div id="confirmedStartBox" class="confirmed-box hidden">
-          <div id="lblScanConfirmed">Scan Confirmed! Ready to start machine.</div>
-          <button id="btnStartMachine" class="success" onclick="startWaterDispense()">Start Machine</button>
+        <div id="scannedQrPreviewWrap" class="qr-preview-box hidden">
+          <img id="scannedQrPreviewImg" class="qr-preview-img" alt="Scanned QR Code" />
         </div>
 
+        <button id="btnConfirmScan" class="blink-confirm-btn" onclick="confirmScanStep()">Confirm Scan</button>
+        <button id="btnChangeQrFromConfirm" class="secondary" onclick="resetToScanPage()">Scan Another QR</button>
+      </div>
+
+      <!-- STEP 2B: AFTER SCAN CONFIRMED -> ENTER LITERS & PRESS START MACHINE -->
+      <div id="dispenseFormCard" class="card hidden">
+        <h3 id="hGetWater">Get Water</h3>
+        <div class="machine-badge">
+          <span id="lblConfirmedMachine">Confirmed Machine</span>: <span id="confirmedMachineLabel">-</span>
+          <span id="confirmedMachineLoc" style="font-weight:500;"></span>
+        </div>
+
+        <input type="number" id="litersInput" min="0.5" step="0.5" placeholder="How many liters of water? (e.g. 5)" oninput="updateEstimate()" />
+        <p id="estimateText" style="margin:8px 0;font-weight:700;color:#0b5ed7;">Rate: Rs. 5/Liter | Total Amount: Rs. 0.00</p>
+
+        <button id="btnStartMachine" class="success" onclick="startWaterDispense()">Start Machine</button>
         <button id="btnChangeQr" class="secondary" onclick="resetToScanPage()">Scan Another QR</button>
       </div>
 
@@ -480,11 +506,11 @@
         welcome: "Welcome", currentBalance: "Current Remaining Balance", btnLogout: "Logout",
         hScanQr: "Scan Machine QR Code", pScanHint: "Scan the QR code attached on the water machine.",
         btnStartCam: "📷 Scan QR with Camera", btnPickGallery: "🖼️ Select QR from Gallery", stopScan: "Stop Scanner",
-        hGetWater: "Get Water", selectedMachine: "Selected Machine",
+        hConfirmScan: "Confirm Scanned QR", selectedMachine: "Selected Machine",
+        btnConfirmScan: "Confirm Scan",
+        hGetWater: "Get Water", confirmedMachine: "Confirmed Machine",
         litersPlaceholder: "How many liters of water? (e.g. 5)",
         ratePrefix: "Rate", perLiter: "Liter", totalAmount: "Total Amount",
-        btnConfirmScan: "Confirm Scan",
-        scanConfirmed: "Scan Confirmed! Press Start Machine below.",
         btnStartMachine: "Start Machine",
         btnChangeQr: "Scan Another QR",
         hLiveWater: "🚰 Water Dispensing — Live Counting", liveMachine: "Machine", liveTarget: "Target", liveStatus: "Status",
@@ -515,11 +541,11 @@
         welcome: "خوش آمدید", currentBalance: "موجودہ بقایا بیلنس", btnLogout: "لاگ آؤٹ",
         hScanQr: "مشین کا QR کوڈ اسکین کریں", pScanHint: "پانی لینے کے لیے مشین پر لگا QR کوڈ اسکین کریں۔",
         btnStartCam: "📷 کیمرہ سے QR کوڈ اسکین کریں", btnPickGallery: "🖼️ گیلری سے QR تصویر منتخب کریں", stopScan: "اسکین بند کریں",
-        hGetWater: "پانی حاصل کریں", selectedMachine: "منتخب مشین",
+        hConfirmScan: "اسکین شدہ QR کنفرم کریں", selectedMachine: "منتخب مشین",
+        btnConfirmScan: "اسکین کنفرم کریں",
+        hGetWater: "پانی حاصل کریں", confirmedMachine: "کنفرم شدہ مشین",
         litersPlaceholder: "کتنے لیٹر پانی چاہیے؟ (مثلاً 5)",
         ratePrefix: "ریٹ", perLiter: "لیٹر", totalAmount: "کل رقم",
-        btnConfirmScan: "اسکین کنفرم کریں",
-        scanConfirmed: "اسکین کنفرم ہو گیا! اب مشین سٹارٹ کریں۔",
         btnStartMachine: "سٹارٹ کرے مشین",
         btnChangeQr: "دوسرا QR اسکین کریں",
         hLiveWater: "🚰 پانی جاری ہے — لائیو کاؤنٹنگ", liveMachine: "مشین", liveTarget: "مطلوبہ", liveStatus: "اسٹیٹس",
@@ -613,11 +639,14 @@
       document.getElementById("btnPickGallery").textContent = t("btnPickGallery");
       document.getElementById("stopScanBtn").textContent = t("stopScan");
 
-      document.getElementById("hGetWater").textContent = t("hGetWater");
+      document.getElementById("hConfirmScan").textContent = t("hConfirmScan");
       document.getElementById("lblSelectedMachine").textContent = t("selectedMachine");
-      document.getElementById("litersInput").placeholder = t("litersPlaceholder");
       document.getElementById("btnConfirmScan").textContent = t("btnConfirmScan");
-      document.getElementById("lblScanConfirmed").textContent = t("scanConfirmed");
+      document.getElementById("btnChangeQrFromConfirm").textContent = t("btnChangeQr");
+
+      document.getElementById("hGetWater").textContent = t("hGetWater");
+      document.getElementById("lblConfirmedMachine").textContent = t("confirmedMachine");
+      document.getElementById("litersInput").placeholder = t("litersPlaceholder");
       document.getElementById("btnStartMachine").textContent = t("btnStartMachine");
       document.getElementById("btnChangeQr").textContent = t("btnChangeQr");
 
@@ -875,7 +904,7 @@
       return true;
     }
 
-    async function handleScannedQrValue(decodedText) {
+    async function handleScannedQrValue(decodedText, galleryPreviewUrl = "") {
       const mId = parseAndValidateMachineQr(decodedText);
       if (!mId) {
         showAlert(t("invalidMachineQr"), "err");
@@ -887,7 +916,7 @@
         showAlert(t("machineFaultyStatus"), "err");
         return;
       }
-      selectMachine(mId);
+      showQrConfirmStep(mId, galleryPreviewUrl);
     }
 
     window.startQrScanner = async function() {
@@ -903,7 +932,7 @@
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 220, height: 220 } },
           async (decodedText) => {
-            await handleScannedQrValue(decodedText);
+            await handleScannedQrValue(decodedText, "");
           },
           () => {}
         );
@@ -934,49 +963,39 @@
       if (!html5QrCode) {
         html5QrCode = new Html5Qrcode("qrReaderBox");
       }
+      const objectUrl = URL.createObjectURL(file);
       try {
         const decodedText = await html5QrCode.scanFile(file, true);
-        await handleScannedQrValue(decodedText);
+        await handleScannedQrValue(decodedText, objectUrl);
       } catch (err) {
+        URL.revokeObjectURL(objectUrl);
         showAlert(t("invalidMachineQr"), "err");
       }
     };
 
-    function selectMachine(mId) {
+    function showQrConfirmStep(mId, previewUrl = "") {
       const cleanId = (mId || "").trim().toUpperCase();
       if (!cleanId) return showAlert(t("invalidMachineQr"), "err");
       activeMachineId = cleanId;
       scanConfirmed = false;
-      document.getElementById("confirmedStartBox").classList.add("hidden");
-      document.getElementById("btnConfirmScan").classList.remove("hidden");
-      document.getElementById("scanCard").classList.add("hidden");
-      document.getElementById("dispenseFormCard").classList.remove("hidden");
-      document.getElementById("liveDispenseCard").classList.add("hidden");
-      updateMachineBanner();
-      updateEstimate();
-      showAlert(`Machine ${cleanId} scanned. Enter liters and press Confirm Scan.`, "ok");
-    }
 
-    window.resetToScanPage = function() {
-      activeMachineId = "";
-      scanConfirmed = false;
-      document.getElementById("litersInput").value = "";
-      document.getElementById("confirmedStartBox").classList.add("hidden");
-      document.getElementById("btnConfirmScan").classList.remove("hidden");
+      const wrap = document.getElementById("scannedQrPreviewWrap");
+      const img = document.getElementById("scannedQrPreviewImg");
+      if (previewUrl) {
+        img.src = previewUrl;
+        wrap.classList.remove("hidden");
+      } else {
+        img.src = "";
+        wrap.classList.add("hidden");
+      }
+
+      document.getElementById("scanCard").classList.add("hidden");
       document.getElementById("dispenseFormCard").classList.add("hidden");
       document.getElementById("liveDispenseCard").classList.add("hidden");
-      document.getElementById("scanCard").classList.remove("hidden");
-      updateEstimate();
-    };
-
-    window.onLitersOrRateChanged = function() {
-      updateEstimate();
-      if (scanConfirmed) {
-        scanConfirmed = false;
-        document.getElementById("confirmedStartBox").classList.add("hidden");
-        document.getElementById("btnConfirmScan").classList.remove("hidden");
-      }
-    };
+      document.getElementById("confirmScanCard").classList.remove("hidden");
+      updateMachineBanner();
+      showAlert(`QR (${cleanId}) detected. Press Confirm Scan to continue.`, "ok");
+    }
 
     window.confirmScanStep = function() {
       if (!activeMachineId) {
@@ -987,26 +1006,34 @@
         resetToScanPage();
         return showAlert(t("machineFaultyStatus"), "err");
       }
-      const liters = parseFloat(document.getElementById("litersInput").value);
-      if (!liters || liters <= 0) {
-        return showAlert("Please enter valid liters.");
-      }
-      const rate = machinesMap[activeMachineId]?.pricePerLiter ?? 5;
-      const startBalance = Number(currentUser?.balance || 0);
-      if (startBalance < rate) {
-        return showAlert("Insufficient balance.");
-      }
-
       scanConfirmed = true;
-      document.getElementById("btnConfirmScan").classList.add("hidden");
-      document.getElementById("confirmedStartBox").classList.remove("hidden");
-      showAlert(t("scanConfirmed"), "ok");
+      document.getElementById("confirmScanCard").classList.add("hidden");
+      document.getElementById("dispenseFormCard").classList.remove("hidden");
+      document.getElementById("litersInput").value = "";
+      updateEstimate();
+      showAlert(`Scan confirmed for ${activeMachineId}. Enter liters and press Start Machine.`, "ok");
+    };
+
+    window.resetToScanPage = function() {
+      activeMachineId = "";
+      scanConfirmed = false;
+      document.getElementById("litersInput").value = "";
+      document.getElementById("scannedQrPreviewImg").src = "";
+      document.getElementById("scannedQrPreviewWrap").classList.add("hidden");
+      document.getElementById("confirmScanCard").classList.add("hidden");
+      document.getElementById("dispenseFormCard").classList.add("hidden");
+      document.getElementById("liveDispenseCard").classList.add("hidden");
+      document.getElementById("scanCard").classList.remove("hidden");
+      updateEstimate();
     };
 
     function updateMachineBanner() {
       document.getElementById("scannedMachineLabel").textContent = activeMachineId || "-";
+      document.getElementById("confirmedMachineLabel").textContent = activeMachineId || "-";
       const loc = machinesMap[activeMachineId]?.location;
-      document.getElementById("scannedMachineLoc").textContent = loc ? ` (${loc})` : "";
+      const locStr = loc ? ` (${loc})` : "";
+      document.getElementById("scannedMachineLoc").textContent = locStr;
+      document.getElementById("confirmedMachineLoc").textContent = locStr;
     }
 
     window.toggleBalanceStrip = function() {
@@ -1163,7 +1190,8 @@
     window.startWaterDispense = async function() {
       if (!currentUser) return;
       if (!activeMachineId || !scanConfirmed) {
-        return showAlert("Please confirm scan first.");
+        resetToScanPage();
+        return showAlert("Please scan and confirm QR first.");
       }
       if (!checkMachineHealthBeforeProceed(activeMachineId)) {
         resetToScanPage();
@@ -1285,17 +1313,11 @@
       activeOrderId = null;
       activeOrderData = null;
 
+      resetToScanPage();
+
       if (isSignalOrMachineProblem) {
-        resetToScanPage();
         showAlert(t("machineSignalProblem"), "err");
       } else {
-        document.getElementById("litersInput").value = "";
-        scanConfirmed = false;
-        document.getElementById("confirmedStartBox").classList.add("hidden");
-        document.getElementById("btnConfirmScan").classList.remove("hidden");
-        updateEstimate();
-        document.getElementById("liveDispenseCard").classList.add("hidden");
-        document.getElementById("dispenseFormCard").classList.remove("hidden");
         showAlert(
           `${dispensed.toFixed(2)} L | Rs. ${finalCost.toFixed(2)} | Remaining: Rs. ${finalRemaining.toFixed(2)}`,
           "ok"
