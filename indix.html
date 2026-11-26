@@ -287,7 +287,7 @@
 
         <div class="side-clock-box">
           <div class="side-clock-label" id="lblTime">Time</div>
-          <div class="side-clock-val" id="liveTimeText">--:--:--</div>
+          <div class="side-clock-val" id="liveTimeText">--:--:-- --</div>
         </div>
       </div>
 
@@ -301,7 +301,7 @@
         Add this app to your home screen with one tap. It will keep showing until added to the home screen.
       </div>
       <button id="installAppBtn" class="success" onclick="triggerInstallApp()">Install App / Add to Home Screen</button>
-      <div id="manualInstallGuide" class="install-steps hidden" id="manualInstallText">
+      <div id="manualInstallGuide" class="install-steps hidden">
         If the automatic prompt does not open, tap browser menu <strong>⋮</strong> or <strong>Share</strong> and select <strong>"Add to Home screen"</strong>, then open from the home screen icon.
       </div>
     </div>
@@ -515,15 +515,33 @@
       return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key;
     }
 
-    function updateLiveClock() {
-      const now = new Date();
+    function format12HourTime(dateObj, includeSeconds = true) {
+      if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return "-";
+      const hours24 = dateObj.getHours();
+      const isPM = hours24 >= 12;
+      const hours12 = String(hours24 % 12 || 12).padStart(2, "0");
+      const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+      const seconds = String(dateObj.getSeconds()).padStart(2, "0");
+      const period = currentLang === "ur"
+        ? (isPM ? "پی ایم" : "اے ایم")
+        : (isPM ? "PM" : "AM");
+      return includeSeconds
+        ? `${hours12}:${minutes}:${seconds} ${period}`
+        : `${hours12}:${minutes} ${period}`;
+    }
+
+    function formatDateOnly(dateObj) {
+      if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return "-";
       const locale = currentLang === "ur" ? "ur-PK" : "en-GB";
-      document.getElementById("liveDateText").textContent = now.toLocaleDateString(locale, {
+      return dateObj.toLocaleDateString(locale, {
         day: "2-digit", month: "short", year: "numeric"
       });
-      document.getElementById("liveTimeText").textContent = now.toLocaleTimeString(locale, {
-        hour: "2-digit", minute: "2-digit", second: "2-digit"
-      });
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      document.getElementById("liveDateText").textContent = formatDateOnly(now);
+      document.getElementById("liveTimeText").textContent = format12HourTime(now, true);
     }
     updateLiveClock();
     setInterval(updateLiveClock, 1000);
@@ -691,11 +709,7 @@
       if (!ts) return "-";
       const d = ts.toDate ? ts.toDate() : new Date(ts);
       if (Number.isNaN(d.getTime())) return "-";
-      const locale = currentLang === "ur" ? "ur-PK" : "en-GB";
-      return d.toLocaleString(locale, {
-        year: "numeric", month: "short", day: "2-digit",
-        hour: "2-digit", minute: "2-digit"
-      });
+      return `${formatDateOnly(d)}, ${format12HourTime(d, false)}`;
     }
 
     function getOrderMs(o) {
@@ -801,7 +815,6 @@
         if (paramM) {
           candidateId = paramM.trim().toUpperCase();
         } else {
-          // If it's a random URL without ?machine=, reject it as non-machine QR
           return null;
         }
       } catch (_) {
