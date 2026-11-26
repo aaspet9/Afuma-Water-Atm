@@ -102,6 +102,34 @@
       color: #15803d;
       margin-top: 4px;
     }
+
+    /* History Strip Cards */
+    .hist-strip {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      margin: 8px 0;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+    .hist-strip-header {
+      padding: 11px 13px;
+      background: #f1f5f9;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .hist-strip-header:hover { background: #e2e8f0; }
+    .hist-strip-main { font-size: 13.5px; font-weight: 700; color: #0f172a; line-height: 1.5; }
+    .hist-strip-sub { font-size: 12px; color: #475569; margin-top: 3px; }
+    .hist-strip-body {
+      padding: 10px 13px;
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -111,7 +139,6 @@
       <p style="margin:0;color:#475569;">مشین کا QR کوڈ اسکین کریں اور لائیو پانی حاصل کریں</p>
     </div>
 
-    <!-- INSTALL / ADD TO HOME SCREEN PROMPT (SHOWN UNTIL INSTALLED ON HOME SCREEN) -->
     <div id="installPromptCard" class="install-banner hidden">
       <div class="install-title">📲 ایپ کو ہوم اسکرین پر محفوظ کریں</div>
       <div style="font-size:13.5px;color:#334155;">
@@ -163,7 +190,6 @@
         <button class="secondary" onclick="logoutUser()">لاگ آؤٹ</button>
       </div>
 
-      <!-- STEP 1: SCAN MACHINE QR CODE -->
       <div id="scanCard" class="card">
         <h3>مشین کا QR کوڈ اسکین کریں</h3>
         <p style="margin:0 0 8px;font-size:14px;color:#475569;">پانی لینے کے لیے مشین پر لگا QR کوڈ اسکین کریں۔</p>
@@ -172,7 +198,6 @@
         <div id="qrReaderBox" style="margin-top:10px;"></div>
       </div>
 
-      <!-- STEP 2: DISPENSE FORM CARD -->
       <div id="dispenseFormCard" class="card hidden">
         <h3>پانی حاصل کریں</h3>
         <div class="machine-badge">
@@ -186,7 +211,6 @@
         <button class="secondary" onclick="changeMachineScan()">دوسرا QR اسکین کریں</button>
       </div>
 
-      <!-- STEP 3: LIVE DISPENSING CARD -->
       <div id="liveDispenseCard" class="card hidden">
         <div class="live-box">
           <h3 style="color:#15803d;margin-bottom:6px;">🚰 پانی جاری ہے — لائیو کاؤنٹنگ</h3>
@@ -213,7 +237,6 @@
         </div>
       </div>
 
-      <!-- BALANCE REQUEST STRIP -->
       <div class="card" style="padding:10px;">
         <div class="strip-btn" onclick="toggleBalanceStrip()">
           <span>ایڈمن کو بیلنس کی درخواست بھیجیں</span>
@@ -229,7 +252,7 @@
         </div>
       </div>
 
-      <!-- HISTORY -->
+      <!-- HISTORY STRIPS -->
       <div class="card">
         <h3>پانی لینے کی تفصیل اور بقایا بیلنس</h3>
         <div id="historyList">کوئی ریکارڈ موجود نہیں۔</div>
@@ -257,8 +280,8 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const IMGBB_API_KEY = "E08b8ba508ad2bfe6d3c2a783a81b832";
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
-    // Inline Web App Manifest for Add to Home Screen
     const manifestData = {
       name: "سمارٹ واٹر اے ٹی ایم",
       short_name: "Water ATM",
@@ -338,6 +361,8 @@
     let outageWatcher = null;
     let isFinalizing = false;
     let html5QrCode = null;
+    let latestOrders = [];
+    const openHistIds = new Set();
 
     function showAlert(text, type = "err") {
       const box = document.getElementById("alertBox");
@@ -348,6 +373,67 @@
     function normalizePhone(raw) {
       return (raw || "").replace(/\D/g, "");
     }
+
+    function formatDateTime(ts) {
+      if (!ts) return "وقت دستیاب نہیں";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      if (Number.isNaN(d.getTime())) return "وقت دستیاب نہیں";
+      return d.toLocaleString("ur-PK", {
+        year: "numeric", month: "short", day: "2-digit",
+        hour: "2-digit", minute: "2-digit"
+      });
+    }
+
+    function getOrderMs(o) {
+      if (o.endedAt?.toMillis) return o.endedAt.toMillis();
+      if (o.endedAt?.seconds) return o.endedAt.seconds * 1000;
+      if (o.createdAt?.toMillis) return o.createdAt.toMillis();
+      if (o.createdAt?.seconds) return o.createdAt.seconds * 1000;
+      return 0;
+    }
+
+    function getZeroBalanceCycleKey(phone) {
+      return `water_atm_zero_since_${phone}`;
+    }
+
+    function syncZeroBalanceTimer(phone, balance) {
+      if (!phone) return;
+      const key = getZeroBalanceCycleKey(phone);
+      const bal = Number(balance || 0);
+      if (bal <= 0.009) {
+        if (!localStorage.getItem(key)) {
+          localStorage.setItem(key, String(Date.now()));
+        }
+      } else {
+        // جب نیا بیلنس آجائے تو پچھلا 24 گھنٹے والا ٹائمر ری سیٹ ہو جائے گا
+        localStorage.removeItem(key);
+      }
+    }
+
+    function getVisibleOrdersForCustomer(phone, rows) {
+      const bal = Number(currentUser?.balance || 0);
+      const key = getZeroBalanceCycleKey(phone);
+      const zeroSinceRaw = localStorage.getItem(key);
+
+      if (bal <= 0.009 && zeroSinceRaw) {
+        const zeroSince = Number(zeroSinceRaw);
+        if (zeroSince > 0 && (Date.now() - zeroSince) >= TWENTY_FOUR_HOURS_MS) {
+          // بیلنس ختم ہونے کے 24 گھنٹے بعد کسٹمر ایپ سے پرانا ڈیٹا خودکار صاف
+          return rows.filter(r => getOrderMs(r) > zeroSince);
+        }
+      }
+      return rows;
+    }
+
+    window.toggleHistStrip = function(id) {
+      if (openHistIds.has(id)) {
+        openHistIds.delete(id);
+      } else {
+        openHistIds.add(id);
+      }
+      const body = document.getElementById(`hbody_${id}`);
+      if (body) body.classList.toggle("hidden", !openHistIds.has(id));
+    };
 
     function isStrongPassword(pass) {
       return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pass);
@@ -556,9 +642,12 @@
       unsubUser = onSnapshot(doc(db, "users", phone), (snap) => {
         if (snap.exists()) {
           currentUser = { id: snap.id, ...snap.data() };
+          const bal = Number(currentUser.balance || 0);
           document.getElementById("uName").textContent = currentUser.name;
           document.getElementById("uPhone").textContent = currentUser.phone;
-          document.getElementById("uBalance").textContent = Number(currentUser.balance || 0).toFixed(2);
+          document.getElementById("uBalance").textContent = bal.toFixed(2);
+          syncZeroBalanceTimer(phone, bal);
+          renderHistory(latestOrders);
         }
       });
 
@@ -567,7 +656,8 @@
       unsubOrders = onSnapshot(q, (qs) => {
         const rows = [];
         qs.forEach(d => rows.push({ id: d.id, ...d.data() }));
-        rows.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        rows.sort((a, b) => getOrderMs(b) - getOrderMs(a));
+        latestOrders = rows;
         renderHistory(rows);
       });
     }
@@ -721,6 +811,7 @@
       await updateDoc(doc(db, "users", currentUser.phone), {
         balance: finalRemaining
       });
+      syncZeroBalanceTimer(currentUser.phone, finalRemaining);
 
       activeOrderId = null;
       activeOrderData = null;
@@ -783,19 +874,41 @@
 
     function renderHistory(rows) {
       const box = document.getElementById("historyList");
-      if (!rows.length) {
+      const phone = currentUser?.phone || "";
+      const visibleRows = getVisibleOrdersForCustomer(phone, rows);
+
+      if (!visibleRows.length) {
         box.innerHTML = "کوئی ریکارڈ موجود نہیں۔";
         return;
       }
-      box.innerHTML = rows.map(r => {
+
+      box.innerHTML = visibleRows.map((r, idx) => {
+        const hId = r.id || `h_${idx}`;
+        const isOpen = openHistIds.has(hId);
         const litersVal = Number(r.dispensedLiters ?? r.targetLiters ?? 0).toFixed(2);
         const costVal = Number(r.cost ?? r.liveCost ?? 0).toFixed(2);
         const remVal = Number(r.remainingBalance ?? 0).toFixed(2);
+        const dtText = formatDateTime(r.createdAt);
+
         return `
-          <div class="hist-item">
-            <div><strong>مشین:</strong> ${r.machineId || "-"} | <strong>پانی:</strong> ${litersVal} لیٹر</div>
-            <div><strong>رقم:</strong> Rs. ${costVal} | <strong>بقایا بیلنس:</strong> Rs. ${remVal}</div>
-            <div style="color:#475569;font-size:12px;">اسٹیٹس: ${r.status || "-"}</div>
+          <div class="hist-strip">
+            <div class="hist-strip-header" onclick="toggleHistStrip('${hId}')">
+              <div>
+                <div class="hist-strip-main">
+                  مشین: ${r.machineId || "-"} | ${litersVal} L | رقم: Rs. ${costVal} | بقایا: Rs. ${remVal}
+                </div>
+                <div class="hist-strip-sub">${dtText}</div>
+              </div>
+              <span>${isOpen ? "▲" : "▼"}</span>
+            </div>
+            <div id="hbody_${hId}" class="hist-strip-body ${isOpen ? "" : "hidden"}">
+              <div><strong>تاریخ و وقت:</strong> ${dtText}</div>
+              <div><strong>مشین نمبر:</strong> ${r.machineId || "-"}</div>
+              <div><strong>پانی بھرا گیا:</strong> ${litersVal} لیٹر</div>
+              <div><strong>رقم (کتنے کا پانی بھرا گیا):</strong> Rs. ${costVal}</div>
+              <div><strong>بقایا رقم:</strong> Rs. ${remVal}</div>
+              <div><strong>اسٹیٹس:</strong> ${r.status || "-"}</div>
+            </div>
           </div>
         `;
       }).join("");
