@@ -37,6 +37,7 @@
     button.secondary { background: #475569; }
     button.blue { background: #0b5ed7; }
     button.success { background: #15803d; }
+    button.small { width: auto; padding: 6px 11px; font-size: 12.5px; margin: 3px 2px; }
 
     .top-header {
       background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
@@ -156,6 +157,61 @@
       font-weight: 800;
       font-size: 13.5px;
       margin: 8px 0;
+    }
+
+    .payment-box {
+      background: #f8fafc;
+      border: 1px solid #93c5fd;
+      border-radius: 14px;
+      padding: 12px;
+      margin: 10px 0;
+    }
+    .qr-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 8px auto;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #0f766e;
+      cursor: pointer;
+    }
+    .qr-wrapper img {
+      display: block;
+      max-width: 240px;
+      width: 100%;
+      height: auto;
+    }
+    .qr-download-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+    .qr-download-btn {
+      width: auto;
+      margin: 0;
+      padding: 7px 14px;
+      font-size: 13px;
+      background: #16a34a;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 800;
+    }
+    .acct-info {
+      font-size: 12.5px;
+      color: #1e293b;
+      line-height: 1.7;
+      background: #eff6ff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #bfdbfe;
     }
 
     .msg { padding: 10px 12px; border-radius: 10px; margin: 8px 0; font-size: 14px; display: none; font-weight: 700; }
@@ -298,7 +354,7 @@
         <button id="btnLogout" class="secondary" style="margin-top:10px;" onclick="logoutShopkeeper()">لاگ آؤٹ</button>
       </div>
 
-      <!-- NAVIGATION TABS (REMOVED "کسٹمر کی تمام دکانیں") -->
+      <!-- NAVIGATION TABS -->
       <div class="tabs">
         <button id="navOrders" class="active" onclick="switchDashTab('orders')">اس دکان سے پانی بھرنے والے</button>
         <button id="navNewCust" onclick="switchDashTab('newcust')">اس دکان سے نئے کسٹمرز</button>
@@ -311,7 +367,7 @@
         <div id="shopOrdersList">لوڈ ہو رہا ہے...</div>
       </div>
 
-      <!-- TAB 2: NEW CUSTOMERS FROM THIS SHOP + ADD/REQUEST + 24H TIMER + PENDING -->
+      <!-- TAB 2: NEW CUSTOMERS FROM THIS SHOP + ADD/REQUEST + MEEZAN QR & RAAST ID + 24H TIMER + PENDING -->
       <div id="panelNewCust" class="card hidden">
         <h3 id="hNewCustomers">اس دکان سے نئے کسٹمرز / ریکویسٹ</h3>
 
@@ -320,6 +376,51 @@
           <input type="text" id="newCustName" placeholder="کسٹمر کا نام" />
           <input type="tel" id="newCustPhone" placeholder="کسٹمر موبائل نمبر (مثلاً 03001234567)" />
           <input type="number" id="newCustAmount" min="10" placeholder="رقم / بیلنس (Rs.)" />
+          <select id="newCustPayMethod">
+            <option value="Cash">کیش (Cash)</option>
+            <option value="Meezan QR / Bank Transfer">میزان بینک QR / ٹرانسفر (Meezan QR / Transfer)</option>
+            <option value="Raast ID (03238833319)">راست آئی ڈی (Raast ID: 03238833319)</option>
+          </select>
+
+          <!-- MEEZAN BANK QR & ACCOUNT DETAILS + RAAST ID -->
+          <div class="payment-box">
+            <div style="font-weight:800;color:#0f172a;font-size:13.5px;margin-bottom:6px;">
+              میزان بینک QR کوڈ اور راست آئی ڈی (QR پر کلک کر کے ڈاؤنلوڈ کریں)
+            </div>
+            <div style="text-align:center;">
+              <div class="qr-wrapper" onclick="toggleQrDownloadBar(event)">
+                <div id="qrDownloadBar" class="qr-download-overlay hidden">
+                  <button type="button" class="qr-download-btn" onclick="downloadMeezanQr(event)">
+                    ⬇ ڈاؤنلوڈ QR کوڈ
+                  </button>
+                </div>
+                <img
+                  id="meezanQrImg"
+                  src="https://i.ibb.co/Q3r2tDyJ/134225.jpg"
+                  alt="Meezan Bank QR Code"
+                  crossorigin="anonymous"
+                />
+              </div>
+            </div>
+
+            <div class="acct-info">
+              <div><strong>Account Title:</strong> ASGHAR ALI</div>
+              <div>
+                <strong>Account No.:</strong> 02730106417132
+                <button type="button" class="small secondary" onclick="copyTextValue('02730106417132')">کاپی</button>
+              </div>
+              <div>
+                <strong>IBAN:</strong> PK46MEZN0002730106417132
+                <button type="button" class="small secondary" onclick="copyTextValue('PK46MEZN0002730106417132')">کاپی</button>
+              </div>
+              <div><strong>Branch:</strong> KAHNA NAU BR-LAHORE</div>
+              <div>
+                <strong>Raast ID:</strong> <span style="color:#0f766e;font-weight:800;">03238833319</span>
+                <button type="button" class="small blue" onclick="copyTextValue('03238833319')">راست ID کاپی</button>
+              </div>
+            </div>
+          </div>
+
           <button id="btnSendCustReq" onclick="sendShopCustomerRequest()">ریکویسٹ بھیجیں</button>
         </div>
 
@@ -355,6 +456,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    const MEEZAN_QR_URL = "https://i.ibb.co/Q3r2tDyJ/134225.jpg";
+    const RAAST_ID = "03238833319";
 
     const I18N = {
       ur: {
@@ -553,6 +657,39 @@
       if (r.createdAt?.seconds) return r.createdAt.seconds * 1000;
       return Number(r.createdAtMs || 0);
     }
+
+    window.toggleQrDownloadBar = function(event) {
+      event.stopPropagation();
+      document.getElementById("qrDownloadBar").classList.toggle("hidden");
+    };
+
+    window.copyTextValue = async function(val) {
+      try {
+        await navigator.clipboard.writeText(val);
+        showAlert(`کاپی ہو گیا: ${val}`, "ok");
+      } catch (_) {
+        showAlert(`نمبر: ${val}`, "ok");
+      }
+    };
+
+    window.downloadMeezanQr = async function(event) {
+      event.stopPropagation();
+      try {
+        const res = await fetch(MEEZAN_QR_URL);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "meezan-bank-qr.jpg";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showAlert("میزان بینک QR کوڈ ڈاؤنلوڈ ہو گیا ہے!", "ok");
+      } catch (_) {
+        window.open(MEEZAN_QR_URL, "_blank");
+      }
+    };
 
     updateClock();
     setInterval(updateClock, 1000);
@@ -870,6 +1007,7 @@
       const name = document.getElementById("newCustName").value.trim();
       const phone = normalizePhone(document.getElementById("newCustPhone").value);
       const amount = parseFloat(document.getElementById("newCustAmount").value);
+      const payMethod = document.getElementById("newCustPayMethod").value;
 
       if (!name || phone.length < 10 || !amount || amount <= 0) {
         return showAlert("براہ کرم کسٹمر کا نام، درست موبائل نمبر اور رقم لکھیں۔");
@@ -892,7 +1030,10 @@
         userPhone: phone,
         userName: name,
         amount,
-        trxId: `Shopkeeper: ${currentShopkeeper.ownerName} (${currentShopkeeper.shopName})`,
+        paymentMethod: payMethod,
+        raastId: RAAST_ID,
+        meezanQrUrl: MEEZAN_QR_URL,
+        trxId: `${payMethod} | Shopkeeper: ${currentShopkeeper.ownerName} (${currentShopkeeper.shopName})`,
         shopkeeperName: currentShopkeeper.ownerName || "",
         shopkeeperPhone: currentShopkeeper.phone || "",
         shopName: currentShopkeeper.shopName || "",
@@ -945,7 +1086,7 @@
                 <span class="badge amber">Pending | Rs. ${Number(r.amount || 0).toFixed(2)}</span>
               </div>
               <div class="sub-line">
-                ${actorText} | ${t("machineLabel")}: <strong>${r.machineId || myM}</strong><br/>
+                ${actorText} | ${r.paymentMethod || "Cash"} | ${t("machineLabel")}: <strong>${r.machineId || myM}</strong><br/>
                 ${t("dateLabel")}: ${formatDateTime(r.createdAt)}
               </div>
             </div>
