@@ -17,7 +17,7 @@
       box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
       border: 1px solid #d1fae5;
     }
-    h1, h2, h3 { margin-top: 0; color: #0f766e; }
+    h1, h2, h3, h4 { margin-top: 0; color: #0f766e; }
     input, select, button {
       width: 100%;
       margin: 6px 0;
@@ -36,8 +36,7 @@
     button:hover { background: #115e59; }
     button.secondary { background: #475569; }
     button.blue { background: #0b5ed7; }
-    button.danger { background: #b91c1c; }
-    button.small { width: auto; padding: 6px 11px; font-size: 12.5px; margin: 2px; }
+    button.success { background: #15803d; }
 
     .top-header {
       background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
@@ -106,7 +105,7 @@
     .lang-btn.active { background: #0f766e; color: #fff; border-color: #0f766e; }
 
     .tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
-    .tabs button { flex: 1; background: #e2e8f0; color: #1e293b; min-width: 110px; }
+    .tabs button { flex: 1; background: #e2e8f0; color: #1e293b; min-width: 130px; }
     .tabs button.active { background: #0f766e; color: #fff; }
 
     .shop-banner {
@@ -132,6 +131,33 @@
     .stat-num { font-size: 18px; font-weight: 800; color: #0f766e; margin-top: 3px; }
     .stat-lbl { font-size: 11.5px; color: #475569; font-weight: 700; }
 
+    .earning-box {
+      background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+      border: 2px solid #10b981;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 10px;
+    }
+    .earning-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      color: #065f46;
+      font-size: 16px;
+    }
+    .timer-banner {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 13.5px;
+      margin: 8px 0;
+    }
+
     .msg { padding: 10px 12px; border-radius: 10px; margin: 8px 0; font-size: 14px; display: none; font-weight: 700; }
     .msg.err { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
     .msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
@@ -151,6 +177,7 @@
       gap: 8px;
       font-weight: 800;
       color: #0f172a;
+      flex-wrap: wrap;
     }
     .badge {
       display: inline-block;
@@ -162,20 +189,7 @@
     .badge.green { background: #dcfce7; color: #166534; }
     .badge.blue { background: #dbeafe; color: #1e40af; }
     .badge.amber { background: #fef3c7; color: #92400e; }
-    .badge.red { background: #fee2e2; color: #991b1b; }
-
     .sub-line { font-size: 13px; color: #334155; margin-top: 5px; line-height: 1.6; }
-    .shop-chip {
-      display: inline-block;
-      background: #e0f2fe;
-      border: 1px solid #7dd3fc;
-      color: #0369a1;
-      padding: 3px 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      margin: 3px 3px 0 0;
-    }
   </style>
 </head>
 <body>
@@ -233,7 +247,7 @@
 
     <!-- DASHBOARD SECTION -->
     <div id="dashSection" class="hidden">
-      <!-- SHOP & MACHINE SUMMARY -->
+      <!-- SHOP & EARNING SUMMARY -->
       <div class="card">
         <div class="shop-banner">
           <div style="font-size:18px;font-weight:800;" id="dispShopName">-</div>
@@ -261,44 +275,63 @@
           </div>
         </div>
 
+        <!-- SHOPKEEPER EARNING & WITHDRAW BOX -->
+        <div class="earning-box">
+          <div class="earning-top">
+            <span id="lblShopEarning">دکاندار کی کمائی / بیلنس:</span>
+            <span>Rs. <span id="dispShopEarning">0.00</span></span>
+          </div>
+          <div style="font-size:12.5px;color:#334155;margin-top:4px;">
+            <span id="lblMinWithdrawHint">ایڈمن کی مقرر کردہ کم از کم ودھڈرا حد:</span>
+            <strong>Rs. <span id="dispMinWithdraw">500</span></strong>
+          </div>
+
+          <div id="withdrawActionWrap" class="hidden" style="margin-top:8px;">
+            <button id="btnOpenWithdraw" class="success" onclick="toggleWithdrawForm()">Withdraw</button>
+            <div id="withdrawFormBox" class="hidden" style="margin-top:8px;">
+              <input type="number" id="withdrawAmountInput" min="1" step="1" placeholder="کتنی رقم نکلوانی ہے؟ (Rs.)" />
+              <button id="btnSubmitWithdraw" class="blue" onclick="submitWithdrawRequest()">Withdraw درخواست بھیجیں</button>
+            </div>
+          </div>
+        </div>
+
         <button id="btnLogout" class="secondary" style="margin-top:10px;" onclick="logoutShopkeeper()">لاگ آؤٹ</button>
       </div>
 
-      <!-- NAVIGATION TABS -->
+      <!-- NAVIGATION TABS (REMOVED "کسٹمر کی تمام دکانیں") -->
       <div class="tabs">
         <button id="navOrders" class="active" onclick="switchDashTab('orders')">اس دکان سے پانی بھرنے والے</button>
         <button id="navNewCust" onclick="switchDashTab('newcust')">اس دکان سے نئے کسٹمرز</button>
-        <button id="navLookup" onclick="switchDashTab('lookup')">کسٹمر کی تمام دکانیں</button>
-        <button id="navTopup" onclick="switchDashTab('topup')">کسٹمر بیلنس درخواست</button>
       </div>
 
       <!-- TAB 1: ORDERS AT THIS SHOP'S MACHINE -->
       <div id="panelOrders" class="card">
-        <h3 id="hShopOrders">اس دکان / مشین سے پانی بھرنے والے کسٹمرز</h3>
+        <h3 id="hShopOrders">اس دکان سے پانی بھرنے والے کسٹمرز</h3>
         <input type="text" id="filterShopOrders" placeholder="کسٹمر کے نام یا نمبر سے تلاش کریں..." oninput="renderShopOrders()" />
         <div id="shopOrdersList">لوڈ ہو رہا ہے...</div>
       </div>
 
-      <!-- TAB 2: NEW CUSTOMERS FROM THIS SHOP -->
+      <!-- TAB 2: NEW CUSTOMERS FROM THIS SHOP + ADD/REQUEST + 24H TIMER + PENDING -->
       <div id="panelNewCust" class="card hidden">
-        <h3 id="hNewCustomers">اس دکان سے پہلی بار لاگ ان / اسکین کرنے والے نئے کسٹمرز</h3>
+        <h3 id="hNewCustomers">اس دکان سے نئے کسٹمرز / ریکویسٹ</h3>
+
+        <div class="item-card" style="background:#f0fdfa;border-color:#99f6e4;">
+          <h4 id="hAddCustReq">نیا کسٹمر ایڈ کریں / ایڈمن کو بیلنس اپروول ریکویسٹ بھیجیں</h4>
+          <input type="text" id="newCustName" placeholder="کسٹمر کا نام" />
+          <input type="tel" id="newCustPhone" placeholder="کسٹمر موبائل نمبر (مثلاً 03001234567)" />
+          <input type="number" id="newCustAmount" min="10" placeholder="رقم / بیلنس (Rs.)" />
+          <button id="btnSendCustReq" onclick="sendShopCustomerRequest()">ریکویسٹ بھیجیں</button>
+        </div>
+
+        <div id="approvalTimerBox" class="timer-banner hidden"></div>
+
+        <input type="text" id="filterNewCust" placeholder="نئے کسٹمرز / پینڈنگ ریکویسٹ میں تلاش کریں..." oninput="renderNewCustomers()" />
+
+        <h4 id="hPendingList">پینڈنگ ریکویسٹس (Pending Approvals)</h4>
+        <div id="pendingRequestsList">لوڈ ہو رہا ہے...</div>
+
+        <h4 id="hRegisteredNewList" style="margin-top:14px;">اس دکان سے رجسٹر / منظور شدہ نئے کسٹمرز</h4>
         <div id="newCustomersList">لوڈ ہو رہا ہے...</div>
-      </div>
-
-      <!-- TAB 3: CUSTOMER MULTI-SHOP & MACHINE HISTORY -->
-      <div id="panelLookup" class="card hidden">
-        <h3 id="hCustomerLookup">کسٹمر نے کس کس دکان اور مشین سے پانی بھرا؟</h3>
-        <input type="text" id="lookupQuery" placeholder="کسٹمر کا موبائل نمبر یا نام لکھیں..." oninput="renderCustomerLookup()" />
-        <div id="customerLookupResult">کسٹمر کا نام یا نمبر لکھیں یا اوپر فہرست سے کسی کسٹمر پر کلک کریں۔</div>
-      </div>
-
-      <!-- TAB 4: SEND CUSTOMER BALANCE REQUEST TO ADMIN -->
-      <div id="panelTopup" class="card hidden">
-        <h3 id="hSendTopup">کسٹمر کے لیے ایڈمن کو بیلنس درخواست بھیجیں</h3>
-        <input type="tel" id="topupCustPhone" placeholder="کسٹمر کا موبائل نمبر (مثلاً 03001234567)" />
-        <input type="number" id="topupAmount" min="10" placeholder="رقم (روپے میں)" />
-        <input type="text" id="topupNote" placeholder="نوٹ / حوالہ (مثلاً دکان پر نقد وصول ہوئے)" />
-        <button id="btnSendTopup" onclick="sendCustomerTopupRequest()">ایڈمن کو بیلنس درخواست بھیجیں</button>
       </div>
     </div>
   </div>
@@ -335,23 +368,27 @@
         regPass: "پاسورڈ (کم از کم 6 حروف)", btnSignup: "رجسٹر کریں",
         owner: "دکاندار", machineBadge: "مشین نمبر", machineState: "اسٹیٹس",
         statLiters: "کل پانی (لیٹر)", statSales: "کل فروخت (روپے)", statNewCust: "نئے کسٹمرز",
+        shopEarning: "دکاندار کی کمائی / بیلنس:",
+        minWithdrawHint: "ایڈمن کی مقرر کردہ کم از کم ودھڈرا حد:",
+        btnOpenWithdraw: "Withdraw",
+        withdrawAmtPlaceholder: "کتنی رقم نکلوانی ہے؟ (Rs.)",
+        btnSubmitWithdraw: "Withdraw درخواست بھیجیں",
         logout: "لاگ آؤٹ",
-        navOrders: "اس دکان سے پانی بھرنے والے", navNewCust: "اس دکان سے نئے کسٹمرز",
-        navLookup: "کسٹمر کی تمام دکانیں", navTopup: "کسٹمر بیلنس درخواست",
-        hShopOrders: "اس دکان / مشین سے پانی بھرنے والے کسٹمرز",
-        filterPlaceholder: "کسٹمر کے نام یا نمبر سے تلاش کریں...",
-        hNewCustomers: "اس دکان سے پہلی بار لاگ ان / اسکین کرنے والے نئے کسٹمرز",
-        hCustomerLookup: "کسٹمر نے کس کس دکان اور مشین سے پانی بھرا؟",
-        lookupPlaceholder: "کسٹمر کا موبائل نمبر یا نام لکھیں...",
-        hSendTopup: "کسٹمر کے لیے ایڈمن کو بیلنس درخواست بھیجیں",
-        topupPhone: "کسٹمر کا موبائل نمبر (مثلاً 03001234567)", topupAmt: "رقم (روپے میں)",
-        topupNote: "نوٹ / حوالہ (مثلاً دکان پر نقد وصول ہوئے)", btnSendTopup: "ایڈمن کو بیلنس درخواست بھیجیں",
+        navOrders: "اس دکان سے پانی بھرنے والے",
+        navNewCust: "اس دکان سے نئے کسٹمرز",
+        hShopOrders: "اس دکان سے پانی بھرنے والے کسٹمرز",
+        filterOrdersPlaceholder: "کسٹمر کے نام یا نمبر سے تلاش کریں...",
+        hNewCustomers: "اس دکان سے نئے کسٹمرز / ریکویسٹ",
+        hAddCustReq: "نیا کسٹمر ایڈ کریں / ایڈمن کو بیلنس اپروول ریکویسٹ بھیجیں",
+        newCustName: "کسٹمر کا نام", newCustPhone: "کسٹمر موبائل نمبر (مثلاً 03001234567)",
+        newCustAmount: "رقم / بیلنس (Rs.)", btnSendCustReq: "ریکویسٹ بھیجیں",
+        filterNewCustPlaceholder: "نئے کسٹمرز / پینڈنگ ریکویسٹ میں تلاش کریں...",
+        hPendingList: "پینڈنگ ریکویسٹس (Pending Approvals)",
+        hRegisteredNewList: "اس دکان سے رجسٹر / منظور شدہ نئے کسٹمرز",
         noRecords: "کوئی ریکارڈ موجود نہیں۔",
-        viewAllShopsBtn: "اس کسٹمر کی تمام دکانیں دیکھیں",
-        customerLabel: "کسٹمر", phoneLabel: "نمبر", litersLabel: "پانی", amountLabel: "رقم",
-        remBalLabel: "بقایا بیلنس", machineLabel: "مشین", shopLabel: "دکان", dateLabel: "تاریخ و وقت",
-        visitedShopsTitle: "جن دکانوں اور مشینوں سے پانی بھرا:",
-        ordersHistoryTitle: "پانی بھرنے کی تفصیل:"
+        machineLabel: "مشین", remBalLabel: "بقایا بیلنس", dateLabel: "تاریخ و وقت",
+        addedByShopkeeper: "دکاندار نے ایڈ کیا", addedByCustomer: "کسٹمر نے ایڈ کیا",
+        approvalTimerPrefix: "⏳ 24 گھنٹے کا ٹائمر جاری ہے — 24 گھنٹے کے اندر اندر ایڈمن اپروول مل جائے گی۔ باقی وقت:"
       },
       en: {
         dir: "ltr", lang: "en",
@@ -364,23 +401,27 @@
         regPass: "Password (min 6 chars)", btnSignup: "Register Shop",
         owner: "Owner", machineBadge: "Machine No.", machineState: "Status",
         statLiters: "Total Water (L)", statSales: "Total Sales (Rs.)", statNewCust: "New Customers",
+        shopEarning: "Shopkeeper Earning / Balance:",
+        minWithdrawHint: "Admin minimum withdraw limit:",
+        btnOpenWithdraw: "Withdraw",
+        withdrawAmtPlaceholder: "Enter amount to withdraw (Rs.)",
+        btnSubmitWithdraw: "Submit Withdraw Request",
         logout: "Logout",
-        navOrders: "Shop Water Sales", navNewCust: "New Customers Here",
-        navLookup: "Customer All Shops", navTopup: "Customer Top-up",
-        hShopOrders: "Customers Who Filled Water From This Shop / Machine",
-        filterPlaceholder: "Search by customer name or phone...",
-        hNewCustomers: "New Customers Logged In / First Scanned From This Shop",
-        hCustomerLookup: "Which Shops & Machines Did This Customer Use?",
-        lookupPlaceholder: "Enter customer mobile number or name...",
-        hSendTopup: "Send Customer Balance Request to Admin",
-        topupPhone: "Customer Mobile Number (e.g. 03001234567)", topupAmt: "Amount (Rs.)",
-        topupNote: "Note / Reference (e.g. Cash received at shop)", btnSendTopup: "Send Balance Request to Admin",
+        navOrders: "Shop Water Customers",
+        navNewCust: "New Customers Here",
+        hShopOrders: "Customers Who Filled Water From This Shop",
+        filterOrdersPlaceholder: "Search by customer name or phone...",
+        hNewCustomers: "New Customers & Requests From This Shop",
+        hAddCustReq: "Add Customer / Send Balance Approval Request to Admin",
+        newCustName: "Customer Name", newCustPhone: "Customer Mobile (e.g. 03001234567)",
+        newCustAmount: "Amount / Balance (Rs.)", btnSendCustReq: "Send Request",
+        filterNewCustPlaceholder: "Search new customers / pending requests...",
+        hPendingList: "Pending Requests",
+        hRegisteredNewList: "Registered / Approved New Customers From This Shop",
         noRecords: "No records found.",
-        viewAllShopsBtn: "View All Shops Used by Customer",
-        customerLabel: "Customer", phoneLabel: "Phone", litersLabel: "Water", amountLabel: "Amount",
-        remBalLabel: "Remaining Balance", machineLabel: "Machine", shopLabel: "Shop", dateLabel: "Date & Time",
-        visitedShopsTitle: "Shops & Machines Visited:",
-        ordersHistoryTitle: "Water Filling History:"
+        machineLabel: "Machine", remBalLabel: "Remaining Balance", dateLabel: "Date & Time",
+        addedByShopkeeper: "Added by Shopkeeper", addedByCustomer: "Added by Customer",
+        approvalTimerPrefix: "⏳ 24-hour approval timer active — Admin approval within 24 hours. Time left:"
       }
     };
 
@@ -414,9 +455,8 @@
         day: "2-digit", month: "short", year: "numeric"
       });
       document.getElementById("liveTimeText").textContent = format12HourTime(now, true);
+      update24HourApprovalTimerBanner();
     }
-    updateClock();
-    setInterval(updateClock, 1000);
 
     window.setLanguage = function(lang) {
       currentLang = lang === "en" ? "en" : "ur";
@@ -451,23 +491,26 @@
       document.getElementById("lblStatLiters").textContent = t("statLiters");
       document.getElementById("lblStatSales").textContent = t("statSales");
       document.getElementById("lblStatNewCust").textContent = t("statNewCust");
+      document.getElementById("lblShopEarning").textContent = t("shopEarning");
+      document.getElementById("lblMinWithdrawHint").textContent = t("minWithdrawHint");
+      document.getElementById("btnOpenWithdraw").textContent = t("btnOpenWithdraw");
+      document.getElementById("withdrawAmountInput").placeholder = t("withdrawAmtPlaceholder");
+      document.getElementById("btnSubmitWithdraw").textContent = t("btnSubmitWithdraw");
       document.getElementById("btnLogout").textContent = t("logout");
 
       document.getElementById("navOrders").textContent = t("navOrders");
       document.getElementById("navNewCust").textContent = t("navNewCust");
-      document.getElementById("navLookup").textContent = t("navLookup");
-      document.getElementById("navTopup").textContent = t("navTopup");
-
       document.getElementById("hShopOrders").textContent = t("hShopOrders");
-      document.getElementById("filterShopOrders").placeholder = t("filterPlaceholder");
+      document.getElementById("filterShopOrders").placeholder = t("filterOrdersPlaceholder");
       document.getElementById("hNewCustomers").textContent = t("hNewCustomers");
-      document.getElementById("hCustomerLookup").textContent = t("hCustomerLookup");
-      document.getElementById("lookupQuery").placeholder = t("lookupPlaceholder");
-      document.getElementById("hSendTopup").textContent = t("hSendTopup");
-      document.getElementById("topupCustPhone").placeholder = t("topupPhone");
-      document.getElementById("topupAmount").placeholder = t("topupAmt");
-      document.getElementById("topupNote").placeholder = t("topupNote");
-      document.getElementById("btnSendTopup").textContent = t("btnSendTopup");
+      document.getElementById("hAddCustReq").textContent = t("hAddCustReq");
+      document.getElementById("newCustName").placeholder = t("newCustName");
+      document.getElementById("newCustPhone").placeholder = t("newCustPhone");
+      document.getElementById("newCustAmount").placeholder = t("newCustAmount");
+      document.getElementById("btnSendCustReq").textContent = t("btnSendCustReq");
+      document.getElementById("filterNewCust").placeholder = t("filterNewCustPlaceholder");
+      document.getElementById("hPendingList").textContent = t("hPendingList");
+      document.getElementById("hRegisteredNewList").textContent = t("hRegisteredNewList");
 
       updateClock();
       renderAll();
@@ -476,8 +519,9 @@
     let currentShopkeeper = null;
     let allOrders = [];
     let allUsers = [];
+    let allBalanceRequests = [];
     let machinesMap = {};
-    let shopkeepersMap = {};
+    let adminSettings = { minWithdrawAmount: 500 };
     let unsubs = [];
 
     function showAlert(text, type = "err") {
@@ -504,19 +548,14 @@
       return 0;
     }
 
-    function getShopDisplayForMachine(mId) {
-      const cleanId = String(mId || "").trim().toUpperCase();
-      if (!cleanId) return "-";
-      const m = machinesMap[cleanId];
-      if (m && m.shopName) {
-        return `${m.shopName}${m.location ? " (" + m.location + ")" : ""}`;
-      }
-      const sk = Object.values(shopkeepersMap).find(s => String(s.machineId || "").toUpperCase() === cleanId);
-      if (sk && sk.shopName) {
-        return `${sk.shopName}${sk.shopAddress ? " (" + sk.shopAddress + ")" : ""}`;
-      }
-      return m?.location || cleanId;
+    function getReqMs(r) {
+      if (r.createdAt?.toMillis) return r.createdAt.toMillis();
+      if (r.createdAt?.seconds) return r.createdAt.seconds * 1000;
+      return Number(r.createdAtMs || 0);
     }
+
+    updateClock();
+    setInterval(updateClock, 1000);
 
     window.switchAuthTab = function(tab) {
       document.getElementById("tabLogin").classList.toggle("active", tab === "login");
@@ -526,11 +565,14 @@
     };
 
     window.switchDashTab = function(tab) {
-      const tabs = ["orders", "newcust", "lookup", "topup"];
-      tabs.forEach(tb => {
-        document.getElementById(`nav${tb.charAt(0).toUpperCase() + tb.slice(1)}`).classList.toggle("active", tb === tab);
-        document.getElementById(`panel${tb.charAt(0).toUpperCase() + tb.slice(1)}`).classList.toggle("hidden", tb !== tab);
-      });
+      document.getElementById("navOrders").classList.toggle("active", tab === "orders");
+      document.getElementById("navNewCust").classList.toggle("active", tab === "newcust");
+      document.getElementById("panelOrders").classList.toggle("hidden", tab !== "orders");
+      document.getElementById("panelNewCust").classList.toggle("hidden", tab !== "newcust");
+    };
+
+    window.toggleWithdrawForm = function() {
+      document.getElementById("withdrawFormBox").classList.toggle("hidden");
     };
 
     window.signupShopkeeper = async function() {
@@ -562,11 +604,11 @@
         phone,
         salt,
         passwordHash,
+        earningBalance: 0,
         status: "active",
         createdAt: serverTimestamp()
       });
 
-      // Link machine in Firestore so Admin, Shopkeeper & Customer apps share exact shop/machine info
       await setDoc(doc(db, "machines", machineId), {
         machineId,
         shopName,
@@ -630,18 +672,18 @@
         renderAll();
       }));
 
+      unsubs.push(onSnapshot(doc(db, "settings", "shopkeeperConfig"), (snap) => {
+        if (snap.exists()) {
+          const d = snap.data();
+          adminSettings.minWithdrawAmount = Number(d.minWithdrawAmount ?? d.minWithdraw ?? 500);
+        }
+        renderAll();
+      }));
+
       unsubs.push(onSnapshot(collection(db, "machines"), (qs) => {
         machinesMap = {};
         qs.forEach(d => {
           machinesMap[d.id.toUpperCase()] = { id: d.id, ...d.data() };
-        });
-        renderAll();
-      }));
-
-      unsubs.push(onSnapshot(collection(db, "shopkeepers"), (qs) => {
-        shopkeepersMap = {};
-        qs.forEach(d => {
-          shopkeepersMap[d.id] = { id: d.id, ...d.data() };
         });
         renderAll();
       }));
@@ -660,102 +702,140 @@
         allUsers = users;
         renderAll();
       }));
+
+      unsubs.push(onSnapshot(collection(db, "balanceRequests"), (qs) => {
+        const reqs = [];
+        qs.forEach(d => reqs.push({ id: d.id, ...d.data() }));
+        reqs.sort((a, b) => getReqMs(b) - getReqMs(a));
+        allBalanceRequests = reqs;
+        renderAll();
+      }));
     }
 
     function getMyMachineId() {
       return String(currentShopkeeper?.machineId || "").trim().toUpperCase();
     }
 
-    function getNewCustomersForMyShop() {
+    function isOrderForThisShopkeeper(o) {
       const myM = getMyMachineId();
-      if (!myM) return [];
+      const myPhone = normalizePhone(currentShopkeeper?.phone || "");
+      const m = String(o.machineId || "").trim().toUpperCase();
+      const skPhone = normalizePhone(o.shopkeeperPhone || "");
+      return (myM && m === myM) || (myPhone && skPhone === myPhone);
+    }
 
-      // Find earliest order per customer across all machines
-      const earliestOrderByPhone = {};
-      [...allOrders].reverse().forEach(o => {
-        const ph = o.userPhone;
-        const l = Number(o.dispensedLiters ?? o.targetLiters ?? 0);
-        if (!ph || l <= 0) return;
-        if (!earliestOrderByPhone[ph]) {
-          earliestOrderByPhone[ph] = o;
-        }
+    function update24HourApprovalTimerBanner() {
+      const box = document.getElementById("approvalTimerBox");
+      if (!box || !currentShopkeeper) return;
+      const myM = getMyMachineId();
+      const myPhone = normalizePhone(currentShopkeeper.phone || "");
+
+      const pendingMine = allBalanceRequests.filter(r => {
+        const st = String(r.status || "pending").toLowerCase();
+        if (st !== "pending") return false;
+        const m = String(r.machineId || "").trim().toUpperCase();
+        const sk = normalizePhone(r.shopkeeperPhone || "");
+        return (myM && m === myM) || (myPhone && sk === myPhone);
       });
 
-      const result = [];
-      const seenPhones = new Set();
+      if (!pendingMine.length) {
+        box.classList.add("hidden");
+        return;
+      }
 
-      allUsers.forEach(u => {
-        const ph = u.phone || u.id;
-        const regM = String(u.registeredMachineId || u.firstMachineId || u.shopMachineId || "").trim().toUpperCase();
-        const firstOrd = earliestOrderByPhone[ph];
-        const firstOrdM = String(firstOrd?.machineId || "").trim().toUpperCase();
+      const latest = pendingMine[0];
+      const startMs = getReqMs(latest);
+      if (!startMs) {
+        box.classList.add("hidden");
+        return;
+      }
 
-        if (regM === myM || firstOrdM === myM) {
-          seenPhones.add(ph);
-          result.push({
-            phone: ph,
-            name: u.name || firstOrd?.userName || ph,
-            balance: Number(u.balance || 0),
-            joinedAt: u.createdAt || firstOrd?.createdAt || null,
-            source: regM === myM ? "Direct Shop Login / Sign Up" : "First Water Scan Here"
-          });
-        }
-      });
+      const remainingMs = Math.max(0, (startMs + 24 * 60 * 60 * 1000) - Date.now());
+      const hrs = Math.floor(remainingMs / (1000 * 60 * 60));
+      const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((remainingMs % (1000 * 60)) / 1000);
+      const timeStr = `${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
-      // Also catch any customer who had their first order on this machine even if user doc lacks tag
-      Object.values(earliestOrderByPhone).forEach(ord => {
-        const ph = ord.userPhone;
-        const m = String(ord.machineId || "").trim().toUpperCase();
-        if (m === myM && !seenPhones.has(ph)) {
-          seenPhones.add(ph);
-          result.push({
-            phone: ph,
-            name: ord.userName || ph,
-            balance: Number(ord.remainingBalance || 0),
-            joinedAt: ord.createdAt || null,
-            source: "First Water Scan Here"
-          });
-        }
-      });
-
-      return result;
+      box.textContent = `${t("approvalTimerPrefix")} ${timeStr}`;
+      box.classList.remove("hidden");
     }
 
     function renderAll() {
       if (!currentShopkeeper) return;
       const myM = getMyMachineId();
       const myMachineObj = machinesMap[myM];
-      document.getElementById("dispMachineStatus").textContent =
-        myMachineObj?.status || "online";
+      document.getElementById("dispMachineStatus").textContent = myMachineObj?.status || "online";
 
       const validMyOrders = allOrders.filter(o => {
-        const m = String(o.machineId || "").trim().toUpperCase();
         const l = Number(o.dispensedLiters ?? o.targetLiters ?? 0);
-        return m === myM && l > 0;
+        return isOrderForThisShopkeeper(o) && l > 0;
       });
 
       const totalLiters = validMyOrders.reduce((acc, o) => acc + Number(o.dispensedLiters ?? o.targetLiters ?? 0), 0);
       const totalSales = validMyOrders.reduce((acc, o) => acc + Number(o.cost ?? o.liveCost ?? 0), 0);
-      const newCusts = getNewCustomersForMyShop();
+
+      const earningVal = Number(currentShopkeeper.earningBalance ?? totalSales);
+      const minWithdraw = Number(adminSettings.minWithdrawAmount ?? 500);
 
       document.getElementById("statTotalLiters").textContent = totalLiters.toFixed(2);
       document.getElementById("statTotalSales").textContent = totalSales.toFixed(0);
-      document.getElementById("statNewCustomers").textContent = String(newCusts.length);
+      document.getElementById("dispShopEarning").textContent = earningVal.toFixed(2);
+      document.getElementById("dispMinWithdraw").textContent = minWithdraw.toFixed(0);
+
+      const withdrawWrap = document.getElementById("withdrawActionWrap");
+      if (earningVal >= minWithdraw && earningVal > 0) {
+        withdrawWrap.classList.remove("hidden");
+      } else {
+        withdrawWrap.classList.add("hidden");
+        document.getElementById("withdrawFormBox").classList.add("hidden");
+      }
 
       renderShopOrders();
-      renderNewCustomers(newCusts);
-      renderCustomerLookup();
+      renderNewCustomers();
+      update24HourApprovalTimerBanner();
     }
+
+    window.submitWithdrawRequest = async function() {
+      if (!currentShopkeeper) return;
+      const myM = getMyMachineId();
+      const validMyOrders = allOrders.filter(o => isOrderForThisShopkeeper(o) && Number(o.dispensedLiters ?? o.targetLiters ?? 0) > 0);
+      const totalSales = validMyOrders.reduce((acc, o) => acc + Number(o.cost ?? o.liveCost ?? 0), 0);
+      const earningVal = Number(currentShopkeeper.earningBalance ?? totalSales);
+      const minWithdraw = Number(adminSettings.minWithdrawAmount ?? 500);
+
+      const amt = parseFloat(document.getElementById("withdrawAmountInput").value);
+      if (!amt || amt <= 0) {
+        return showAlert("براہ کرم درست رقم لکھیں۔");
+      }
+      if (earningVal < minWithdraw) {
+        return showAlert(`کم از کم ودھڈرا حد Rs. ${minWithdraw} ہے۔`);
+      }
+      if (amt > earningVal) {
+        return showAlert("درخواست کی رقم آپ کے موجودہ بیلنس سے زیادہ ہے۔");
+      }
+
+      await addDoc(collection(db, "withdrawRequests"), {
+        shopkeeperName: currentShopkeeper.ownerName || "",
+        shopName: currentShopkeeper.shopName || "",
+        shopkeeperPhone: currentShopkeeper.phone || "",
+        machineId: myM,
+        amount: amt,
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+
+      document.getElementById("withdrawAmountInput").value = "";
+      document.getElementById("withdrawFormBox").classList.add("hidden");
+      showAlert("ودھڈرا درخواست ایڈمن کو بھیج دی گئی ہے!", "ok");
+    };
 
     window.renderShopOrders = function() {
       const box = document.getElementById("shopOrdersList");
-      const myM = getMyMachineId();
       const q = (document.getElementById("filterShopOrders").value || "").trim().toLowerCase();
 
       const list = allOrders.filter(o => {
-        const m = String(o.machineId || "").trim().toUpperCase();
         const l = Number(o.dispensedLiters ?? o.targetLiters ?? 0);
-        if (m !== myM || l <= 0) return false;
+        if (!isOrderForThisShopkeeper(o) || l <= 0) return false;
         if (!q) return true;
         return String(o.userName || "").toLowerCase().includes(q) || String(o.userPhone || "").includes(q);
       });
@@ -776,202 +856,166 @@
               <span class="badge green">${liters} L | Rs. ${cost}</span>
             </div>
             <div class="sub-line">
-              ${t("machineLabel")}: <strong>${o.machineId}</strong> |
+              ${t("machineLabel")}: <strong>${o.machineId || "-"}</strong> |
               ${t("remBalLabel")}: <strong>Rs. ${rem}</strong> |
               ${t("dateLabel")}: ${formatDateTime(o.createdAt)}
             </div>
-            <button class="small blue" onclick="inspectCustomerShops('${o.userPhone || ""}')">
-              🔍 ${t("viewAllShopsBtn")}
-            </button>
           </div>
         `;
       }).join("");
     };
 
-    function renderNewCustomers(newCusts) {
-      const box = document.getElementById("newCustomersList");
-      if (!newCusts.length) {
-        box.innerHTML = `<div style="color:#64748b;padding:8px 0;">${t("noRecords")}</div>`;
-        return;
-      }
-
-      box.innerHTML = newCusts.map(c => `
-        <div class="item-card">
-          <div class="item-top">
-            <span>🆕 ${c.name} (${c.phone})</span>
-            <span class="badge amber">${c.source}</span>
-          </div>
-          <div class="sub-line">
-            ${t("shopLabel")}: <strong>${currentShopkeeper.shopName}</strong> |
-            ${t("machineLabel")}: <strong>${getMyMachineId()}</strong> |
-            ${t("remBalLabel")}: <strong>Rs. ${c.balance.toFixed(2)}</strong><br/>
-            ${t("dateLabel")}: ${formatDateTime(c.joinedAt)}
-          </div>
-          <button class="small blue" onclick="inspectCustomerShops('${c.phone}')">
-            🔍 ${t("viewAllShopsBtn")}
-          </button>
-        </div>
-      `).join("");
-    }
-
-    window.inspectCustomerShops = function(phone) {
-      if (!phone) return;
-      document.getElementById("lookupQuery").value = phone;
-      switchDashTab("lookup");
-      renderCustomerLookup();
-    };
-
-    window.renderCustomerLookup = function() {
-      const box = document.getElementById("customerLookupResult");
-      const q = (document.getElementById("lookupQuery").value || "").trim().toLowerCase();
-
-      if (!q) {
-        // Show quick summary of all customers who used this shop so shopkeeper can tap any
-        const myM = getMyMachineId();
-        const phonesHere = [...new Set(
-          allOrders
-            .filter(o => String(o.machineId || "").toUpperCase() === myM && Number(o.dispensedLiters ?? o.targetLiters ?? 0) > 0)
-            .map(o => o.userPhone)
-            .filter(Boolean)
-        )];
-
-        if (!phonesHere.length) {
-          box.innerHTML = `<div style="color:#64748b;padding:8px 0;">${t("noRecords")}</div>`;
-          return;
-        }
-
-        box.innerHTML = phonesHere.map(ph => {
-          const u = allUsers.find(x => (x.phone || x.id) === ph);
-          const custOrders = allOrders.filter(o => o.userPhone === ph && Number(o.dispensedLiters ?? o.targetLiters ?? 0) > 0);
-          const uniqueMachines = [...new Set(custOrders.map(o => String(o.machineId || "").toUpperCase()).filter(Boolean))];
-          return `
-            <div class="item-card">
-              <div class="item-top">
-                <span>👤 ${u?.name || custOrders[0]?.userName || ph} (${ph})</span>
-                <span class="badge blue">${uniqueMachines.length} ${t("machineLabel")}</span>
-              </div>
-              <div style="margin-top:6px;">
-                ${uniqueMachines.map(m => `<span class="shop-chip">🏪 ${getShopDisplayForMachine(m)} — [${m}]</span>`).join("")}
-              </div>
-              <button class="small blue" style="margin-top:8px;" onclick="inspectCustomerShops('${ph}')">
-                ${t("ordersHistoryTitle")}
-              </button>
-            </div>
-          `;
-        }).join("");
-        return;
-      }
-
-      const matchedOrders = allOrders.filter(o => {
-        const l = Number(o.dispensedLiters ?? o.targetLiters ?? 0);
-        if (l <= 0) return false;
-        return String(o.userPhone || "").includes(q) || String(o.userName || "").toLowerCase().includes(q);
-      });
-
-      const matchedUser = allUsers.find(u =>
-        String(u.phone || u.id || "").includes(q) || String(u.name || "").toLowerCase().includes(q)
-      );
-
-      if (!matchedOrders.length && !matchedUser) {
-        box.innerHTML = `<div style="color:#64748b;padding:8px 0;">${t("noRecords")}</div>`;
-        return;
-      }
-
-      const custName = matchedUser?.name || matchedOrders[0]?.userName || "-";
-      const custPhone = matchedUser?.phone || matchedUser?.id || matchedOrders[0]?.userPhone || "-";
-      const custBal = Number(matchedUser?.balance ?? matchedOrders[0]?.remainingBalance ?? 0).toFixed(2);
-
-      // Group by machine & shop
-      const shopSummary = {};
-      matchedOrders.forEach(o => {
-        const m = String(o.machineId || "-").toUpperCase();
-        if (!shopSummary[m]) {
-          shopSummary[m] = {
-            machineId: m,
-            shopTitle: getShopDisplayForMachine(m),
-            count: 0,
-            liters: 0,
-            amount: 0
-          };
-        }
-        shopSummary[m].count += 1;
-        shopSummary[m].liters += Number(o.dispensedLiters ?? o.targetLiters ?? 0);
-        shopSummary[m].amount += Number(o.cost ?? o.liveCost ?? 0);
-      });
-
-      const shopsHtml = Object.values(shopSummary).map(s => `
-        <div class="item-card" style="background:#f0fdfa;border-color:#99f6e4;">
-          <div class="item-top">
-            <span>🏪 ${s.shopTitle}</span>
-            <span class="badge blue">${t("machineLabel")}: ${s.machineId}</span>
-          </div>
-          <div class="sub-line">
-            تعداد: <strong>${s.count} مرتبہ</strong> |
-            ${t("litersLabel")}: <strong>${s.liters.toFixed(2)} L</strong> |
-            ${t("amountLabel")}: <strong>Rs. ${s.amount.toFixed(2)}</strong>
-          </div>
-        </div>
-      `).join("");
-
-      const ordersHtml = matchedOrders.map(o => {
-        const m = String(o.machineId || "-").toUpperCase();
-        const liters = Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2);
-        const cost = Number(o.cost ?? o.liveCost ?? 0).toFixed(2);
-        return `
-          <div class="item-card">
-            <div class="item-top">
-              <span>🏪 ${getShopDisplayForMachine(m)} (${m})</span>
-              <span class="badge green">${liters} L | Rs. ${cost}</span>
-            </div>
-            <div class="sub-line">${t("dateLabel")}: ${formatDateTime(o.createdAt)}</div>
-          </div>
-        `;
-      }).join("");
-
-      box.innerHTML = `
-        <div class="item-card" style="background:#eff6ff;border-color:#93c5fd;">
-          <div class="item-top">
-            <span>👤 ${custName} (${custPhone})</span>
-            <span class="badge green">${t("remBalLabel")}: Rs. ${custBal}</span>
-          </div>
-        </div>
-        <h4>${t("visitedShopsTitle")}</h4>
-        ${shopsHtml || t("noRecords")}
-        <h4>${t("ordersHistoryTitle")}</h4>
-        ${ordersHtml || t("noRecords")}
-      `;
-    };
-
-    window.sendCustomerTopupRequest = async function() {
+    window.sendShopCustomerRequest = async function() {
       if (!currentShopkeeper) return;
-      const custPhone = normalizePhone(document.getElementById("topupCustPhone").value);
-      const amount = parseFloat(document.getElementById("topupAmount").value);
-      const note = document.getElementById("topupNote").value.trim();
+      const name = document.getElementById("newCustName").value.trim();
+      const phone = normalizePhone(document.getElementById("newCustPhone").value);
+      const amount = parseFloat(document.getElementById("newCustAmount").value);
 
-      if (custPhone.length < 10 || !amount || amount <= 0) {
-        return showAlert("کسٹمر کا درست موبائل نمبر اور رقم درج کریں۔");
+      if (!name || phone.length < 10 || !amount || amount <= 0) {
+        return showAlert("براہ کرم کسٹمر کا نام، درست موبائل نمبر اور رقم لکھیں۔");
       }
 
-      const custSnap = await getDoc(doc(db, "users", custPhone));
-      const custName = custSnap.exists() ? (custSnap.data().name || custPhone) : custPhone;
+      const myM = getMyMachineId();
+
+      await setDoc(doc(db, "users", phone), {
+        name,
+        phone,
+        registeredMachineId: myM,
+        firstMachineId: myM,
+        registeredByShopkeeper: currentShopkeeper.ownerName || "",
+        registeredByShopPhone: currentShopkeeper.phone || "",
+        addedBy: "shopkeeper",
+        createdAt: serverTimestamp()
+      }, { merge: true });
 
       await addDoc(collection(db, "balanceRequests"), {
-        userPhone: custPhone,
-        userName: custName,
+        userPhone: phone,
+        userName: name,
         amount,
-        trxId: note || `Shopkeeper: ${currentShopkeeper.shopName} (${getMyMachineId()})`,
-        shopkeeperPhone: currentShopkeeper.phone,
-        shopName: currentShopkeeper.shopName,
-        machineId: getMyMachineId(),
-        imageUrl: null,
+        trxId: `Shopkeeper: ${currentShopkeeper.ownerName} (${currentShopkeeper.shopName})`,
+        shopkeeperName: currentShopkeeper.ownerName || "",
+        shopkeeperPhone: currentShopkeeper.phone || "",
+        shopName: currentShopkeeper.shopName || "",
+        machineId: myM,
+        addedBy: "shopkeeper",
         status: "pending",
+        createdAtMs: Date.now(),
         createdAt: serverTimestamp()
       });
 
-      document.getElementById("topupCustPhone").value = "";
-      document.getElementById("topupAmount").value = "";
-      document.getElementById("topupNote").value = "";
-      showAlert("کسٹمر کی بیلنس درخواست ایڈمن کو بھیج دی گئی ہے!", "ok");
+      document.getElementById("newCustName").value = "";
+      document.getElementById("newCustPhone").value = "";
+      document.getElementById("newCustAmount").value = "";
+      showAlert("ریکویسٹ بھیج دی گئی ہے! 24 گھنٹے کے اندر اپروول کے بعد کسٹمر پانی بھر سکے گا۔", "ok");
+    };
+
+    window.renderNewCustomers = function() {
+      const pendingBox = document.getElementById("pendingRequestsList");
+      const regBox = document.getElementById("newCustomersList");
+      const q = (document.getElementById("filterNewCust").value || "").trim().toLowerCase();
+      const myM = getMyMachineId();
+      const myPhone = normalizePhone(currentShopkeeper?.phone || "");
+
+      const mineRequests = allBalanceRequests.filter(r => {
+        const m = String(r.machineId || "").trim().toUpperCase();
+        const sk = normalizePhone(r.shopkeeperPhone || "");
+        const firstM = String(r.firstMachineId || "").trim().toUpperCase();
+        return (myM && (m === myM || firstM === myM)) || (myPhone && sk === myPhone);
+      });
+
+      const pendingList = mineRequests.filter(r => {
+        const st = String(r.status || "pending").toLowerCase();
+        if (st !== "pending") return false;
+        if (!q) return true;
+        return String(r.userName || "").toLowerCase().includes(q) || String(r.userPhone || "").includes(q);
+      });
+
+      if (!pendingList.length) {
+        pendingBox.innerHTML = `<div style="color:#64748b;padding:6px 0;">${t("noRecords")}</div>`;
+      } else {
+        pendingBox.innerHTML = pendingList.map(r => {
+          const isByShop = r.addedBy === "shopkeeper" || Boolean(r.shopkeeperPhone);
+          const actorText = isByShop
+            ? `${t("addedByShopkeeper")}: ${r.shopkeeperName || currentShopkeeper.ownerName}`
+            : t("addedByCustomer");
+          return `
+            <div class="item-card">
+              <div class="item-top">
+                <span>⏳ ${r.userName || "-"} (${r.userPhone || "-"})</span>
+                <span class="badge amber">Pending | Rs. ${Number(r.amount || 0).toFixed(2)}</span>
+              </div>
+              <div class="sub-line">
+                ${actorText} | ${t("machineLabel")}: <strong>${r.machineId || myM}</strong><br/>
+                ${t("dateLabel")}: ${formatDateTime(r.createdAt)}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const earliestOrderByPhone = {};
+      [...allOrders].reverse().forEach(o => {
+        const ph = o.userPhone;
+        const l = Number(o.dispensedLiters ?? o.targetLiters ?? 0);
+        if (!ph || l <= 0) return;
+        if (!earliestOrderByPhone[ph]) earliestOrderByPhone[ph] = o;
+      });
+
+      const newCustMap = new Map();
+
+      allUsers.forEach(u => {
+        const ph = u.phone || u.id;
+        const regM = String(u.registeredMachineId || u.firstMachineId || u.shopMachineId || "").trim().toUpperCase();
+        const firstOrdM = String(earliestOrderByPhone[ph]?.machineId || "").trim().toUpperCase();
+        const regBySk = normalizePhone(u.registeredByShopPhone || "") === myPhone;
+
+        if ((myM && (regM === myM || firstOrdM === myM)) || regBySk) {
+          newCustMap.set(ph, {
+            phone: ph,
+            name: u.name || earliestOrderByPhone[ph]?.userName || ph,
+            balance: Number(u.balance || 0),
+            addedBy: u.addedBy === "shopkeeper" ? t("addedByShopkeeper") : t("addedByCustomer"),
+            joinedAt: u.createdAt || earliestOrderByPhone[ph]?.createdAt || null
+          });
+        }
+      });
+
+      mineRequests.forEach(r => {
+        const ph = r.userPhone;
+        if (ph && !newCustMap.has(ph)) {
+          newCustMap.set(ph, {
+            phone: ph,
+            name: r.userName || ph,
+            balance: 0,
+            addedBy: r.addedBy === "shopkeeper" ? t("addedByShopkeeper") : t("addedByCustomer"),
+            joinedAt: r.createdAt || null
+          });
+        }
+      });
+
+      const finalNewCusts = [...newCustMap.values()].filter(c => {
+        if (!q) return true;
+        return String(c.name || "").toLowerCase().includes(q) || String(c.phone || "").includes(q);
+      });
+
+      document.getElementById("statNewCustomers").textContent = String(finalNewCusts.length);
+
+      if (!finalNewCusts.length) {
+        regBox.innerHTML = `<div style="color:#64748b;padding:6px 0;">${t("noRecords")}</div>`;
+      } else {
+        regBox.innerHTML = finalNewCusts.map(c => `
+          <div class="item-card">
+            <div class="item-top">
+              <span>🆕 ${c.name} (${c.phone})</span>
+              <span class="badge blue">${c.addedBy}</span>
+            </div>
+            <div class="sub-line">
+              ${t("remBalLabel")}: <strong>Rs. ${c.balance.toFixed(2)}</strong> |
+              ${t("dateLabel")}: ${formatDateTime(c.joinedAt)}
+            </div>
+          </div>
+        `).join("");
+      }
     };
 
     setLanguage(currentLang);
