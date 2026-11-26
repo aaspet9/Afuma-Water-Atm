@@ -3,218 +3,326 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ایڈمن پینل — سمارٹ واٹر اے ٹی ایم</title>
+  <meta name="theme-color" content="#0b5ed7" />
+  <title>Admin Panel - Smart Water ATM</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: #eef4f8; color: #162433; }
-    .container { max-width: 820px; margin: 20px auto; padding: 16px; }
-    .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-    h1, h2, h3 { margin-top: 0; color: #0b5ed7; }
-    input, button, label { width: 100%; margin: 6px 0; border-radius: 9px; font-size: 14px; }
-    input, button { padding: 10px 12px; border: 1px solid #cbd5e1; }
-    button { background: #0b5ed7; color: #fff; border: none; font-weight: 600; cursor: pointer; }
+    .container { max-width: 680px; margin: 14px auto; padding: 12px; }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07);
+      border: 1px solid #e2e8f0;
+    }
+    h1, h2, h3, h4 { margin-top: 0; color: #0b5ed7; }
+    input, select, button, label {
+      width: 100%;
+      margin: 6px 0;
+      border-radius: 10px;
+      font-size: 15px;
+    }
+    input, select, button { padding: 11px 12px; border: 1px solid #cbd5e1; }
+    button { background: #0b5ed7; color: #fff; border: none; font-weight: 700; cursor: pointer; }
     button:hover { background: #094bb0; }
     button.success { background: #15803d; }
     button.danger { background: #b91c1c; }
     button.secondary { background: #475569; }
-    button.small { width: auto; padding: 7px 12px; margin: 4px 2px 0; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-    .item-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin: 10px 0; background: #f8fafc; }
-    .msg { padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 14px; display: none; }
-    .msg.err { display: block; background: #fee2e2; color: #991b1b; }
-    .msg.ok { display: block; background: #dcfce7; color: #166534; }
-    .hidden { display: none; }
-    .req-img { max-width: 220px; max-height: 220px; border-radius: 8px; margin-top: 8px; border: 1px solid #cbd5e1; display: block; }
-    .qr-box { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-top: 10px; display: inline-block; text-align: center; }
+    button.small { width: auto; padding: 7px 12px; font-size: 13px; margin: 4px 2px; }
+
+    .top-header {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(11, 94, 215, 0.1);
+      border: 1px solid #bae6fd;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .clock-pill {
+      flex: 1;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 7px 6px;
+      text-align: center;
+    }
+    .clock-lbl { font-size: 10.5px; font-weight: 700; color: #475569; }
+    .clock-val { font-size: 12px; font-weight: 800; color: #0f172a; margin-top: 2px; }
+    .logo-ring {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, #dc2626, #0284c7);
+      flex-shrink: 0;
+    }
+    .logo-ring img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      display: block;
+    }
+    .sub-caption {
+      text-align: center;
+      font-size: 13px;
+      color: #475569;
+      margin-top: 8px;
+      font-weight: 600;
+    }
 
     .strip-btn {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #e0f2fe;
+      background: linear-gradient(135deg, #e0f2fe, #dbeafe);
       color: #0c4a6e;
-      border: 1px solid #bae6fd;
+      border: 1px solid #93c5fd;
       padding: 13px 15px;
-      border-radius: 10px;
-      font-weight: 700;
+      border-radius: 12px;
+      font-weight: 800;
       cursor: pointer;
-      margin: 0;
     }
-    .strip-body { padding-top: 12px; }
+    .strip-btn.setting-strip {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      color: #78350f;
+      border-color: #f59e0b;
+    }
 
-    .row-strip {
+    .msg { padding: 11px 12px; border-radius: 10px; margin: 8px 0; font-size: 14px; display: none; font-weight: 700; }
+    .msg.err { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .hidden { display: none; }
+
+    .item-box {
+      background: #f8fafc;
       border: 1px solid #cbd5e1;
-      border-radius: 10px;
+      border-radius: 12px;
+      padding: 12px;
       margin: 8px 0;
-      background: #f8fafc;
-      overflow: hidden;
     }
-    .row-strip-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 13px;
-      background: #f1f5f9;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .row-strip-header:hover { background: #e2e8f0; }
-    .row-strip-body {
-      padding: 11px 13px;
-      background: #fff;
-      border-top: 1px solid #e2e8f0;
-      font-size: 13px;
-    }
-    .sub-strip {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      margin: 6px 0;
-      background: #f8fafc;
-      overflow: hidden;
-    }
-    .sub-strip-header {
+    .item-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-      padding: 9px 11px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .sub-strip-header:hover { background: #eef2f6; }
-    .sub-strip-body {
-      padding: 9px 11px;
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
-      font-size: 12.5px;
+      font-weight: 800;
+      flex-wrap: wrap;
     }
     .badge {
-      display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 8px;
       border-radius: 999px;
       font-size: 11.5px;
-      font-weight: 600;
-      background: #e2e8f0;
-      color: #1e293b;
+      font-weight: 800;
+      display: inline-block;
     }
-    .badge.ok { background: #dcfce7; color: #166534; }
-    .badge.warn { background: #fef3c7; color: #92400e; }
-    .badge.err { background: #fee2e2; color: #991b1b; }
-    .bulk-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
+    .badge.green { background: #dcfce7; color: #166534; }
+    .badge.red { background: #fee2e2; color: #991b1b; }
+    .badge.blue { background: #dbeafe; color: #1e40af; }
+    .badge.amber { background: #fef3c7; color: #92400e; }
+
+    .qr-output-box {
+      text-align: center;
+      background: #f8fafc;
+      border: 1px dashed #0284c7;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .qr-output-box > div:first-child { display: inline-block; }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 8px;
-      background: #f1f5f9;
-      padding: 8px 10px;
-      border-radius: 8px;
       margin: 8px 0;
     }
-    .chk-inline {
-      width: auto;
-      margin: 0 0 0 8px;
-      transform: scale(1.15);
-      cursor: pointer;
+    .lock-note {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      color: #1e3a8a;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 8px 0;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="card" style="text-align:center;">
-      <h1>🛠️ ایڈمن پینل — سمارٹ واٹر اے ٹی ایم</h1>
-      <p style="margin:0;color:#475569;">بیلنس درخواستیں، دکاندار پے آؤٹ، مشین QR کوڈز اور صارفین کا کنٹرول</p>
+    <!-- TOP HEADER -->
+    <div class="top-header">
+      <div class="header-row">
+        <div class="clock-pill">
+          <div class="clock-lbl">تاریخ</div>
+          <div class="clock-val" id="liveDateText">--/--/----</div>
+        </div>
+        <div class="logo-ring">
+          <img src="https://i.ibb.co/YFS48PVd/134196.jpg" alt="Logo" />
+        </div>
+        <div class="clock-pill">
+          <div class="clock-lbl">وقت</div>
+          <div class="clock-val" id="liveTimeText">--:--:-- --</div>
+        </div>
+      </div>
+      <h2 style="text-align:center;margin:10px 0 2px;">ایڈمن پینل — سمارٹ واٹر اے ٹی ایم 🛠️</h2>
+      <div class="sub-caption">بیلنس درخواستیں، دکاندار پے آؤٹ، مشین QR کوڈز، سیٹنگ مشین اور صارفین کا کنٹرول</div>
     </div>
 
     <div id="alertBox" class="msg"></div>
 
-    <div id="adminLoginCard" class="card" style="max-width:420px;margin:0 auto 14px;">
+    <!-- ADMIN LOGIN -->
+    <div id="adminLoginCard" class="card">
       <h3>ایڈمن لاگ ان</h3>
-      <input type="password" id="adminPassInput" placeholder="ایڈمن پاسورڈ لکھیں" />
-      <button onclick="adminLogin()">لاگ ان کریں</button>
+      <input type="password" id="adminPass" placeholder="ایڈمن پاسورڈ لکھیں" />
+      <button onclick="loginAdmin()">لاگ ان کریں</button>
     </div>
 
+    <!-- ADMIN DASHBOARD -->
     <div id="adminPanel" class="hidden">
-      <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <strong>ایڈمن سیشن فعال ہے</strong>
-        <button class="danger small" onclick="adminLogout()">لاگ آؤٹ</button>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+          <strong>ایڈمن سیشن فعال ہے</strong>
+          <button class="danger small" onclick="logoutAdmin()">لاگ آؤٹ</button>
+        </div>
       </div>
 
-      <!-- 1. USER BALANCE REQUESTS -->
+      <!-- 1. PENDING BALANCE REQUESTS -->
       <div class="card">
         <h3>صارفین کی بیلنس درخواستیں (Pending Requests)</h3>
-        <div id="requestsList">لوڈ ہو رہا ہے...</div>
+        <div id="pendingRequestsList">کوئی بیلنس درخواست زیر التواء نہیں ہے۔</div>
       </div>
 
-      <!-- 2. SHOPKEEPER PAYOUT REQUESTS (COLLAPSIBLE STRIP) -->
+      <!-- 2. SHOPKEEPER WITHDRAW / PAYMENT REQUESTS -->
       <div class="card" style="padding:10px;">
-        <div class="strip-btn" onclick="toggleElement('payoutStripBody', 'payoutStripArrow')">
-          <span>دکانداروں کی بنی ہوئی رقم کی درخواستیں (Send Payment)</span>
-          <span id="payoutStripArrow">▼</span>
+        <div class="strip-btn" onclick="toggleStrip('withdrawBody', 'arrowWithdraw')">
+          <span>دکانداروں کی بنی ہوئی رقم کی درخواستیں (Withdraw / Send Payment)</span>
+          <span id="arrowWithdraw">▼</span>
         </div>
-        <div id="payoutStripBody" class="strip-body hidden">
-          <div id="payoutRequestsList">لوڈ ہو رہا ہے...</div>
+        <div id="withdrawBody" class="hidden" style="padding-top:12px;">
+          <label style="display:block;font-size:13px;font-weight:700;color:#334155;">کم از کم ودھڈرا حد (Minimum Withdraw Rs.):</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="minWithdrawInput" min="1" value="500" style="margin:0;flex:1;" />
+            <button class="small success" style="margin:0;" onclick="saveMinWithdrawLimit()">حد محفوظ کریں</button>
+          </div>
+          <div id="withdrawRequestsList" style="margin-top:10px;">کوئی ودھڈرا درخواست موجود نہیں۔</div>
         </div>
       </div>
 
-      <!-- 3. MACHINE & QR GENERATOR -->
+      <!-- 3. GENERATE MACHINE / SHOPKEEPER QR CODE -->
       <div class="card">
         <h3>مشین، دکاندار پرافٹ اور الگ QR کوڈ جنریٹ کریں</h3>
-        <div class="grid-2">
-          <input type="text" id="mIdInput" placeholder="مشین ID (مثلاً M01)" />
-          <input type="text" id="mLocInput" placeholder="مقام / دکان کا نام (مثلاً بابر علی)" />
-          <input type="number" id="mRateInput" step="0.1" placeholder="فی لیٹر ریٹ (مثلاً 3)" />
-          <input type="number" id="mProfitInput" step="0.1" placeholder="دکاندار فی لیٹر پرافٹ (مثلاً 1)" />
+        <input type="text" id="mId" placeholder="مشین ID (مثلاً M01)" />
+        <input type="text" id="mLoc" placeholder="مقام / دکان کا نام (مثلاً ذمی دکان بابر علی)" />
+        <input type="number" id="mRate" min="1" step="0.5" placeholder="فی لیٹر ریٹ (مثلاً 5)" />
+        <input type="number" id="mShopProfit" min="0" step="0.5" placeholder="دکاندار فی لیٹر پرافٹ (مثلاً 1)" />
+        <input type="tel" id="mShopPhone" placeholder="دکاندار کا موبائل نمبر (مثلاً 03001234567)" />
+        <button class="success" onclick="saveMachineAndQr()">مشین محفوظ کریں اور QR کوڈ بنائیں</button>
+        <div id="qrResultBox" class="qr-output-box hidden">
+          <div id="qrCanvas"></div>
+          <div id="qrPayloadText" style="font-size:12px;color:#334155;margin-top:8px;word-break:break-all;"></div>
         </div>
-        <input type="tel" id="mShopPhoneInput" placeholder="دکاندار کا موبائل نمبر (مثلاً 03001234567)" />
-        <button class="success" onclick="saveMachine()">مشین محفوظ کریں اور QR کوڈ بنائیں</button>
       </div>
 
-      <!-- 4. SHOPKEEPERS STRIP -->
+      <!-- 4. NEW STRIP: SETTING MACHINE (ONLY SAVED QR MACHINES SELECTABLE) -->
       <div class="card" style="padding:10px;">
-        <div class="strip-btn" onclick="toggleElement('shopStripBody', 'shopStripArrow')">
+        <div class="strip-btn setting-strip" onclick="toggleStrip('settingMachineBody', 'arrowSettingMachine')">
+          <span>⚙️ سیٹینگ مشین (Setting Machine)</span>
+          <span id="arrowSettingMachine">▼</span>
+        </div>
+        <div id="settingMachineBody" class="hidden" style="padding-top:12px;">
+          <label style="display:block;font-size:13px;font-weight:700;color:#334155;">
+            صرف وہ مشین منتخب کریں جس کا QR کوڈ پہلے سے جنریٹ/سیو ہو چکا ہے:
+          </label>
+          <select id="savedQrMachineSelect" onchange="onSelectSavedQrMachine()">
+            <option value="">-- محفوظ شدہ QR مشین منتخب کریں --</option>
+          </select>
+
+          <div id="machineSettingWorkspace" class="item-box hidden" style="background:#f0f9ff;border-color:#7dd3fc;">
+            <div class="item-top">
+              <span>مشین: <strong id="cfgMachineId">-</strong> (<span id="cfgMachineLoc">-</span>)</span>
+              <span id="cfgLockBadge" class="badge blue">Unlocked</span>
+            </div>
+
+            <div class="lock-note" id="cfgLockStatusText">
+              سیٹنگ محفوظ ہونے کے بعد تب تک تبدیل نہیں ہوگی جب تک آپ خود سیٹنگ ان لاک / اپڈیٹ نہ کریں۔
+            </div>
+
+            <label style="display:block;font-size:13px;font-weight:700;">فلو سینسر / فی لیٹر ریٹ سیٹ کریں (Rs./Liter):</label>
+            <input type="number" id="cfgFlowRate" min="0.5" step="0.5" placeholder="ریٹ فی لیٹر (مثلاً 5)" />
+
+            <label style="display:block;font-size:13px;font-weight:700;">فلو سینسر حالت / پاور اسٹیٹ (Firebase سے مستقل لاک):</label>
+            <select id="cfgPowerState">
+              <option value="ON">ON (مشین آن رہے — چاہے بند ہو جائے آن ہی رہے)</option>
+              <option value="OFF">OFF (مشین آف رہے — پاور دیں یا کچھ بھی کرے آف ہی رہے)</option>
+            </select>
+
+            <div class="control-grid">
+              <button class="success" onclick="sendMachineCommand('START')">▶ Start بٹن</button>
+              <button class="danger" onclick="sendMachineCommand('STOP')">⏹ Stop بٹن</button>
+            </div>
+
+            <button id="btnSaveLockedSetting" class="success" onclick="saveLockedMachineSetting()">
+              🔒 سیٹنگ کنفرم کر کے سیو کریں (لاک)
+            </button>
+            <button id="btnUnlockSetting" class="secondary hidden" onclick="unlockMachineSettingForEdit()">
+              🔓 سیٹنگ دوبارہ تبدیل کرنے کے لیے کھولیں
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. SHOPKEEPERS BALANCE, PROFIT & MACHINE QR LIST -->
+      <div class="card" style="padding:10px;">
+        <div class="strip-btn" onclick="toggleStrip('shopkeepersBody', 'arrowShopkeepers')">
           <span>🏪 دکانداروں کا بیلنس، پرافٹ اور مشین QR لسٹ</span>
-          <span id="shopStripArrow">▼</span>
+          <span id="arrowShopkeepers">▼</span>
         </div>
-        <div id="shopStripBody" class="strip-body hidden">
-          <input type="text" id="shopSearchInput" placeholder="دکاندار کا موبائل نمبر یا نام لکھ کر سرچ کریں..." oninput="renderShopkeepers()" />
-          <div id="shopkeepersList">لوڈ ہو رہا ہے...</div>
-        </div>
-      </div>
-
-      <!-- 5. CUSTOMERS STRIP -->
-      <div class="card" style="padding:10px;">
-        <div class="strip-btn" onclick="toggleElement('userStripBody', 'userStripArrow')">
-          <span>👤 صارفین (کسٹمرز) کا مکمل ڈیٹا اور سرچ</span>
-          <span id="userStripArrow">▼</span>
-        </div>
-        <div id="userStripBody" class="strip-body hidden">
-          <input type="tel" id="userSearchInput" placeholder="کسٹمر کا موبائل نمبر یا نام لکھ کر سرچ کریں..." oninput="renderCustomers()" />
-          <div id="customersList">لوڈ ہو رہا ہے...</div>
+        <div id="shopkeepersBody" class="hidden" style="padding-top:12px;">
+          <input type="text" id="searchShopkeeper" placeholder="دکاندار کا موبائل نمبر یا نام لکھ کر سرچ کریں..." oninput="renderShopkeepers()" />
+          <div id="shopkeepersList">کوئی دکاندار ریکارڈ موجود نہیں۔</div>
         </div>
       </div>
 
-      <!-- 6. RECENT WATER ORDERS STRIP -->
+      <!-- 6. CUSTOMERS DATA & SEARCH -->
       <div class="card" style="padding:10px;">
-        <div class="strip-btn" onclick="toggleElement('ordersStripBody', 'ordersStripArrow')">
-          <span>💧 حالیہ پانی کے آرڈرز (پٹیوں میں)</span>
-          <span id="ordersStripArrow">▼</span>
+        <div class="strip-btn" onclick="toggleStrip('customersBody', 'arrowCustomers')">
+          <span>👥 صارفین (کسٹمرز) کا مکمل ڈیٹا اور سرچ</span>
+          <span id="arrowCustomers">▼</span>
         </div>
-        <div id="ordersStripBody" class="strip-body">
-          <input type="text" id="orderSearchInput" placeholder="مشین نمبر، موبائل نمبر یا نام سے آرڈر سرچ کریں..." oninput="renderOrders()" />
-          <div class="bulk-bar">
-            <label style="width:auto;margin:0;display:flex;align-items:center;cursor:pointer;font-weight:600;">
-              <input type="checkbox" id="selectAllOrdersChk" class="chk-inline" onchange="toggleSelectAllOrders(this.checked)" />
-              Select All (سب منتخب کریں)
+        <div id="customersBody" class="hidden" style="padding-top:12px;">
+          <input type="text" id="searchCustomer" placeholder="کسٹمر کا موبائل نمبر یا نام لکھ کر سرچ کریں..." oninput="renderCustomers()" />
+          <div id="customersList">کوئی صارف موجود نہیں۔</div>
+        </div>
+      </div>
+
+      <!-- 7. RECENT WATER ORDERS (BUTTONS WITH SELECT ALL & DELETE SELECTED) -->
+      <div class="card" style="padding:10px;">
+        <div class="strip-btn" onclick="toggleStrip('ordersBody', 'arrowOrders')">
+          <span>🚰 حالیہ پانی کے آرڈرز (بٹنوں میں)</span>
+          <span id="arrowOrders">▼</span>
+        </div>
+        <div id="ordersBody" class="hidden" style="padding-top:12px;">
+          <input type="text" id="searchOrder" placeholder="مشین نمبر، موبائل نمبر یا نام سے آرڈر سرچ کریں..." oninput="renderOrders()" />
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0;">
+            <label style="width:auto;margin:0;display:flex;align-items:center;gap:6px;font-weight:700;cursor:pointer;">
+              <input type="checkbox" id="selectAllOrders" style="width:auto;margin:0;" onchange="toggleSelectAllOrders(this.checked)" />
+              <span>Select All (سب منتخب کریں)</span>
             </label>
             <button class="danger small" onclick="deleteSelectedOrders()">Delete Selected (منتخب شدہ ڈیلیٹ کریں)</button>
           </div>
-          <div id="ordersList">لوڈ ہو رہا ہے...</div>
+          <div id="ordersList">کوئی آرڈر موجود نہیں۔</div>
         </div>
       </div>
     </div>
@@ -223,8 +331,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc,
-      onSnapshot, serverTimestamp, runTransaction
+      getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
+      collection, onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -239,131 +347,16 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const ADMIN_PASS = "921533082022";
-    const IMGBB_API_KEY = "E08b8ba508ad2bfe6d3c2a783a81b832";
+    const ADMIN_PASS_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"; // admin123
 
-    const DUMMY_IMG = "https://i.ibb.co/21v3Y8p/sample-proof.png";
-
-    const DUMMY_REQUESTS = [
-      {
-        id: "dummy_req_1",
-        isDummy: true,
-        userName: "ڈمی صارف بلال",
-        userPhone: "03001112233",
-        amount: 200,
-        trxId: "TRX-DUMMY-101",
-        imageUrl: DUMMY_IMG,
-        status: "pending",
-        createdAt: new Date()
-      }
-    ];
-
-    const DUMMY_PAYOUT_REQUESTS = [
-      {
-        id: "dummy_payout_1",
-        isDummy: true,
-        shopkeeperName: "ڈمی دکاندار بابر علی",
-        shopkeeperPhone: "03044918885",
-        amount: 150,
-        accountInfo: "JazzCash 03044918885",
-        status: "pending",
-        createdAt: new Date()
-      }
-    ];
-
-    const DUMMY_MACHINES = [
-      {
-        id: "M01",
-        isDummy: true,
-        machineId: "M01",
-        location: "ڈمی دکان بابر علی",
-        pricePerLiter: 3,
-        shopkeeperProfitPerLiter: 1,
-        shopkeeperPhone: "03044918885"
-      }
-    ];
-
-    const DUMMY_USERS = [
-      {
-        id: "03238883319",
-        isDummy: true,
-        name: "ڈمی کسٹمر Asghar Ali",
-        phone: "03238883319",
-        balance: 500,
-        shopkeeperProfit: 150,
-        shopkeeperLiters: 50
-      }
-    ];
-
-    const DUMMY_ORDERS = [
-      {
-        id: "dummy_ord_1",
-        isDummy: true,
-        userName: "ڈمی کسٹمر Asghar Ali",
-        userPhone: "03238883319",
-        machineId: "M01",
-        dispensedLiters: 10,
-        cost: 30,
-        remainingBalance: 470,
-        status: "completed",
-        createdAt: new Date()
-      },
-      {
-        id: "dummy_ord_2",
-        isDummy: true,
-        userName: "ڈمی کسٹمر Asghar Ali",
-        userPhone: "03238883319",
-        machineId: "M01",
-        dispensedLiters: 5,
-        cost: 15,
-        remainingBalance: 455,
-        status: "completed",
-        createdAt: new Date()
-      }
-    ];
-
-    let liveRequests = [];
-    let livePayoutRequests = [];
-    let liveMachines = [];
-    let liveUsers = [];
-    let liveOrders = [];
-
-    const deletedDummyIds = new Set(JSON.parse(localStorage.getItem("water_atm_deleted_dummies") || "[]"));
-    const settledOrderIds = new Set();
-    const openIds = new Set();
-    const payoutProofMap = {};
+    let machinesMap = {};
+    let usersList = [];
+    let ordersList = [];
+    let balanceRequests = [];
+    let withdrawRequests = [];
+    let unsubs = [];
+    let selectedSettingMachineId = "";
     const selectedOrderIds = new Set();
-    let activeShopQrMap = {};
-
-    function markDummyDeleted(id) {
-      deletedDummyIds.add(id);
-      localStorage.setItem("water_atm_deleted_dummies", JSON.stringify(Array.from(deletedDummyIds)));
-    }
-
-    function getAllRequests() {
-      return [...liveRequests, ...DUMMY_REQUESTS.filter(d => !deletedDummyIds.has(d.id))];
-    }
-    function getAllPayoutRequests() {
-      return [...livePayoutRequests, ...DUMMY_PAYOUT_REQUESTS.filter(d => !deletedDummyIds.has(d.id))];
-    }
-    function getAllMachines() {
-      const map = {};
-      DUMMY_MACHINES.filter(d => !deletedDummyIds.has(d.id)).forEach(m => { map[m.id] = m; });
-      liveMachines.forEach(m => { map[m.id] = m; });
-      return Object.values(map);
-    }
-    function getAllUsers() {
-      const map = {};
-      DUMMY_USERS.filter(d => !deletedDummyIds.has(d.id)).forEach(u => { map[normalizePhone(u.phone || u.id)] = u; });
-      liveUsers.forEach(u => { map[normalizePhone(u.phone || u.id)] = u; });
-      return Object.values(map);
-    }
-    function getAllOrders() {
-      const arr = [...liveOrders, ...DUMMY_ORDERS.filter(d => !deletedDummyIds.has(d.id))];
-      arr.sort((a, b) => (b.createdAt?.seconds || new Date(b.createdAt).getTime() / 1000 || 0) -
-                        (a.createdAt?.seconds || new Date(a.createdAt).getTime() / 1000 || 0));
-      return arr;
-    }
 
     function showAlert(text, type = "err") {
       const box = document.getElementById("alertBox");
@@ -371,844 +364,423 @@
       box.textContent = text;
     }
 
-    function normalizePhone(raw) {
-      return (raw || "").replace(/\D/g, "");
-    }
-
-    function getCustomerAppUrlForMachine(mId) {
-      const base = window.location.href.replace(/admin\.html.*$/i, "index.html");
-      const sep = base.includes("?") ? "&" : "?";
-      return `${base}${sep}machine=${encodeURIComponent(mId)}`;
-    }
-
-    window.toggleShopMachineQr = function(qrBoxId, mId) {
-      const box = document.getElementById(qrBoxId);
-      if (!box) return;
-      const isCurrentlyShown = !box.classList.contains("hidden");
-      if (isCurrentlyShown) {
-        box.classList.add("hidden");
-        box.innerHTML = "";
-        delete activeShopQrMap[qrBoxId];
-        return;
-      }
-      box.classList.remove("hidden");
-      box.innerHTML = "";
-      const qrUrl = getCustomerAppUrlForMachine(mId);
-      new QRCode(box, {
-        text: qrUrl,
-        width: 170,
-        height: 170
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("liveDateText").textContent = now.toLocaleDateString("ur-PK", {
+        day: "2-digit", month: "short", year: "numeric"
       });
-      const caption = document.createElement("div");
-      caption.style.fontSize = "11.5px";
-      caption.style.color = "#475569";
-      caption.style.marginTop = "6px";
-      caption.textContent = `مشین ${mId} QR`;
-      box.appendChild(caption);
-      activeShopQrMap[qrBoxId] = mId;
+      const h24 = now.getHours();
+      const isPM = h24 >= 12;
+      const h12 = String(h24 % 12 || 12).padStart(2, "0");
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const s = String(now.getSeconds()).padStart(2, "0");
+      document.getElementById("liveTimeText").textContent = `${h12}:${m}:${s} ${isPM ? "پی ایم" : "اے ایم"}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    window.toggleStrip = function(bodyId, arrowId) {
+      const el = document.getElementById(bodyId);
+      const ar = document.getElementById(arrowId);
+      const hidden = el.classList.contains("hidden");
+      el.classList.toggle("hidden", !hidden);
+      ar.textContent = hidden ? "▲" : "▼";
     };
 
-    function formatTime(ts) {
-      if (!ts) return "وقت دستیاب نہیں";
-      const d = ts.toDate ? ts.toDate() : new Date(ts);
-      if (Number.isNaN(d.getTime())) return "وقت دستیاب نہیں";
-      return d.toLocaleString("ur-PK", {
-        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit"
-      });
-    }
-
-    function getImageSrc(obj) {
-      return obj?.imageUrl || obj?.proofUrl || obj?.screenshot || "";
-    }
-
-    async function compressAndUploadToImgBB(file, apiKey = IMGBB_API_KEY) {
-      const bitmap = await createImageBitmap(file);
-      const maxDim = 900;
-      let { width, height } = bitmap;
-      if (width > maxDim || height > maxDim) {
-        const scale = Math.min(maxDim / width, maxDim / height);
-        width = Math.round(width * scale);
-        height = Math.round(height * scale);
-      }
-
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
-
-      let quality = 0.72;
-      let blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", quality));
-      while (blob && blob.size > 200 * 1024 && quality > 0.25) {
-        quality -= 0.1;
-        blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", quality));
-      }
-
-      const form = new FormData();
-      form.append("image", blob, "proof.jpg");
-      const resp = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`, {
-        method: "POST",
-        body: form
-      });
-      const data = await resp.json();
-      if (!data.success || !data.data?.url) throw new Error("ImgBB پر تصویر اپلوڈ نہیں ہو سکی۔");
-      return data.data.url;
-    }
-
-    window.toggleElement = function(bodyId, arrowId) {
-      const body = document.getElementById(bodyId);
-      const arrow = document.getElementById(arrowId);
-      const isHidden = body.classList.contains("hidden");
-      body.classList.toggle("hidden", !isHidden);
-      if (arrow) arrow.textContent = isHidden ? "▲" : "▼";
-    };
-
-    window.toggleRowStrip = function(key) {
-      if (openIds.has(key)) {
-        openIds.delete(key);
-      } else {
-        openIds.add(key);
-      }
-      const body = document.getElementById(`body_${key}`);
-      const arrow = document.getElementById(`arrow_${key}`);
-      if (body) body.classList.toggle("hidden", !openIds.has(key));
-      if (arrow) arrow.textContent = openIds.has(key) ? "▲" : "▼";
-      if (!openIds.has(key)) {
-        renderShopkeepers();
-      }
-    };
-
-    window.adminLogin = function() {
-      const p = document.getElementById("adminPassInput").value;
-      if (p !== ADMIN_PASS) return showAlert("غلط ایڈمن پاسورڈ!");
+    window.loginAdmin = async function() {
+      const pass = document.getElementById("adminPass").value;
+      if (!pass) return showAlert("ایڈمن پاسورڈ لکھیں۔");
+      const h = await sha256(pass);
+      if (h !== ADMIN_PASS_HASH) return showAlert("غلط پاسورڈ۔");
       sessionStorage.setItem("water_atm_admin", "1");
-      showAdminPanel();
+      openAdminPanel();
     };
 
-    window.adminLogout = function() {
+    window.logoutAdmin = function() {
+      unsubs.forEach(fn => { try { fn(); } catch (_) {} });
+      unsubs = [];
       sessionStorage.removeItem("water_atm_admin");
       document.getElementById("adminPanel").classList.add("hidden");
       document.getElementById("adminLoginCard").classList.remove("hidden");
     };
 
-    function showAdminPanel() {
+    function openAdminPanel() {
       document.getElementById("adminLoginCard").classList.add("hidden");
       document.getElementById("adminPanel").classList.remove("hidden");
-      renderAll();
-      listenAll();
-    }
 
-    function renderAll() {
-      renderRequests();
-      renderPayoutRequests();
-      renderShopkeepers();
-      renderCustomers();
-      renderOrders();
-    }
+      unsubs.forEach(fn => { try { fn(); } catch (_) {} });
+      unsubs = [];
 
-    function listenAll() {
-      onSnapshot(collection(db, "balanceRequests"), (qs) => {
-        liveRequests = [];
-        qs.forEach(d => liveRequests.push({ id: d.id, ...d.data() }));
-        liveRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        renderRequests();
-        renderCustomers();
-      });
+      unsubs.push(onSnapshot(doc(db, "settings", "shopkeeperConfig"), (snap) => {
+        if (snap.exists()) {
+          const val = Number(snap.data().minWithdrawAmount ?? 500);
+          document.getElementById("minWithdrawInput").value = val;
+        }
+      }));
 
-      onSnapshot(collection(db, "shopkeeperPayoutRequests"), (qs) => {
-        livePayoutRequests = [];
-        qs.forEach(d => livePayoutRequests.push({ id: d.id, ...d.data() }));
-        livePayoutRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        renderPayoutRequests();
-        renderShopkeepers();
-      });
-
-      onSnapshot(collection(db, "machines"), (qs) => {
-        liveMachines = [];
-        qs.forEach(d => liveMachines.push({ id: d.id.toUpperCase(), ...d.data() }));
-        renderShopkeepers();
-      });
-
-      onSnapshot(collection(db, "users"), (qs) => {
-        liveUsers = [];
-        qs.forEach(d => liveUsers.push({ id: d.id, ...d.data() }));
-        renderShopkeepers();
-        renderCustomers();
-      });
-
-      onSnapshot(collection(db, "dispenseOrders"), (qs) => {
-        liveOrders = [];
+      unsubs.push(onSnapshot(collection(db, "machines"), (qs) => {
+        machinesMap = {};
         qs.forEach(d => {
-          const item = { id: d.id, ...d.data() };
-          liveOrders.push(item);
-          maybeCreditShopkeeperProfit(item);
+          machinesMap[d.id.toUpperCase()] = { id: d.id, ...d.data() };
         });
-        liveOrders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        renderOrders();
+        populateSavedQrMachinesDropdown();
         renderShopkeepers();
+        renderOrders();
+      }));
+
+      unsubs.push(onSnapshot(collection(db, "users"), (qs) => {
+        usersList = [];
+        qs.forEach(d => usersList.push({ id: d.id, ...d.data() }));
         renderCustomers();
-      });
+        renderShopkeepers();
+      }));
+
+      unsubs.push(onSnapshot(collection(db, "dispenseOrders"), (qs) => {
+        ordersList = [];
+        qs.forEach(d => ordersList.push({ id: d.id, ...d.data() }));
+        renderOrders();
+        renderCustomers();
+        renderShopkeepers();
+      }));
+
+      unsubs.push(onSnapshot(collection(db, "balanceRequests"), (qs) => {
+        balanceRequests = [];
+        qs.forEach(d => balanceRequests.push({ id: d.id, ...d.data() }));
+        renderPendingRequests();
+      }));
+
+      unsubs.push(onSnapshot(collection(db, "withdrawRequests"), (qs) => {
+        withdrawRequests = [];
+        qs.forEach(d => withdrawRequests.push({ id: d.id, ...d.data() }));
+        renderWithdrawRequests();
+      }));
     }
 
-    window.deleteOrderRecord = async function(orderId, isDummy = false) {
-      if (!orderId) return;
-      if (!confirm("کیا آپ واقعی یہ پانی کا آرڈر ریکارڈ ڈیلیٹ کرنا چاہتے ہیں؟")) return;
-      selectedOrderIds.delete(orderId);
-      if (isDummy || deletedDummyIds.has(orderId)) {
-        markDummyDeleted(orderId);
-        renderAll();
-      } else {
-        await deleteDoc(doc(db, "dispenseOrders", orderId));
-      }
-      showAlert("پانی کا آرڈر ریکارڈ ڈیلیٹ کر دیا گیا۔", "ok");
-    };
-
-    window.toggleOrderSelection = function(orderId, checked) {
-      if (checked) selectedOrderIds.add(orderId);
-      else selectedOrderIds.delete(orderId);
-    };
-
-    window.toggleSelectAllOrders = function(checked) {
-      const checkboxes = document.querySelectorAll(".order-row-chk");
-      checkboxes.forEach(cb => {
-        cb.checked = checked;
-        if (checked) selectedOrderIds.add(cb.value);
-        else selectedOrderIds.delete(cb.value);
-      });
-    };
-
-    window.deleteSelectedOrders = async function() {
-      if (!selectedOrderIds.size) return showAlert("پہلے کم از کم ایک آرڈر منتخب کریں۔");
-      if (!confirm(`کیا آپ منتخب شدہ (${selectedOrderIds.size}) آرڈرز ڈیلیٹ کرنا چاہتے ہیں؟`)) return;
-      const ids = Array.from(selectedOrderIds);
-      for (const id of ids) {
-        if (id.startsWith("dummy_")) {
-          markDummyDeleted(id);
-        } else {
-          await deleteDoc(doc(db, "dispenseOrders", id));
-        }
-        selectedOrderIds.delete(id);
-      }
-      document.getElementById("selectAllOrdersChk").checked = false;
-      renderAll();
-      showAlert("منتخب شدہ آرڈرز ڈیلیٹ کر دیے گئے۔", "ok");
-    };
-
-    window.deleteBalanceRequestRecord = async function(reqId, isDummy = false) {
-      if (!reqId) return;
-      if (!confirm("کیا آپ واقعی یہ بیلنس درخواست ڈیلیٹ کرنا چاہتے ہیں؟")) return;
-      if (isDummy || deletedDummyIds.has(reqId)) {
-        markDummyDeleted(reqId);
-        renderAll();
-      } else {
-        await deleteDoc(doc(db, "balanceRequests", reqId));
-      }
-      showAlert("بیلنس درخواست ڈیلیٹ کر دی گئی۔", "ok");
-    };
-
-    window.deletePayoutRequestRecord = async function(reqId, isDummy = false) {
-      if (!reqId) return;
-      if (!confirm("کیا آپ واقعی یہ پے آؤٹ درخواست ڈیلیٹ کرنا چاہتے ہیں؟")) return;
-      if (isDummy || deletedDummyIds.has(reqId)) {
-        markDummyDeleted(reqId);
-        renderAll();
-      } else {
-        await deleteDoc(doc(db, "shopkeeperPayoutRequests", reqId));
-      }
-      showAlert("دکاندار کی پے آؤٹ درخواست ڈیلیٹ کر دی گئی۔", "ok");
-    };
-
-    window.deleteShopkeeperRecord = async function(shopKey, phone, isDummy = false) {
-      if (!confirm("کیا آپ واقعی اس دکاندار کا ریکارڈ ڈیلیٹ کرنا چاہتے ہیں؟")) return;
-      if (isDummy) {
-        markDummyDeleted("dummy_payout_1");
-        markDummyDeleted("M01");
-      }
-      const cleanPhone = normalizePhone(phone);
-      if (cleanPhone && liveUsers.some(u => normalizePhone(u.phone || u.id) === cleanPhone)) {
-        await deleteDoc(doc(db, "users", cleanPhone));
-      }
-      renderShopkeepers();
-      showAlert("دکاندار کا ریکارڈ ڈیلیٹ کر دیا گیا۔", "ok");
-    };
-
-    window.deleteCustomerRecord = async function(phone, isDummy = false) {
-      const cleanPhone = normalizePhone(phone);
-      if (!confirm("کیا آپ واقعی اس کسٹمر کا مکمل ڈیٹا ڈیلیٹ کرنا چاہتے ہیں؟")) return;
-      if (isDummy) {
-        markDummyDeleted("03238883319");
-        markDummyDeleted("dummy_ord_1");
-        markDummyDeleted("dummy_ord_2");
-      }
-      const uOrders = liveOrders.filter(o => normalizePhone(o.userPhone) === cleanPhone);
-      for (const o of uOrders) await deleteDoc(doc(db, "dispenseOrders", o.id));
-      const uReqs = liveRequests.filter(r => normalizePhone(r.userPhone) === cleanPhone);
-      for (const r of uReqs) await deleteDoc(doc(db, "balanceRequests", r.id));
-      if (cleanPhone && liveUsers.some(u => normalizePhone(u.phone || u.id) === cleanPhone)) {
-        await deleteDoc(doc(db, "users", cleanPhone));
-      }
-      renderAll();
-      showAlert("کسٹمر کا مکمل ڈیٹا ڈیلیٹ کر دیا گیا۔", "ok");
-    };
-
-    async function maybeCreditShopkeeperProfit(order) {
-      if (!order || !order.id || order.isDummy || order.profitCredited) return;
-      const doneStatuses = ["completed", "stopped_by_user", "stopped_power_or_machine", "stopped"];
-      if (!doneStatuses.includes(order.status)) return;
-      if (settledOrderIds.has(order.id)) return;
-
-      const liters = Number(order.dispensedLiters || 0);
-      if (liters <= 0) return;
-
-      const mId = (order.machineId || "").toUpperCase();
-      const machine = getAllMachines().find(m => m.id === mId);
-      const profitPerLiter = Number(machine?.shopkeeperProfitPerLiter || 0);
-      const shopPhone = normalizePhone(machine?.shopkeeperPhone || "");
-      const profitAmount = Number((liters * profitPerLiter).toFixed(2));
-
-      if (!shopPhone || profitAmount <= 0) return;
-      settledOrderIds.add(order.id);
-
-      try {
-        await runTransaction(db, async (tx) => {
-          const ordRef = doc(db, "dispenseOrders", order.id);
-          const ordSnap = await tx.get(ordRef);
-          if (!ordSnap.exists() || ordSnap.data().profitCredited) return;
-
-          const shopRef = doc(db, "users", shopPhone);
-          const shopSnap = await tx.get(shopRef);
-
-          const prevProfit = shopSnap.exists() ? Number(shopSnap.data().shopkeeperProfit || 0) : 0;
-          const prevLiters = shopSnap.exists() ? Number(shopSnap.data().shopkeeperLiters || 0) : 0;
-
-          if (shopSnap.exists()) {
-            tx.update(shopRef, {
-              shopkeeperProfit: Number((prevProfit + profitAmount).toFixed(2)),
-              shopkeeperLiters: Number((prevLiters + liters).toFixed(2))
-            });
-          } else {
-            tx.set(shopRef, {
-              name: machine?.location || `دکاندار ${shopPhone}`,
-              phone: shopPhone,
-              balance: 0,
-              shopkeeperProfit: profitAmount,
-              shopkeeperLiters: liters,
-              createdAt: serverTimestamp()
-            });
-          }
-
-          tx.update(ordRef, {
-            profitCredited: true,
-            shopkeeperPhone: shopPhone,
-            shopkeeperProfitEarned: profitAmount
-          });
-        });
-      } catch (e) {
-        settledOrderIds.delete(order.id);
-      }
-    }
-
-    function renderRequests() {
-      const box = document.getElementById("requestsList");
-      const pending = getAllRequests().filter(x => x.status === "pending");
+    function renderPendingRequests() {
+      const box = document.getElementById("pendingRequestsList");
+      const pending = balanceRequests.filter(r => String(r.status || "pending") === "pending");
       if (!pending.length) {
-        box.innerHTML = "کوئی نئی بیلنس درخواست زیرِ التواء نہیں ہے۔";
+        box.innerHTML = "کوئی بیلنس درخواست زیر التواء نہیں ہے۔";
         return;
       }
-      box.innerHTML = pending.map(r => {
-        const imgSrc = getImageSrc(r);
-        return `
-          <div class="item-box">
-            <div><strong>صارف:</strong> ${r.userName || "-"} (${r.userPhone})</div>
-            <div><strong>مطلوبہ رقم:</strong> Rs. ${Number(r.amount || 0).toFixed(2)} | <strong>Trx ID:</strong> ${r.trxId || "-"}</div>
-            ${imgSrc ? `<img src="${imgSrc}" class="req-img" alt="اسکرین شاٹ" />` : ""}
-            <div style="margin-top:8px;">
-              <button class="success small" onclick="approveRequest('${r.id}', '${r.userPhone}', ${Number(r.amount || 0)}, ${!!r.isDummy})">منظور کریں</button>
-              <button class="danger small" onclick="rejectRequest('${r.id}', ${!!r.isDummy})">مسترد کریں</button>
-              <button class="danger small" onclick="deleteBalanceRequestRecord('${r.id}', ${!!r.isDummy})">ڈیلیٹ کریں</button>
-            </div>
+      box.innerHTML = pending.map(r => `
+        <div class="item-box">
+          <div class="item-top">
+            <span>${r.userName || r.userPhone} (${r.userPhone})</span>
+            <span class="badge amber">Rs. ${Number(r.amount || 0).toFixed(2)}</span>
           </div>
-        `;
-      }).join("");
+          <div style="font-size:13px;color:#334155;margin-top:4px;">
+            مشین: <strong>${r.machineId || "-"}</strong> | حوالہ: ${r.trxId || "-"}
+          </div>
+          <button class="small success" onclick="approveBalanceRequest('${r.id}', '${r.userPhone}', ${Number(r.amount || 0)})">منظور کریں</button>
+          <button class="small danger" onclick="rejectBalanceRequest('${r.id}')">مسترد کریں</button>
+        </div>
+      `).join("");
     }
 
-    window.onPayoutProofChange = async function(reqId, inputEl) {
-      const file = inputEl.files[0];
-      const prevEl = document.getElementById(`payoutPrev_${reqId}`);
-      if (!file) {
-        delete payoutProofMap[reqId];
-        if (prevEl) prevEl.style.display = "none";
-        return;
-      }
-      try {
-        showAlert("اسکرین شاٹ کمپریس ہو کر ImgBB پر اپلوڈ ہو رہا ہے...", "ok");
-        const url = await compressAndUploadToImgBB(file, IMGBB_API_KEY);
-        payoutProofMap[reqId] = url;
-        if (prevEl) {
-          prevEl.src = url;
-          prevEl.style.display = "block";
-        }
-        showAlert("اسکرین شاٹ لنک تیار ہو گیا ہے۔", "ok");
-      } catch (err) {
-        showAlert(err.message || "اسکرین شاٹ اپلوڈ میں مسئلہ پیش آیا۔");
-      }
+    window.approveBalanceRequest = async function(reqId, phone, amount) {
+      const uRef = doc(db, "users", phone);
+      const uSnap = await getDoc(uRef);
+      const currentBal = uSnap.exists() ? Number(uSnap.data().balance || 0) : 0;
+      await setDoc(uRef, { phone, balance: Number((currentBal + amount).toFixed(2)) }, { merge: true });
+      await updateDoc(doc(db, "balanceRequests", reqId), { status: "approved", approvedAt: serverTimestamp() });
+      showAlert("بیلنس درخواست منظور کر لی گئی۔", "ok");
     };
 
-    function renderPayoutRequests() {
-      const box = document.getElementById("payoutRequestsList");
-      const pending = getAllPayoutRequests().filter(x => x.status === "pending");
-      if (!pending.length) {
-        box.innerHTML = "دکانداروں کی طرف سے کوئی نئی رقم کی درخواست نہیں ہے۔";
-        return;
-      }
-      box.innerHTML = pending.map(r => {
-        const shopPhone = normalizePhone(r.shopkeeperPhone || r.phone || "");
-        const reqAmt = Number(r.amount || 0);
-        const existingProof = payoutProofMap[r.id] || "";
-        return `
-          <div class="item-box">
-            <div><strong>دکاندار:</strong> ${r.shopkeeperName || r.name || "-"} (${shopPhone})</div>
-            <div><strong>بنی ہوئی رقم کی درخواست:</strong> Rs. ${reqAmt.toFixed(2)} | <strong>اکاؤنٹ/نوٹ:</strong> ${r.accountInfo || r.note || "-"}</div>
-            <div><strong>وقت:</strong> ${formatTime(r.createdAt)}</div>
-            <input type="text" id="sendTrx_${r.id}" placeholder="بھیجی گئی رقم کی ٹرانزیکشن ID لکھیں" />
-            <label style="font-size:13px;color:#334155;">ادائیگی کا اسکرین شاٹ (100–200 KB کمپریس ہو کر لنک سیو ہوگا):</label>
-            <input type="file" accept="image/*" onchange="onPayoutProofChange('${r.id}', this)" />
-            <img id="payoutPrev_${r.id}" src="${existingProof}" class="req-img" style="${existingProof ? "" : "display:none;"}" alt="پیمنٹ ثبوت" />
-            <div style="margin-top:8px;">
-              <button class="success small" onclick="sendShopkeeperPayment('${r.id}', '${shopPhone}', ${reqAmt}, ${!!r.isDummy})">Send Payment (پیمنٹ بھیجیں)</button>
-              <button class="danger small" onclick="rejectPayoutRequest('${r.id}', ${!!r.isDummy})">مسترد کریں</button>
-              <button class="danger small" onclick="deletePayoutRequestRecord('${r.id}', ${!!r.isDummy})">ڈیلیٹ کریں</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    window.sendShopkeeperPayment = async function(reqId, shopPhone, reqAmount, isDummy = false) {
-      const cleanPhone = normalizePhone(shopPhone);
-      const sentTrxId = (document.getElementById(`sendTrx_${reqId}`)?.value || "").trim();
-      const proofUrl = payoutProofMap[reqId] || "";
-
-      if (!sentTrxId) {
-        return showAlert("براہِ کرم بھیجی گئی رقم کی ٹرانزیکشن ID لکھیں۔");
-      }
-
-      if (isDummy || String(reqId).startsWith("dummy_")) {
-        markDummyDeleted(reqId);
-        delete payoutProofMap[reqId];
-        renderPayoutRequests();
-        return showAlert(`ڈمی پیمنٹ (Rs. ${Number(reqAmount).toFixed(2)}) ریکارڈ مکمل ہو گیا۔`, "ok");
-      }
-
-      try {
-        await runTransaction(db, async (tx) => {
-          const reqRef = doc(db, "shopkeeperPayoutRequests", reqId);
-          const reqSnap = await tx.get(reqRef);
-          if (!reqSnap.exists() || reqSnap.data().status !== "pending") {
-            throw new Error("یہ درخواست پہلے ہی مکمل ہو چکی ہے۔");
-          }
-
-          const shopRef = doc(db, "users", cleanPhone);
-          const shopSnap = await tx.get(shopRef);
-          const currentProfit = shopSnap.exists() ? Number(shopSnap.data().shopkeeperProfit || 0) : 0;
-          const payAmt = Number(reqAmount || reqSnap.data().amount || 0);
-          const newProfit = Math.max(0, Number((currentProfit - payAmt).toFixed(2)));
-
-          if (shopSnap.exists()) {
-            tx.update(shopRef, { shopkeeperProfit: newProfit });
-          }
-
-          tx.update(reqRef, {
-            status: "paid",
-            sentTrxId,
-            sentProofUrl: proofUrl || null,
-            paidAmount: payAmt,
-            remainingProfit: newProfit,
-            paidAt: serverTimestamp()
-          });
-        });
-
-        delete payoutProofMap[reqId];
-        showAlert(`دکاندار (${cleanPhone}) کو Rs. ${Number(reqAmount).toFixed(2)} پیمنٹ، ٹرانزیکشن ID اور اسکرین شاٹ لنک بھیج دیا گیا۔`, "ok");
-      } catch (err) {
-        showAlert(err.message || "پیمنٹ بھیجنے میں مسئلہ پیش آیا۔");
-      }
-    };
-
-    window.rejectPayoutRequest = async function(reqId, isDummy = false) {
-      if (isDummy || String(reqId).startsWith("dummy_")) {
-        markDummyDeleted(reqId);
-        delete payoutProofMap[reqId];
-        renderPayoutRequests();
-        return showAlert("ڈمی درخواست مسترد کر دی گئی۔", "ok");
-      }
-      await updateDoc(doc(db, "shopkeeperPayoutRequests", reqId), {
-        status: "rejected",
-        rejectedAt: serverTimestamp()
-      });
-      delete payoutProofMap[reqId];
-      showAlert("دکاندار کی درخواست مسترد کر دی گئی۔", "ok");
-    };
-
-    window.approveRequest = async function(reqId, phone, amount, isDummy = false) {
-      if (isDummy || String(reqId).startsWith("dummy_")) {
-        markDummyDeleted(reqId);
-        renderRequests();
-        return showAlert("ڈمی بیلنس درخواست منظور کر دی گئی۔", "ok");
-      }
-      const cleanPhone = normalizePhone(phone);
-      try {
-        await runTransaction(db, async (tx) => {
-          const reqRef = doc(db, "balanceRequests", reqId);
-          const reqSnap = await tx.get(reqRef);
-          if (!reqSnap.exists() || reqSnap.data().status !== "pending") {
-            throw new Error("یہ درخواست پہلے ہی پراسیس ہو چکی ہے۔");
-          }
-
-          const userRef = doc(db, "users", cleanPhone);
-          const userSnap = await tx.get(userRef);
-          if (!userSnap.exists()) throw new Error("صارف کا اکاؤنٹ نہیں ملا۔");
-
-          const currentBal = Number(userSnap.data().balance || 0);
-          const newBal = Number((currentBal + Number(amount)).toFixed(2));
-
-          tx.update(userRef, { balance: newBal });
-          tx.update(reqRef, { status: "approved", approvedAt: serverTimestamp() });
-        });
-        showAlert(`Rs. ${Number(amount).toFixed(2)} بیلنس ${cleanPhone} کے اکاؤنٹ میں شامل کر دیا گیا۔`, "ok");
-      } catch (e) {
-        showAlert(e.message || "منظوری میں مسئلہ پیش آیا۔");
-      }
-    };
-
-    window.rejectRequest = async function(reqId, isDummy = false) {
-      if (isDummy || String(reqId).startsWith("dummy_")) {
-        markDummyDeleted(reqId);
-        renderRequests();
-        return showAlert("ڈمی درخواست مسترد کر دی گئی۔", "ok");
-      }
-      await updateDoc(doc(db, "balanceRequests", reqId), {
-        status: "rejected",
-        rejectedAt: serverTimestamp()
-      });
+    window.rejectBalanceRequest = async function(reqId) {
+      await updateDoc(doc(db, "balanceRequests", reqId), { status: "rejected", rejectedAt: serverTimestamp() });
       showAlert("درخواست مسترد کر دی گئی۔", "ok");
     };
 
-    window.saveMachine = async function() {
-      const mId = document.getElementById("mIdInput").value.trim().toUpperCase();
-      const location = document.getElementById("mLocInput").value.trim();
-      const pricePerLiter = parseFloat(document.getElementById("mRateInput").value) || 5;
-      const shopkeeperProfitPerLiter = parseFloat(document.getElementById("mProfitInput").value) || 0;
-      const shopkeeperPhone = normalizePhone(document.getElementById("mShopPhoneInput").value);
+    window.saveMinWithdrawLimit = async function() {
+      const val = parseFloat(document.getElementById("minWithdrawInput").value);
+      if (!val || val <= 0) return showAlert("درست رقم لکھیں۔");
+      await setDoc(doc(db, "settings", "shopkeeperConfig"), { minWithdrawAmount: val }, { merge: true });
+      showAlert(`کم از کم ودھڈرا حد Rs. ${val} محفوظ ہو گئی۔`, "ok");
+    };
 
-      if (!mId) return showAlert("مشین ID لکھیں (مثلاً M01)۔");
+    function renderWithdrawRequests() {
+      const box = document.getElementById("withdrawRequestsList");
+      if (!withdrawRequests.length) {
+        box.innerHTML = "کوئی ودھڈرا درخواست موجود نہیں۔";
+        return;
+      }
+      box.innerHTML = withdrawRequests.map(w => `
+        <div class="item-box">
+          <div class="item-top">
+            <span>${w.shopkeeperName || "-"} (${w.shopkeeperPhone || "-"})</span>
+            <span class="badge blue">${w.status || "pending"}</span>
+          </div>
+          <div style="font-size:13px;color:#334155;margin-top:4px;">
+            دکان: <strong>${w.shopName || "-"}</strong> | مشین: <strong>${w.machineId || "-"}</strong> | رقم: <strong>Rs. ${Number(w.amount || 0).toFixed(2)}</strong>
+          </div>
+          ${w.status === "pending" ? `<button class="small success" onclick="approveWithdraw('${w.id}')">ادائیگی مکمل / منظور کریں</button>` : ""}
+        </div>
+      `).join("");
+    }
 
-      await setDoc(doc(db, "machines", mId), {
-        machineId: mId,
-        location,
+    window.approveWithdraw = async function(id) {
+      await updateDoc(doc(db, "withdrawRequests", id), { status: "paid", paidAt: serverTimestamp() });
+      showAlert("ودھڈرا درخواست منظور ہو گئی۔", "ok");
+    };
+
+    window.saveMachineAndQr = async function() {
+      const machineId = document.getElementById("mId").value.trim().toUpperCase();
+      const location = document.getElementById("mLoc").value.trim();
+      const pricePerLiter = parseFloat(document.getElementById("mRate").value) || 5;
+      const shopProfitPerLiter = parseFloat(document.getElementById("mShopProfit").value) || 0;
+      const shopPhone = document.getElementById("mShopPhone").value.trim();
+
+      if (!machineId) return showAlert("مشین ID لکھیں۔");
+
+      const qrPayload = `${window.location.origin}/?machine=${encodeURIComponent(machineId)}`;
+
+      await setDoc(doc(db, "machines", machineId), {
+        machineId,
+        location: location || machineId,
+        shopName: location || machineId,
         pricePerLiter,
-        shopkeeperProfitPerLiter,
-        shopkeeperPhone,
-        updatedAt: serverTimestamp()
+        shopProfitPerLiter,
+        shopPhone,
+        qrGenerated: true,
+        qrPayload,
+        status: "online",
+        powerState: "ON",
+        lockedPowerState: "ON",
+        forcedOff: false,
+        settingLocked: false
       }, { merge: true });
 
-      showAlert(`مشین ${mId} محفوظ ہو گئی۔ دکاندار لسٹ سے اس کا QR کوڈ دیکھا جا سکتا ہے۔`, "ok");
+      const qrContainer = document.getElementById("qrCanvas");
+      qrContainer.innerHTML = "";
+      new QRCode(qrContainer, { text: qrPayload, width: 170, height: 170 });
+      document.getElementById("qrPayloadText").textContent = `QR Data: ${qrPayload}`;
+      document.getElementById("qrResultBox").classList.remove("hidden");
+      showAlert(`مشین ${machineId} کا QR کوڈ سیو اور جنریٹ ہو گیا۔`, "ok");
+    };
+
+    function populateSavedQrMachinesDropdown() {
+      const sel = document.getElementById("savedQrMachineSelect");
+      const currentVal = sel.value;
+      const qrMachines = Object.values(machinesMap).filter(m => m.qrGenerated === true || Boolean(m.qrPayload));
+
+      sel.innerHTML = `<option value="">-- محفوظ شدہ QR مشین منتخب کریں --</option>` +
+        qrMachines.map(m => `<option value="${m.id}">${m.id} — ${m.location || m.shopName || m.id}</option>`).join("");
+
+      if (currentVal && machinesMap[currentVal]) {
+        sel.value = currentVal;
+      }
+    }
+
+    window.onSelectSavedQrMachine = function() {
+      const mId = document.getElementById("savedQrMachineSelect").value;
+      const ws = document.getElementById("machineSettingWorkspace");
+      if (!mId || !machinesMap[mId]) {
+        selectedSettingMachineId = "";
+        ws.classList.add("hidden");
+        return;
+      }
+
+      selectedSettingMachineId = mId;
+      const m = machinesMap[mId];
+      ws.classList.remove("hidden");
+      document.getElementById("cfgMachineId").textContent = m.id;
+      document.getElementById("cfgMachineLoc").textContent = m.location || m.shopName || "-";
+      document.getElementById("cfgFlowRate").value = m.pricePerLiter ?? 5;
+
+      const effectivePower = m.forcedOff === true ? "OFF" : (m.lockedPowerState || m.powerState || "ON");
+      document.getElementById("cfgPowerState").value = effectivePower;
+
+      applySettingLockUi(Boolean(m.settingLocked));
+    };
+
+    function applySettingLockUi(isLocked) {
+      document.getElementById("cfgFlowRate").disabled = isLocked;
+      document.getElementById("cfgPowerState").disabled = isLocked;
+      document.getElementById("btnSaveLockedSetting").classList.toggle("hidden", isLocked);
+      document.getElementById("btnUnlockSetting").classList.toggle("hidden", !isLocked);
+
+      const badge = document.getElementById("cfgLockBadge");
+      badge.textContent = isLocked ? "🔒 Locked / Saved" : "🔓 Editable";
+      badge.className = `badge ${isLocked ? "green" : "blue"}`;
+    }
+
+    window.unlockMachineSettingForEdit = function() {
+      if (!selectedSettingMachineId) return;
+      applySettingLockUi(false);
+      showAlert("سیٹنگ ایڈٹ کرنے کے لیے کھول دی گئی ہے۔", "ok");
+    };
+
+    window.saveLockedMachineSetting = async function() {
+      if (!selectedSettingMachineId) return;
+      const rate = parseFloat(document.getElementById("cfgFlowRate").value);
+      const pState = document.getElementById("cfgPowerState").value === "OFF" ? "OFF" : "ON";
+      if (!rate || rate <= 0) return showAlert("درست فی لیٹر ریٹ لکھیں۔");
+
+      const isOff = pState === "OFF";
+      await setDoc(doc(db, "machines", selectedSettingMachineId), {
+        pricePerLiter: rate,
+        flowSensorRate: rate,
+        powerState: pState,
+        lockedPowerState: pState,
+        forcedOff: isOff,
+        valveOpen: !isOff,
+        status: isOff ? "locked_off" : "online",
+        settingLocked: true,
+        settingUpdatedAt: serverTimestamp()
+      }, { merge: true });
+
+      applySettingLockUi(true);
+      showAlert(`مشین ${selectedSettingMachineId} کی سیٹنگ (${pState}, ریٹ Rs. ${rate}/L) لاک اور سیو ہو گئی۔`, "ok");
+    };
+
+    window.sendMachineCommand = async function(cmd) {
+      if (!selectedSettingMachineId) return;
+      const m = machinesMap[selectedSettingMachineId] || {};
+      if (m.settingLocked && (m.lockedPowerState === "OFF" || m.forcedOff === true) && cmd === "START") {
+        return showAlert("یہ مشین فائربیس سے OFF لاک ہے! پہلے سیٹنگ کھول کر ON کریں۔");
+      }
+      const isStart = cmd === "START";
+      await setDoc(doc(db, "machines", selectedSettingMachineId), {
+        sensorOrder: isStart ? "START_WATER" : "STOP_WATER",
+        valveOpen: isStart,
+        powerState: isStart ? "ON" : (m.lockedPowerState || "ON"),
+        commandAt: serverTimestamp()
+      }, { merge: true });
+      showAlert(`مشین ${selectedSettingMachineId} کو ${cmd} کمانڈ بھیج دی گئی۔`, "ok");
     };
 
     function renderShopkeepers() {
       const box = document.getElementById("shopkeepersList");
-      const q = (document.getElementById("shopSearchInput")?.value || "").trim().toLowerCase();
-      const qDigits = normalizePhone(q);
-
-      const machines = getAllMachines();
-      const users = getAllUsers();
-      const payouts = getAllPayoutRequests();
-      const mapByKey = {};
-
-      machines.forEach(m => {
-        const sp = normalizePhone(m.shopkeeperPhone || "");
-        const key = sp || `MACHINE_${m.id}`;
-        if (!mapByKey[key]) {
-          mapByKey[key] = {
-            key,
-            phone: sp,
-            name: m.location || "دکاندار",
-            machines: [],
-            profitEarned: 0,
-            litersDispensed: 0,
-            isDummy: !!m.isDummy
-          };
-        }
-        mapByKey[key].machines.push(m);
-      });
-
-      users.forEach(u => {
-        const up = normalizePhone(u.phone || u.id);
-        const hasShopFlag = Number(u.shopkeeperProfit || 0) > 0 || !!mapByKey[up];
-        if (hasShopFlag) {
-          if (!mapByKey[up]) {
-            mapByKey[up] = {
-              key: up,
-              phone: up,
-              name: u.name || "دکاندار",
-              machines: [],
-              profitEarned: 0,
-              litersDispensed: 0,
-              isDummy: !!u.isDummy
-            };
-          }
-          if (u.name) mapByKey[up].name = u.name;
-          mapByKey[up].profitEarned = Number(u.shopkeeperProfit || 0);
-          mapByKey[up].litersDispensed = Number(u.shopkeeperLiters || 0);
-        }
-      });
-
-      const list = Object.values(mapByKey).filter(s => {
+      const q = (document.getElementById("searchShopkeeper").value || "").trim().toLowerCase();
+      const rows = Object.values(machinesMap).filter(m => {
         if (!q) return true;
-        const phoneMatch = qDigits && (s.phone || "").includes(qDigits);
-        const nameMatch = (s.name || "").toLowerCase().includes(q);
-        const machineMatch = s.machines.some(m =>
-          (m.id || "").toLowerCase().includes(q) || (m.location || "").toLowerCase().includes(q)
-        );
-        return phoneMatch || nameMatch || machineMatch;
+        return String(m.id || "").toLowerCase().includes(q) ||
+               String(m.location || "").toLowerCase().includes(q) ||
+               String(m.shopPhone || "").includes(q);
       });
 
-      if (!list.length) {
-        box.innerHTML = "کوئی دکاندار ریکارڈ نہیں ملا۔";
+      if (!rows.length) {
+        box.innerHTML = "کوئی دکاندار ریکارڈ موجود نہیں۔";
         return;
       }
 
-      box.innerHTML = list.map(s => {
-        const stripKey = `shop_${s.key.replace(/[^a-zA-Z0-9_]/g, "_")}`;
-        const isOpen = openIds.has(stripKey);
-        const shopPayouts = payouts.filter(p => normalizePhone(p.shopkeeperPhone || p.phone || "") === s.phone);
-
-        const machineStrips = s.machines.length
-          ? s.machines.map(m => {
-              const mKey = `sm_${stripKey}_${m.id}`;
-              const mOpen = openIds.has(mKey);
-              const qrBoxId = `shop_qr_${stripKey}_${m.id}`;
-              return `
-                <div class="sub-strip">
-                  <div class="sub-strip-header" onclick="toggleRowStrip('${mKey}')">
-                    <span>مشین ${m.id} — ${m.location || "بغیر نام"}</span>
-                    <span id="arrow_${mKey}">${mOpen ? "▲" : "▼"}</span>
-                  </div>
-                  <div id="body_${mKey}" class="sub-strip-body ${mOpen ? "" : "hidden"}">
-                    <div>ریٹ: <strong>Rs. ${m.pricePerLiter ?? 5}/L</strong></div>
-                    <div>دکاندار پرافٹ: <strong>Rs. ${m.shopkeeperProfitPerLiter ?? 0}/L</strong></div>
-                    <div>دکاندار نمبر: <strong>${m.shopkeeperPhone || "-"}</strong></div>
-                    <button class="small" onclick="toggleShopMachineQr('${qrBoxId}', '${m.id}')">QR کوڈ دکھائیں / چھپائیں</button>
-                    <div id="${qrBoxId}" class="qr-box hidden"></div>
-                  </div>
-                </div>
-              `;
-            }).join("")
-          : "<div style='color:#64748b;'>کوئی مشین منسلک نہیں۔</div>";
-
-        const payoutHistoryHtml = shopPayouts.length
-          ? shopPayouts.map(p => {
-              const proofSrc = getImageSrc(p);
-              return `
-                <div style="margin:6px 0;padding:7px;background:#fff;border-radius:6px;border:1px solid #e2e8f0;">
-                  <div>رقم: <strong>Rs. ${Number(p.amount || 0).toFixed(2)}</strong> | <span class="badge ${p.status === "paid" ? "ok" : p.status === "rejected" ? "err" : "warn"}">${p.status || "pending"}</span></div>
-                  <div>Sent Trx ID: <strong>${p.sentTrxId || "-"}</strong> | وقت: ${formatTime(p.paidAt || p.createdAt)}</div>
-                  ${proofSrc ? `<img src="${proofSrc}" class="req-img" alt="پیمنٹ اسکرین شاٹ" />` : ""}
-                  <button class="danger small" onclick="deletePayoutRequestRecord('${p.id}', ${!!p.isDummy})">ڈیلیٹ کریں</button>
-                </div>
-              `;
-            }).join("")
-          : "<div style='color:#64748b;'>کوئی پے آؤٹ ریکارڈ نہیں۔</div>";
-
+      box.innerHTML = rows.map(m => {
+        const mOrders = ordersList.filter(o => String(o.machineId || "").toUpperCase() === m.id);
+        const totalLiters = mOrders.reduce((s, o) => s + Number(o.dispensedLiters ?? o.targetLiters ?? 0), 0);
+        const profitPerL = Number(m.shopProfitPerLiter ?? 0);
+        const profit = totalLiters * profitPerL;
         return `
-          <div class="row-strip">
-            <div class="row-strip-header" onclick="toggleRowStrip('${stripKey}')">
-              <div>
-                <div>${s.name || "-"} | ${s.phone || "-"}</div>
-                <div style="font-size:12.5px;font-weight:500;color:#334155;margin-top:2px;">
-                  بقایا پرافٹ: <strong>Rs. ${Number(s.profitEarned || 0).toFixed(2)}</strong> |
-                  کل پانی: <strong>${Number(s.litersDispensed || 0).toFixed(2)} L</strong>
-                </div>
-              </div>
-              <span id="arrow_${stripKey}">${isOpen ? "▲" : "▼"}</span>
+          <div class="item-box">
+            <div class="item-top">
+              <span>${m.id} — ${m.location || m.id}</span>
+              <span class="badge green">پرافٹ: Rs. ${profit.toFixed(2)}</span>
             </div>
-            <div id="body_${stripKey}" class="row-strip-body ${isOpen ? "" : "hidden"}">
-              <button class="danger small" onclick="deleteShopkeeperRecord('${stripKey}', '${s.phone}', ${!!s.isDummy})">دکاندار ریکارڈ ڈیلیٹ کریں</button>
-              <div style="margin-top:6px;"><strong>مشینیں:</strong>${machineStrips}</div>
-              <div style="margin-top:8px;"><strong>پیمنٹ کی درخواستیں و ثبوت:</strong>${payoutHistoryHtml}</div>
+            <div style="font-size:13px;color:#334155;margin-top:4px;">
+              ریٹ: Rs. ${m.pricePerLiter ?? 5}/L | پرافٹ: Rs. ${profitPerL}/L | کل لیٹر: ${totalLiters.toFixed(2)} L | فون: ${m.shopPhone || "-"}
             </div>
+            <button class="small danger" onclick="deleteMachineRecord('${m.id}')">ریکارڈ ڈیلیٹ کریں</button>
           </div>
         `;
       }).join("");
     }
+
+    window.deleteMachineRecord = async function(mId) {
+      await deleteDoc(doc(db, "machines", mId));
+      showAlert(`مشین ${mId} کا ریکارڈ ڈیلیٹ کر دیا گیا۔`, "ok");
+    };
 
     function renderCustomers() {
       const box = document.getElementById("customersList");
-      const q = (document.getElementById("userSearchInput")?.value || "").trim().toLowerCase();
-      const qDigits = normalizePhone(q);
-
-      const users = getAllUsers();
-      const reqs = getAllRequests();
-      const orders = getAllOrders();
-
-      const filtered = users.filter(u => {
+      const q = (document.getElementById("searchCustomer").value || "").trim().toLowerCase();
+      const rows = usersList.filter(u => {
         if (!q) return true;
-        const p = normalizePhone(u.phone || u.id);
-        const phoneMatch = qDigits && p.includes(qDigits);
-        const nameMatch = (u.name || "").toLowerCase().includes(q);
-        return phoneMatch || nameMatch;
+        return String(u.name || "").toLowerCase().includes(q) || String(u.phone || u.id || "").includes(q);
       });
 
-      if (!filtered.length) {
-        box.innerHTML = "کوئی صارف ریکارڈ نہیں ملا۔";
+      if (!rows.length) {
+        box.innerHTML = "کوئی صارف موجود نہیں۔";
         return;
       }
 
-      box.innerHTML = filtered.map(u => {
-        const p = normalizePhone(u.phone || u.id);
-        const custKey = `cust_${p || u.id}`;
-        const isOpen = openIds.has(custKey);
-
-        const userReqs = reqs.filter(r => normalizePhone(r.userPhone) === p);
-        const userOrders = orders.filter(o => normalizePhone(o.userPhone) === p);
-
-        const totalApprovedPayment = userReqs
-          .filter(r => r.status === "approved")
-          .reduce((sum, r) => sum + Number(r.amount || 0), 0);
-
-        const totalWaterLiters = userOrders
-          .reduce((sum, o) => sum + Number(o.dispensedLiters ?? o.targetLiters ?? 0), 0);
-
-        const totalSpentOnWater = userOrders
-          .reduce((sum, o) => sum + Number(o.cost ?? o.liveCost ?? 0), 0);
-
-        const reqStrips = userReqs.length
-          ? userReqs.map((r, idx) => {
-              const rKey = `cr_${custKey}_${r.id || idx}`;
-              const rOpen = openIds.has(rKey);
-              const imgSrc = getImageSrc(r);
-              return `
-                <div class="sub-strip">
-                  <div class="sub-strip-header" onclick="toggleRowStrip('${rKey}')">
-                    <span>پیمنٹ: Rs. ${Number(r.amount || 0).toFixed(2)} | ${formatTime(r.createdAt)}</span>
-                    <span class="badge ${r.status === "approved" ? "ok" : r.status === "rejected" ? "err" : "warn"}">${r.status || "pending"}</span>
-                  </div>
-                  <div id="body_${rKey}" class="sub-strip-body ${rOpen ? "" : "hidden"}">
-                    <div><strong>Trx ID:</strong> ${r.trxId || "-"}</div>
-                    <div><strong>اسٹیٹس:</strong> ${r.status || "pending"}</div>
-                    ${imgSrc ? `<img src="${imgSrc}" class="req-img" alt="اسکرین شاٹ" />` : ""}
-                    <button class="danger small" onclick="deleteBalanceRequestRecord('${r.id}', ${!!r.isDummy})">ڈیلیٹ کریں</button>
-                  </div>
-                </div>
-              `;
-            }).join("")
-          : "<div style='color:#64748b;'>کوئی پیمنٹ درخواست نہیں۔</div>";
-
-        const orderStrips = userOrders.length
-          ? userOrders.map((o, idx) => {
-              const oKey = `co_${custKey}_${o.id || idx}`;
-              const oOpen = openIds.has(oKey);
-              const litersVal = Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2);
-              const costVal = Number(o.cost ?? o.liveCost ?? 0).toFixed(2);
-              const remVal = Number(o.remainingBalance ?? 0).toFixed(2);
-              return `
-                <div class="sub-strip">
-                  <div class="sub-strip-header" onclick="toggleRowStrip('${oKey}')">
-                    <span>مشین ${o.machineId || "-"} | ${litersVal} L | ${formatTime(o.createdAt)}</span>
-                    <span class="badge">${o.status || "-"}</span>
-                  </div>
-                  <div id="body_${oKey}" class="sub-strip-body ${oOpen ? "" : "hidden"}">
-                    <div><strong>وقت:</strong> ${formatTime(o.createdAt)}</div>
-                    <div><strong>پانی لیا:</strong> ${litersVal} لیٹر | <strong>رقم:</strong> Rs. ${costVal}</div>
-                    <div><strong>بقایا بیلنس:</strong> Rs. ${remVal}</div>
-                    <div><strong>اسٹیٹس / تفصیل:</strong> ${o.status || "-"}${o.endedAt ? " (ختم: " + formatTime(o.endedAt) + ")" : ""}</div>
-                    <button class="danger small" onclick="deleteOrderRecord('${o.id}', ${!!o.isDummy})">ڈیلیٹ کریں</button>
-                  </div>
-                </div>
-              `;
-            }).join("")
-          : "<div style='color:#64748b;'>ابھی تک کوئی پانی نہیں لیا۔</div>";
-
+      box.innerHTML = rows.map(u => {
+        const ph = u.phone || u.id;
         return `
-          <div class="row-strip">
-            <div class="row-strip-header" onclick="toggleRowStrip('${custKey}')">
-              <div>
-                <div>${u.name || "-"} | ${p}</div>
-                <div style="font-size:12.5px;font-weight:500;color:#334155;margin-top:2px;">
-                  بیلنس: <strong>Rs. ${Number(u.balance || 0).toFixed(2)}</strong> |
-                  کل پانی: <strong>${totalWaterLiters.toFixed(2)} L</strong>
-                </div>
-              </div>
-              <span id="arrow_${custKey}">${isOpen ? "▲" : "▼"}</span>
+          <div class="item-box">
+            <div class="item-top">
+              <span>${u.name || ph} (${ph})</span>
+              <span class="badge blue">بیلنس: Rs. ${Number(u.balance || 0).toFixed(2)}</span>
             </div>
-            <div id="body_${custKey}" class="row-strip-body ${isOpen ? "" : "hidden"}">
-              <div style="margin-bottom:8px;">
-                <strong>منظور شدہ پیمنٹ:</strong> Rs. ${totalApprovedPayment.toFixed(2)} |
-                <strong>کل خرچ رقم:</strong> Rs. ${totalSpentOnWater.toFixed(2)}
-              </div>
-              <button class="danger small" onclick="deleteCustomerRecord('${p}', ${!!u.isDummy})">کسٹمر کا سارا ڈیٹا ڈیلیٹ کریں</button>
-              <div style="margin-top:6px;"><strong>پیمنٹ درخواستیں و اسکرین شاٹ:</strong>${reqStrips}</div>
-              <div style="margin-top:8px;"><strong>پانی لینے کی پٹیاں (وقت و تفصیل):</strong>${orderStrips}</div>
-            </div>
+            <button class="small danger" onclick="deleteCustomerData('${ph}')">کسٹمر کا سارا ڈیٹا ڈیلیٹ کریں</button>
           </div>
         `;
       }).join("");
     }
 
+    window.deleteCustomerData = async function(phone) {
+      await deleteDoc(doc(db, "users", phone));
+      showAlert(`کسٹمر ${phone} کا ڈیٹا ڈیلیٹ کر دیا گیا۔`, "ok");
+    };
+
     function renderOrders() {
       const box = document.getElementById("ordersList");
-      const q = (document.getElementById("orderSearchInput")?.value || "").trim().toLowerCase();
-      const qDigits = normalizePhone(q);
-
-      const filtered = getAllOrders().filter(o => {
+      const q = (document.getElementById("searchOrder").value || "").trim().toLowerCase();
+      const rows = ordersList.filter(o => {
         if (!q) return true;
-        const phoneMatch = qDigits && normalizePhone(o.userPhone || "").includes(qDigits);
-        const mMatch = (o.machineId || "").toLowerCase().includes(q);
-        const nameMatch = (o.userName || "").toLowerCase().includes(q);
-        return phoneMatch || mMatch || nameMatch;
-      }).slice(0, 50);
+        return String(o.machineId || "").toLowerCase().includes(q) ||
+               String(o.userPhone || "").includes(q) ||
+               String(o.userName || "").toLowerCase().includes(q);
+      });
 
-      if (!filtered.length) {
+      if (!rows.length) {
         box.innerHTML = "کوئی آرڈر موجود نہیں۔";
         return;
       }
 
-      box.innerHTML = filtered.map((o, idx) => {
-        const key = `ord_${o.id || idx}`;
-        const isOpen = openIds.has(key);
-        const litersVal = Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2);
-        const costVal = Number(o.cost ?? o.liveCost ?? 0).toFixed(2);
-        const remVal = Number(o.remainingBalance ?? 0).toFixed(2);
-        const checkedAttr = selectedOrderIds.has(o.id) ? "checked" : "";
-
+      box.innerHTML = rows.map(o => {
+        const checked = selectedOrderIds.has(o.id) ? "checked" : "";
         return `
-          <div class="row-strip">
-            <div class="row-strip-header">
-              <div style="display:flex;align-items:center;flex:1;" onclick="toggleRowStrip('${key}')">
-                <input type="checkbox" class="chk-inline order-row-chk" value="${o.id}" ${checkedAttr} onclick="event.stopPropagation(); toggleOrderSelection('${o.id}', this.checked)" />
-                <div>
-                  <div>مشین ${o.machineId || "-"} | ${o.userPhone || "-"} | ${litersVal} L</div>
-                  <div style="font-size:12px;font-weight:500;color:#475569;">${formatTime(o.createdAt)}</div>
-                </div>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span class="badge">${o.status || "-"}</span>
-                <button class="danger small" style="margin:0;padding:5px 9px;" onclick="event.stopPropagation(); deleteOrderRecord('${o.id}', ${!!o.isDummy})">ڈیلیٹ کریں</button>
-                <span onclick="toggleRowStrip('${key}')" id="arrow_${key}">${isOpen ? "▲" : "▼"}</span>
-              </div>
-            </div>
-            <div id="body_${key}" class="row-strip-body ${isOpen ? "" : "hidden"}">
-              <div><strong>صارف:</strong> ${o.userName || "-"} (${o.userPhone || "-"})</div>
-              <div><strong>مشین:</strong> ${o.machineId || "-"} | <strong>وقت:</strong> ${formatTime(o.createdAt)}</div>
-              <div><strong>پانی لیا:</strong> ${litersVal} لیٹر | <strong>رقم:</strong> Rs. ${costVal} | <strong>بقایا:</strong> Rs. ${remVal}</div>
-              <div><strong>اسٹیٹس:</strong> ${o.status || "-"}${o.endedAt ? " (ختم: " + formatTime(o.endedAt) + ")" : ""}</div>
+          <div class="item-box">
+            <div class="item-top">
+              <label style="width:auto;margin:0;display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" style="width:auto;margin:0;" ${checked} onchange="toggleOrderSelection('${o.id}', this.checked)" />
+                <span>${o.machineId || "-"} | ${o.userName || o.userPhone || "-"}</span>
+              </label>
+              <span class="badge green">${Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2)} L | Rs. ${Number(o.cost ?? o.liveCost ?? 0).toFixed(2)}</span>
             </div>
           </div>
         `;
       }).join("");
     }
 
+    window.toggleOrderSelection = function(id, isChecked) {
+      if (isChecked) selectedOrderIds.add(id);
+      else selectedOrderIds.delete(id);
+    };
+
+    window.toggleSelectAllOrders = function(checked) {
+      selectedOrderIds.clear();
+      if (checked) ordersList.forEach(o => selectedOrderIds.add(o.id));
+      renderOrders();
+    };
+
+    window.deleteSelectedOrders = async function() {
+      if (!selectedOrderIds.size) return showAlert("پہلے کم از کم ایک آرڈر منتخب کریں۔");
+      for (const id of [...selectedOrderIds]) {
+        await deleteDoc(doc(db, "dispenseOrders", id));
+        selectedOrderIds.delete(id);
+      }
+      document.getElementById("selectAllOrders").checked = false;
+      showAlert("منتخب شدہ آرڈرز ڈیلیٹ کر دیے گئے۔", "ok");
+    };
+
     if (sessionStorage.getItem("water_atm_admin") === "1") {
-      showAdminPanel();
+      openAdminPanel();
     }
   </script>
 </body>
