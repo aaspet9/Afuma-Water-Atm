@@ -235,7 +235,7 @@
         </div>
       </div>
 
-      <!-- 4. NEW STRIP: SETTING MACHINE (ONLY SAVED QR MACHINES SELECTABLE) -->
+      <!-- 4. SETTING MACHINE (ONLY SAVED QR MACHINES SELECTABLE) -->
       <div class="card" style="padding:10px;">
         <div class="strip-btn setting-strip" onclick="toggleStrip('settingMachineBody', 'arrowSettingMachine')">
           <span>⚙️ سیٹینگ مشین (Setting Machine)</span>
@@ -347,7 +347,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const ADMIN_PASS_HASH = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"; // admin123
+
+    // جب بھی پاسورڈ چینج کرنا ہو تو نیچے والی قیمت تبدیل کر دیں
+    const ADMIN_PASSWORD = String(localStorage.getItem("water_atm_admin_pass") || "921533082022");
 
     let machinesMap = {};
     let usersList = [];
@@ -379,11 +381,6 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
-
     window.toggleStrip = function(bodyId, arrowId) {
       const el = document.getElementById(bodyId);
       const ar = document.getElementById(arrowId);
@@ -392,12 +389,12 @@
       ar.textContent = hidden ? "▲" : "▼";
     };
 
-    window.loginAdmin = async function() {
-      const pass = document.getElementById("adminPass").value;
+    window.loginAdmin = function() {
+      const pass = document.getElementById("adminPass").value.trim();
       if (!pass) return showAlert("ایڈمن پاسورڈ لکھیں۔");
-      const h = await sha256(pass);
-      if (h !== ADMIN_PASS_HASH) return showAlert("غلط پاسورڈ۔");
+      if (pass !== ADMIN_PASSWORD) return showAlert("غلط پاسورڈ۔");
       sessionStorage.setItem("water_atm_admin", "1");
+      document.getElementById("alertBox").className = "msg";
       openAdminPanel();
     };
 
@@ -405,6 +402,7 @@
       unsubs.forEach(fn => { try { fn(); } catch (_) {} });
       unsubs = [];
       sessionStorage.removeItem("water_atm_admin");
+      document.getElementById("adminPass").value = "";
       document.getElementById("adminPanel").classList.add("hidden");
       document.getElementById("adminLoginCard").classList.remove("hidden");
     };
