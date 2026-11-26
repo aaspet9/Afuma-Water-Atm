@@ -1,46 +1,141 @@
 <!DOCTYPE html>
-<html lang="ur" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0b5ed7" />
-  <title>سمارٹ واٹر اے ٹی ایم</title>
+  <title>Smart Water ATM</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: #eef4f8; color: #162433; }
-    .container { max-width: 520px; margin: 20px auto; padding: 16px; }
-    .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .container { max-width: 540px; margin: 16px auto; padding: 14px; }
+    .card { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 14px; box-shadow: 0 6px 20px rgba(15, 23, 42, 0.07); }
     h1, h2, h3 { margin-top: 0; color: #0b5ed7; }
-    input, button, label { width: 100%; margin: 6px 0; border-radius: 9px; font-size: 15px; }
+    input, button, label { width: 100%; margin: 6px 0; border-radius: 10px; font-size: 15px; }
     input, button { padding: 11px 12px; border: 1px solid #cbd5e1; }
     button { background: #0b5ed7; color: #fff; border: none; font-weight: 600; cursor: pointer; }
     button:hover { background: #094bb0; }
     button.secondary { background: #475569; }
     button.success { background: #15803d; }
     button.danger { background: #b91c1c; }
+    button.small { width: auto; padding: 7px 12px; font-size: 13px; margin: 4px 2px 0; }
+
+    /* Top Header with Round Logo + Live Date & Time + Red Small Title */
+    .top-brand-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 18px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+    .lang-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .lang-btn {
+      width: auto;
+      margin: 0;
+      padding: 5px 12px;
+      font-size: 12.5px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      font-weight: 700;
+    }
+    .lang-btn.active {
+      background: #0b5ed7;
+      color: #fff;
+      border-color: #0b5ed7;
+    }
+    .logo-clock-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .side-clock-box {
+      flex: 1;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+      min-width: 0;
+    }
+    .side-clock-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+    }
+    .side-clock-val {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .round-logo-wrap {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, #dc2626, #0284c7);
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+    .round-logo-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+      display: block;
+    }
+    .red-small-title {
+      text-align: center;
+      color: #dc2626;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      margin-top: 8px;
+    }
+
     .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
     .tabs button { background: #e2e8f0; color: #1e293b; }
     .tabs button.active { background: #0b5ed7; color: #fff; }
-    .balance-box { background: linear-gradient(135deg, #0b5ed7, #0284c7); color: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .balance-val { font-size: 28px; font-weight: 700; margin-top: 4px; }
-    .msg { padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 14px; display: none; }
-    .msg.err { display: block; background: #fee2e2; color: #991b1b; }
-    .msg.ok { display: block; background: #dcfce7; color: #166534; }
+    .balance-box {
+      background: linear-gradient(135deg, #0b5ed7, #0284c7);
+      color: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .balance-val { font-size: 28px; font-weight: 800; margin-top: 4px; }
+    .msg { padding: 11px 12px; border-radius: 10px; margin: 8px 0; font-size: 14px; display: none; font-weight: 600; }
+    .msg.err { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .hidden { display: none; }
     .preview-img { max-width: 100%; max-height: 180px; border-radius: 8px; margin-top: 8px; display: none; border: 1px solid #cbd5e1; }
 
     .install-banner {
       background: #fffbeb;
       border: 2px solid #f59e0b;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 14px;
       margin-bottom: 14px;
     }
     .install-title {
       font-weight: 800;
       color: #92400e;
-      font-size: 16px;
+      font-size: 15px;
       margin-bottom: 6px;
     }
     .install-steps {
@@ -57,11 +152,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #e0f2fe;
+      background: linear-gradient(135deg, #e0f2fe, #dbeafe);
       color: #0c4a6e;
-      border: 1px solid #bae6fd;
+      border: 1px solid #93c5fd;
       padding: 13px 15px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: 700;
       cursor: pointer;
       margin: 0;
@@ -80,7 +175,7 @@
     .live-box {
       background: #f0fdf4;
       border: 2px solid #16a34a;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 16px;
     }
     .live-grid {
@@ -92,7 +187,7 @@
     .live-stat {
       background: #fff;
       border: 1px solid #bbf7d0;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 12px;
       text-align: center;
     }
@@ -103,50 +198,111 @@
       margin-top: 4px;
     }
 
-    /* History Strip Cards */
+    /* Colorful History Strip & Receipt Design */
     .hist-strip {
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      margin: 8px 0;
-      background: #f8fafc;
+      border: 1px solid #bae6fd;
+      border-radius: 14px;
+      margin: 10px 0;
+      background: linear-gradient(135deg, #f0f9ff 0%, #eff6ff 100%);
       overflow: hidden;
+      box-shadow: 0 3px 10px rgba(2, 132, 199, 0.08);
     }
     .hist-strip-header {
-      padding: 11px 13px;
-      background: #f1f5f9;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%);
       cursor: pointer;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
+      align-items: center;
+      gap: 10px;
     }
-    .hist-strip-header:hover { background: #e2e8f0; }
-    .hist-strip-main { font-size: 13.5px; font-weight: 700; color: #0f172a; line-height: 1.5; }
-    .hist-strip-sub { font-size: 12px; color: #475569; margin-top: 3px; }
-    .hist-strip-body {
-      padding: 10px 13px;
-      background: #fff;
-      border-top: 1px solid #e2e8f0;
+    .hist-strip-header:hover {
+      background: linear-gradient(135deg, #bae6fd 0%, #c7d2fe 100%);
+    }
+    .hist-strip-main {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.5;
+    }
+    .hist-strip-sub {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e3a8a;
+      margin-top: 3px;
+    }
+    .receipt-box {
+      padding: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-top: 2px dashed #0284c7;
+      font-size: 13.5px;
+      line-height: 1.75;
+    }
+    .receipt-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-weight: 800;
       font-size: 13px;
-      line-height: 1.6;
+      margin-bottom: 10px;
     }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .receipt-row:last-child { border-bottom: none; }
+    .receipt-key { color: #475569; font-weight: 600; }
+    .receipt-val { color: #0f172a; font-weight: 800; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="card" style="text-align:center;">
-      <h1>💧 سمارٹ واٹر اے ٹی ایم</h1>
-      <p style="margin:0;color:#475569;">مشین کا QR کوڈ اسکین کریں اور لائیو پانی حاصل کریں</p>
+    <!-- TOP BRAND HEADER: LIVE DATE + ROUND LOGO + LIVE TIME + RED SMALL TITLE -->
+    <div class="top-brand-card">
+      <div class="lang-bar">
+        <button id="btnLangEn" class="lang-btn active" onclick="setLanguage('en')">English</button>
+        <button id="btnLangUr" class="lang-btn" onclick="setLanguage('ur')">اردو</button>
+      </div>
+
+      <div class="logo-clock-row">
+        <div class="side-clock-box">
+          <div class="side-clock-label" id="lblDate">Date</div>
+          <div class="side-clock-val" id="liveDateText">--/--/----</div>
+        </div>
+
+        <div class="round-logo-wrap">
+          <img
+            src="https://i.ibb.co/YFS48PVd/134196.jpg"
+            alt="Logo"
+            class="round-logo-img"
+          />
+        </div>
+
+        <div class="side-clock-box">
+          <div class="side-clock-label" id="lblTime">Time</div>
+          <div class="side-clock-val" id="liveTimeText">--:--:--</div>
+        </div>
+      </div>
+
+      <div class="red-small-title">Smart Water ATM</div>
     </div>
 
+    <!-- INSTALL / ADD TO HOME SCREEN PROMPT -->
     <div id="installPromptCard" class="install-banner hidden">
-      <div class="install-title">📲 ایپ کو ہوم اسکرین پر محفوظ کریں</div>
-      <div style="font-size:13.5px;color:#334155;">
-        تیز اور آسان رسائی کے لیے ایک بٹن سے ایپ ہوم اسکرین پر لائیں۔ جب تک ہوم اسکرین پر نہیں آئے گی، یہ آپشن نظر آتا رہے گا۔
+      <div class="install-title" id="installTitle">📲 Save App to Home Screen</div>
+      <div style="font-size:13.5px;color:#334155;" id="installDesc">
+        Add this app to your home screen with one tap. It will keep showing until added to the home screen.
       </div>
-      <button id="installAppBtn" class="success" onclick="triggerInstallApp()">ایپ انسٹال کریں / ہوم اسکرین پر محفوظ کریں</button>
-      <div id="manualInstallGuide" class="install-steps hidden">
-        اگر خودکار پاپ اپ نہ کھلے تو براؤزر کے <strong>⋮ (تین نقطے)</strong> یا <strong>Share</strong> بٹن پر دبا کر <strong>"Add to Home screen"</strong> منتخب کریں اور پھر ہوم اسکرین والے آئیکن سے ایپ کھولیں۔
+      <button id="installAppBtn" class="success" onclick="triggerInstallApp()">Install App / Add to Home Screen</button>
+      <div id="manualInstallGuide" class="install-steps hidden" id="manualInstallText">
+        If the automatic prompt does not open, tap browser menu <strong>⋮</strong> or <strong>Share</strong> and select <strong>"Add to Home screen"</strong>, then open from the home screen icon.
       </div>
     </div>
 
@@ -155,27 +311,27 @@
     <!-- AUTH SECTION -->
     <div id="authSection" class="card">
       <div class="tabs">
-        <button id="tabLogin" class="active" onclick="switchTab('login')">لاگ ان</button>
-        <button id="tabSignup" onclick="switchTab('signup')">نیا اکاؤنٹ</button>
+        <button id="tabLogin" class="active" onclick="switchTab('login')">Login</button>
+        <button id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
       </div>
 
       <div id="loginForm">
-        <h3>لاگ ان کریں</h3>
-        <input type="tel" id="loginPhone" placeholder="موبائل نمبر (مثلاً 03001234567)" />
-        <input type="password" id="loginPass" placeholder="پاسورڈ" />
-        <button onclick="loginUser()">لاگ ان</button>
+        <h3 id="hLogin">Login</h3>
+        <input type="tel" id="loginPhone" placeholder="Mobile Number (e.g. 03001234567)" />
+        <input type="password" id="loginPass" placeholder="Password" />
+        <button id="btnLoginSubmit" onclick="loginUser()">Login</button>
       </div>
 
       <div id="signupForm" class="hidden">
-        <h3>نیا صارف رجسٹر کریں</h3>
-        <input type="text" id="regName" placeholder="پورا نام (لازمی)" />
-        <input type="tel" id="regPhone" placeholder="موبائل نمبر (لازمی، مثلاً 03001234567)" />
-        <input type="password" id="regPass" placeholder="مضبوط پاسورڈ بنائیں" />
-        <input type="password" id="regPass2" placeholder="پاسورڈ دوبارہ لکھیں" />
-        <small style="color:#475569;display:block;margin-bottom:6px;">
-          پاسورڈ کم از کم 8 حروف کا ہو جس میں بڑا حرف، چھوٹا حرف، عدد اور علامت (!@#$) شامل ہو۔
+        <h3 id="hSignup">Create Account</h3>
+        <input type="text" id="regName" placeholder="Full Name (Required)" />
+        <input type="tel" id="regPhone" placeholder="Mobile Number (Required, e.g. 03001234567)" />
+        <input type="password" id="regPass" placeholder="Create Strong Password" />
+        <input type="password" id="regPass2" placeholder="Confirm Password" />
+        <small id="passHint" style="color:#475569;display:block;margin-bottom:6px;">
+          Password must be at least 8 characters with uppercase, lowercase, number, and symbol (!@#$).
         </small>
-        <button class="success" onclick="signupUser()">اکاؤنٹ بنائیں</button>
+        <button id="btnSignupSubmit" class="success" onclick="signupUser()">Sign Up</button>
       </div>
     </div>
 
@@ -183,79 +339,87 @@
     <div id="dashSection" class="hidden">
       <div class="card">
         <div class="balance-box">
-          <div>خوش آمدید، <strong id="uName"></strong> (<span id="uPhone"></span>)</div>
-          <div style="margin-top:8px;font-size:14px;opacity:0.9;">موجودہ بقایا بیلنس</div>
+          <div><span id="lblWelcome">Welcome</span>, <strong id="uName"></strong> (<span id="uPhone"></span>)</div>
+          <div style="margin-top:8px;font-size:14px;opacity:0.92;" id="lblCurrentBalance">Current Remaining Balance</div>
           <div class="balance-val">Rs. <span id="uBalance">0.00</span></div>
         </div>
-        <button class="secondary" onclick="logoutUser()">لاگ آؤٹ</button>
+        <button id="btnLogout" class="secondary" onclick="logoutUser()">Logout</button>
       </div>
 
+      <!-- STEP 1: SCAN MACHINE QR CODE -->
       <div id="scanCard" class="card">
-        <h3>مشین کا QR کوڈ اسکین کریں</h3>
-        <p style="margin:0 0 8px;font-size:14px;color:#475569;">پانی لینے کے لیے مشین پر لگا QR کوڈ اسکین کریں۔</p>
-        <button onclick="startQrScanner()">📷 کیمرہ سے QR کوڈ اسکین کریں</button>
-        <button id="stopScanBtn" class="secondary hidden" onclick="stopQrScanner()">اسکین بند کریں</button>
+        <h3 id="hScanQr">Scan Machine QR Code</h3>
+        <p id="pScanHint" style="margin:0 0 8px;font-size:14px;color:#475569;">Scan the QR code attached on the water machine.</p>
+        <button id="btnStartCam" onclick="startQrScanner()">📷 Scan QR with Camera</button>
+        <button id="btnPickGallery" class="success" onclick="triggerGalleryQrScan()">🖼️ Select QR from Gallery</button>
+        <input type="file" id="galleryQrInput" accept="image/*" class="hidden" onchange="handleGalleryQrFile(event)" />
+        <button id="stopScanBtn" class="secondary hidden" onclick="stopQrScanner()">Stop Scanner</button>
         <div id="qrReaderBox" style="margin-top:10px;"></div>
       </div>
 
+      <!-- STEP 2: DISPENSE FORM CARD -->
       <div id="dispenseFormCard" class="card hidden">
-        <h3>پانی حاصل کریں</h3>
+        <h3 id="hGetWater">Get Water</h3>
         <div class="machine-badge">
-          منتخب مشین: <span id="scannedMachineLabel">-</span>
+          <span id="lblSelectedMachine">Selected Machine</span>: <span id="scannedMachineLabel">-</span>
           <span id="scannedMachineLoc" style="font-weight:500;"></span>
         </div>
 
-        <input type="number" id="litersInput" min="0.5" step="0.5" placeholder="کتنے لیٹر پانی چاہیے؟ (مثلاً 5)" oninput="updateEstimate()" />
-        <p id="estimateText" style="margin:8px 0;font-weight:700;color:#0b5ed7;">ریٹ: Rs. 5/لیٹر | کل رقم: Rs. 0.00</p>
-        <button class="success" onclick="startWaterDispense()">سبمٹ کریں / پانی شروع کریں</button>
-        <button class="secondary" onclick="changeMachineScan()">دوسرا QR اسکین کریں</button>
+        <input type="number" id="litersInput" min="0.5" step="0.5" placeholder="How many liters of water? (e.g. 5)" oninput="updateEstimate()" />
+        <p id="estimateText" style="margin:8px 0;font-weight:700;color:#0b5ed7;">Rate: Rs. 5/Liter | Total Amount: Rs. 0.00</p>
+        <button id="btnStartDispense" class="success" onclick="startWaterDispense()">Submit / Start Water</button>
+        <button id="btnChangeQr" class="secondary" onclick="changeMachineScan()">Scan Another QR</button>
       </div>
 
+      <!-- STEP 3: LIVE DISPENSING CARD -->
       <div id="liveDispenseCard" class="card hidden">
         <div class="live-box">
-          <h3 style="color:#15803d;margin-bottom:6px;">🚰 پانی جاری ہے — لائیو کاؤنٹنگ</h3>
+          <h3 id="hLiveWater" style="color:#15803d;margin-bottom:6px;">🚰 Water Dispensing — Live Counting</h3>
           <div style="font-size:14px;color:#334155;">
-            مشین: <strong id="liveMachineId">-</strong> | مطلوبہ: <strong id="liveTargetLiters">0</strong> لیٹر | اسٹیٹس: <strong id="liveStatusText">running</strong>
+            <span id="lblLiveMachine">Machine</span>: <strong id="liveMachineId">-</strong> |
+            <span id="lblLiveTarget">Target</span>: <strong id="liveTargetLiters">0</strong> L |
+            <span id="lblLiveStatus">Status</span>: <strong id="liveStatusText">running</strong>
           </div>
 
           <div class="live-grid">
             <div class="live-stat">
-              <div style="font-size:13px;color:#475569;">پانی جا رہا ہے</div>
+              <div style="font-size:13px;color:#475569;" id="lblLiveLiters">Water Going</div>
               <div class="live-num"><span id="liveLiters">0.00</span> L</div>
             </div>
             <div class="live-stat">
-              <div style="font-size:13px;color:#475569;">رقم جا رہی ہے</div>
+              <div style="font-size:13px;color:#475569;" id="lblLiveCost">Amount Going</div>
               <div class="live-num">Rs. <span id="liveCost">0.00</span></div>
             </div>
           </div>
 
           <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:10px;">
-            بقایا بیلنس: Rs. <span id="liveRemainingBalance">0.00</span>
+            <span id="lblLiveRem">Remaining Balance</span>: Rs. <span id="liveRemainingBalance">0.00</span>
           </div>
 
-          <button id="stopBtn" class="danger" onclick="stopWaterDispense('stopped_by_user')">پانی روکیں / حساب مکمل کریں</button>
+          <button id="stopBtn" class="danger" onclick="stopWaterDispense('stopped_by_user')">Stop Water / Finish</button>
         </div>
       </div>
 
+      <!-- BALANCE REQUEST STRIP -->
       <div class="card" style="padding:10px;">
         <div class="strip-btn" onclick="toggleBalanceStrip()">
-          <span>ایڈمن کو بیلنس کی درخواست بھیجیں</span>
+          <span id="lblBalReqStrip">Send Balance Request to Admin</span>
           <span id="stripArrow">▼</span>
         </div>
         <div id="balanceRequestBody" class="hidden" style="padding-top:12px;">
-          <input type="number" id="reqAmount" min="10" placeholder="کتنے روپے بیلنس چاہیے؟" />
-          <input type="text" id="reqTrx" placeholder="ادائیگی کی ٹرانزیکشن ID یا نوٹ" />
-          <label style="display:block;font-size:14px;color:#334155;">ادائیگی کا اسکرین شاٹ (100–200 KB کمپریس ہو کر لنک سیو ہوگا):</label>
+          <input type="number" id="reqAmount" min="10" placeholder="Enter balance amount (Rs.)" />
+          <input type="text" id="reqTrx" placeholder="Payment Transaction ID or Note" />
+          <label id="lblReqShot" style="display:block;font-size:14px;color:#334155;">Payment Screenshot (compressed 100–200 KB & link saved):</label>
           <input type="file" id="reqScreenshot" accept="image/*" onchange="previewScreenshot()" />
-          <img id="screenshotPreview" class="preview-img" alt="اسکرین شاٹ پریویو" />
-          <button onclick="sendBalanceRequest()">درخواست بھیجیں</button>
+          <img id="screenshotPreview" class="preview-img" alt="Screenshot Preview" />
+          <button id="btnSendReq" onclick="sendBalanceRequest()">Send Request</button>
         </div>
       </div>
 
-      <!-- HISTORY STRIPS -->
+      <!-- HISTORY STRIPS & RECEIPTS -->
       <div class="card">
-        <h3>پانی لینے کی تفصیل اور بقایا بیلنس</h3>
-        <div id="historyList">کوئی ریکارڈ موجود نہیں۔</div>
+        <h3 id="hHistory">Water History & Receipts</h3>
+        <div id="historyList">No records found.</div>
       </div>
     </div>
   </div>
@@ -282,8 +446,157 @@
     const IMGBB_API_KEY = "E08b8ba508ad2bfe6d3c2a783a81b832";
     const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
+    const I18N = {
+      en: {
+        dir: "ltr", lang: "en",
+        dateLbl: "Date", timeLbl: "Time",
+        installTitle: "📲 Save App to Home Screen",
+        installDesc: "Add this app to your home screen with one tap. It will keep showing until added to the home screen.",
+        installBtn: "Install App / Add to Home Screen",
+        manualInstall: "If the automatic prompt does not open, tap browser menu <strong>⋮</strong> or <strong>Share</strong> and select <strong>\"Add to Home screen\"</strong>, then open from the home screen icon.",
+        tabLogin: "Login", tabSignup: "Sign Up",
+        hLogin: "Login", loginPhone: "Mobile Number (e.g. 03001234567)", loginPass: "Password", btnLogin: "Login",
+        hSignup: "Create Account", regName: "Full Name (Required)", regPhone: "Mobile Number (Required, e.g. 03001234567)",
+        regPass: "Create Strong Password", regPass2: "Confirm Password",
+        passHint: "Password must be at least 8 characters with uppercase, lowercase, number, and symbol (!@#$).",
+        btnSignup: "Sign Up",
+        welcome: "Welcome", currentBalance: "Current Remaining Balance", btnLogout: "Logout",
+        hScanQr: "Scan Machine QR Code", pScanHint: "Scan the QR code attached on the water machine.",
+        btnStartCam: "📷 Scan QR with Camera", btnPickGallery: "🖼️ Select QR from Gallery", stopScan: "Stop Scanner",
+        hGetWater: "Get Water", selectedMachine: "Selected Machine",
+        litersPlaceholder: "How many liters of water? (e.g. 5)",
+        ratePrefix: "Rate", perLiter: "Liter", totalAmount: "Total Amount",
+        btnStartDispense: "Submit / Start Water", btnChangeQr: "Scan Another QR",
+        hLiveWater: "🚰 Water Dispensing — Live Counting", liveMachine: "Machine", liveTarget: "Target", liveStatus: "Status",
+        liveLiters: "Water Going", liveCost: "Amount Going", liveRem: "Remaining Balance", stopBtn: "Stop Water / Finish",
+        balReqStrip: "Send Balance Request to Admin", reqAmount: "Enter balance amount (Rs.)",
+        reqTrx: "Payment Transaction ID or Note",
+        reqShot: "Payment Screenshot (compressed 100–200 KB & link saved):", btnSendReq: "Send Request",
+        hHistory: "Water History & Receipts", noRecords: "No records found.",
+        receiptTitle: "WATER ATM RECEIPT", machineNo: "Machine No.", litersFilled: "Water Filled",
+        amountCharged: "Amount Charged", remBalance: "Remaining Balance", dateTime: "Date & Time", status: "Status",
+        invalidMachineQr: "Invalid QR code! Only valid water machine QR codes are accepted."
+      },
+      ur: {
+        dir: "rtl", lang: "ur",
+        dateLbl: "تاریخ", timeLbl: "وقت",
+        installTitle: "📲 ایپ کو ہوم اسکرین پر محفوظ کریں",
+        installDesc: "تیز اور آسان رسائی کے لیے ایک بٹن سے ایپ ہوم اسکرین پر لائیں۔ جب تک ہوم اسکرین پر نہیں آئے گی، یہ آپشن نظر آتا رہے گا۔",
+        installBtn: "ایپ انسٹال کریں / ہوم اسکرین پر محفوظ کریں",
+        manualInstall: "اگر خودکار پاپ اپ نہ کھلے تو براؤزر کے <strong>⋮ (تین نقطے)</strong> یا <strong>Share</strong> بٹن پر دبا کر <strong>\"Add to Home screen\"</strong> منتخب کریں اور پھر ہوم اسکرین والے آئیکن سے ایپ کھولیں۔",
+        tabLogin: "لاگ ان", tabSignup: "نیا اکاؤنٹ",
+        hLogin: "لاگ ان کریں", loginPhone: "موبائل نمبر (مثلاً 03001234567)", loginPass: "پاسورڈ", btnLogin: "لاگ ان",
+        hSignup: "نیا صارف رجسٹر کریں", regName: "پورا نام (لازمی)", regPhone: "موبائل نمبر (لازمی، مثلاً 03001234567)",
+        regPass: "مضبوط پاسورڈ بنائیں", regPass2: "پاسورڈ دوبارہ لکھیں",
+        passHint: "پاسورڈ کم از کم 8 حروف کا ہو جس میں بڑا حرف، چھوٹا حرف، عدد اور علامت (!@#$) شامل ہو۔",
+        btnSignup: "اکاؤنٹ بنائیں",
+        welcome: "خوش آمدید", currentBalance: "موجودہ بقایا بیلنس", btnLogout: "لاگ آؤٹ",
+        hScanQr: "مشین کا QR کوڈ اسکین کریں", pScanHint: "پانی لینے کے لیے مشین پر لگا QR کوڈ اسکین کریں۔",
+        btnStartCam: "📷 کیمرہ سے QR کوڈ اسکین کریں", btnPickGallery: "🖼️ گیلری سے QR تصویر منتخب کریں", stopScan: "اسکین بند کریں",
+        hGetWater: "پانی حاصل کریں", selectedMachine: "منتخب مشین",
+        litersPlaceholder: "کتنے لیٹر پانی چاہیے؟ (مثلاً 5)",
+        ratePrefix: "ریٹ", perLiter: "لیٹر", totalAmount: "کل رقم",
+        btnStartDispense: "سبمٹ کریں / پانی شروع کریں", btnChangeQr: "دوسرا QR اسکین کریں",
+        hLiveWater: "🚰 پانی جاری ہے — لائیو کاؤنٹنگ", liveMachine: "مشین", liveTarget: "مطلوبہ", liveStatus: "اسٹیٹس",
+        liveLiters: "پانی جا رہا ہے", liveCost: "رقم جا رہی ہے", liveRem: "بقایا بیلنس", stopBtn: "پانی روکیں / حساب مکمل کریں",
+        balReqStrip: "ایڈمن کو بیلنس کی درخواست بھیجیں", reqAmount: "کتنے روپے بیلنس چاہیے؟",
+        reqTrx: "ادائیگی کی ٹرانزیکشن ID یا نوٹ",
+        reqShot: "ادائیگی کا اسکرین شاٹ (100–200 KB کمپریس ہو کر لنک سیو ہوگا):", btnSendReq: "درخواست بھیجیں",
+        hHistory: "پانی لینے کی تفصیل اور رسیدیں", noRecords: "کوئی ریکارڈ موجود نہیں۔",
+        receiptTitle: "واٹر اے ٹی ایم رسید", machineNo: "مشین نمبر", litersFilled: "پانی بھرا گیا",
+        amountCharged: "رقم (کتنے کا پانی بھرا گیا)", remBalance: "بقایا رقم", dateTime: "تاریخ و وقت", status: "اسٹیٹس",
+        invalidMachineQr: "غلط QR کوڈ! صرف واٹر مشین کا درست QR کوڈ ہی قبول ہوگا۔"
+      }
+    };
+
+    let currentLang = localStorage.getItem("water_atm_lang") || "en";
+
+    function t(key) {
+      return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key;
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      const locale = currentLang === "ur" ? "ur-PK" : "en-GB";
+      document.getElementById("liveDateText").textContent = now.toLocaleDateString(locale, {
+        day: "2-digit", month: "short", year: "numeric"
+      });
+      document.getElementById("liveTimeText").textContent = now.toLocaleTimeString(locale, {
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+    }
+    updateLiveClock();
+    setInterval(updateLiveClock, 1000);
+
+    window.setLanguage = function(lang) {
+      currentLang = lang === "ur" ? "ur" : "en";
+      localStorage.setItem("water_atm_lang", currentLang);
+      document.documentElement.lang = t("lang");
+      document.documentElement.dir = t("dir");
+      document.getElementById("btnLangEn").classList.toggle("active", currentLang === "en");
+      document.getElementById("btnLangUr").classList.toggle("active", currentLang === "ur");
+
+      document.getElementById("lblDate").textContent = t("dateLbl");
+      document.getElementById("lblTime").textContent = t("timeLbl");
+      document.getElementById("installTitle").textContent = t("installTitle");
+      document.getElementById("installDesc").textContent = t("installDesc");
+      document.getElementById("installAppBtn").textContent = t("installBtn");
+      document.getElementById("manualInstallGuide").innerHTML = t("manualInstall");
+
+      document.getElementById("tabLogin").textContent = t("tabLogin");
+      document.getElementById("tabSignup").textContent = t("tabSignup");
+      document.getElementById("hLogin").textContent = t("hLogin");
+      document.getElementById("loginPhone").placeholder = t("loginPhone");
+      document.getElementById("loginPass").placeholder = t("loginPass");
+      document.getElementById("btnLoginSubmit").textContent = t("btnLogin");
+
+      document.getElementById("hSignup").textContent = t("hSignup");
+      document.getElementById("regName").placeholder = t("regName");
+      document.getElementById("regPhone").placeholder = t("regPhone");
+      document.getElementById("regPass").placeholder = t("regPass");
+      document.getElementById("regPass2").placeholder = t("regPass2");
+      document.getElementById("passHint").textContent = t("passHint");
+      document.getElementById("btnSignupSubmit").textContent = t("btnSignup");
+
+      document.getElementById("lblWelcome").textContent = t("welcome");
+      document.getElementById("lblCurrentBalance").textContent = t("currentBalance");
+      document.getElementById("btnLogout").textContent = t("btnLogout");
+
+      document.getElementById("hScanQr").textContent = t("hScanQr");
+      document.getElementById("pScanHint").textContent = t("pScanHint");
+      document.getElementById("btnStartCam").textContent = t("btnStartCam");
+      document.getElementById("btnPickGallery").textContent = t("btnPickGallery");
+      document.getElementById("stopScanBtn").textContent = t("stopScan");
+
+      document.getElementById("hGetWater").textContent = t("hGetWater");
+      document.getElementById("lblSelectedMachine").textContent = t("selectedMachine");
+      document.getElementById("litersInput").placeholder = t("litersPlaceholder");
+      document.getElementById("btnStartDispense").textContent = t("btnStartDispense");
+      document.getElementById("btnChangeQr").textContent = t("btnChangeQr");
+
+      document.getElementById("hLiveWater").textContent = t("hLiveWater");
+      document.getElementById("lblLiveMachine").textContent = t("liveMachine");
+      document.getElementById("lblLiveTarget").textContent = t("liveTarget");
+      document.getElementById("lblLiveStatus").textContent = t("liveStatus");
+      document.getElementById("lblLiveLiters").textContent = t("liveLiters");
+      document.getElementById("lblLiveCost").textContent = t("liveCost");
+      document.getElementById("lblLiveRem").textContent = t("liveRem");
+      document.getElementById("stopBtn").textContent = t("stopBtn");
+
+      document.getElementById("lblBalReqStrip").textContent = t("balReqStrip");
+      document.getElementById("reqAmount").placeholder = t("reqAmount");
+      document.getElementById("reqTrx").placeholder = t("reqTrx");
+      document.getElementById("lblReqShot").textContent = t("reqShot");
+      document.getElementById("btnSendReq").textContent = t("btnSendReq");
+      document.getElementById("hHistory").textContent = t("hHistory");
+
+      updateLiveClock();
+      updateEstimate();
+      renderHistory(latestOrders);
+    };
+
     const manifestData = {
-      name: "سمارٹ واٹر اے ٹی ایم",
+      name: "Smart Water ATM",
       short_name: "Water ATM",
       start_url: window.location.href,
       display: "standalone",
@@ -325,7 +638,7 @@
       localStorage.setItem("water_atm_on_homescreen", "1");
       deferredPrompt = null;
       refreshInstallPromptVisibility();
-      showAlert("ایپ ہوم اسکرین پر محفوظ ہو گئی ہے!", "ok");
+      showAlert("App saved to Home Screen!", "ok");
     });
 
     if (window.matchMedia && (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true)) {
@@ -375,10 +688,11 @@
     }
 
     function formatDateTime(ts) {
-      if (!ts) return "وقت دستیاب نہیں";
+      if (!ts) return "-";
       const d = ts.toDate ? ts.toDate() : new Date(ts);
-      if (Number.isNaN(d.getTime())) return "وقت دستیاب نہیں";
-      return d.toLocaleString("ur-PK", {
+      if (Number.isNaN(d.getTime())) return "-";
+      const locale = currentLang === "ur" ? "ur-PK" : "en-GB";
+      return d.toLocaleString(locale, {
         year: "numeric", month: "short", day: "2-digit",
         hour: "2-digit", minute: "2-digit"
       });
@@ -405,7 +719,6 @@
           localStorage.setItem(key, String(Date.now()));
         }
       } else {
-        // جب نیا بیلنس آجائے تو پچھلا 24 گھنٹے والا ٹائمر ری سیٹ ہو جائے گا
         localStorage.removeItem(key);
       }
     }
@@ -418,7 +731,6 @@
       if (bal <= 0.009 && zeroSinceRaw) {
         const zeroSince = Number(zeroSinceRaw);
         if (zeroSince > 0 && (Date.now() - zeroSince) >= TWENTY_FOUR_HOURS_MS) {
-          // بیلنس ختم ہونے کے 24 گھنٹے بعد کسٹمر ایپ سے پرانا ڈیٹا خودکار صاف
           return rows.filter(r => getOrderMs(r) > zeroSince);
         }
       }
@@ -474,25 +786,55 @@
         body: form
       });
       const data = await resp.json();
-      if (!data.success || !data.data?.url) throw new Error("ImgBB پر تصویر اپلوڈ نہیں ہو سکی۔");
+      if (!data.success || !data.data?.url) throw new Error("ImgBB upload failed.");
       return data.data.url;
     }
 
-    function extractMachineIdFromScan(decodedText) {
+    function parseAndValidateMachineQr(decodedText) {
       const raw = (decodedText || "").trim();
+      if (!raw) return null;
+
+      let candidateId = "";
       try {
         const url = new URL(raw);
         const paramM = url.searchParams.get("machine");
-        if (paramM) return paramM.trim().toUpperCase();
-      } catch (_) {}
-      const match = raw.match(/machine=([A-Za-z0-9_-]+)/i);
-      if (match) return match[1].trim().toUpperCase();
-      return raw.toUpperCase();
+        if (paramM) {
+          candidateId = paramM.trim().toUpperCase();
+        } else {
+          // If it's a random URL without ?machine=, reject it as non-machine QR
+          return null;
+        }
+      } catch (_) {
+        const match = raw.match(/machine=([A-Za-z0-9_-]+)/i);
+        if (match) {
+          candidateId = match[1].trim().toUpperCase();
+        } else if (/^[A-Za-z0-9_-]{2,20}$/.test(raw)) {
+          candidateId = raw.toUpperCase();
+        } else {
+          return null;
+        }
+      }
+
+      const knownIds = Object.keys(machinesMap);
+      if (knownIds.length > 0 && !machinesMap[candidateId]) {
+        return null;
+      }
+      return candidateId;
+    }
+
+    async function handleScannedQrValue(decodedText) {
+      const mId = parseAndValidateMachineQr(decodedText);
+      if (!mId) {
+        showAlert(t("invalidMachineQr"), "err");
+        return;
+      }
+      await stopQrScanner();
+      selectMachine(mId);
     }
 
     window.startQrScanner = async function() {
       if (!window.Html5Qrcode) {
-        return showAlert("QR اسکینر لوڈ نہیں ہو سکا۔ انٹرنیٹ چیک کریں۔");
+        return showAlert("QR scanner failed to load.");
       }
       document.getElementById("stopScanBtn").classList.remove("hidden");
       if (!html5QrCode) {
@@ -503,14 +845,12 @@
           { facingMode: "environment" },
           { fps: 10, qrbox: { width: 220, height: 220 } },
           async (decodedText) => {
-            const mId = extractMachineIdFromScan(decodedText);
-            await stopQrScanner();
-            selectMachine(mId);
+            await handleScannedQrValue(decodedText);
           },
           () => {}
         );
       } catch (err) {
-        showAlert("کیمرہ شروع نہیں ہو سکا۔ براہِ کرم کیمرہ کی اجازت دیں۔");
+        showAlert("Camera permission denied or unavailable.");
       }
     };
 
@@ -522,9 +862,31 @@
       document.getElementById("qrReaderBox").innerHTML = "";
     };
 
+    window.triggerGalleryQrScan = function() {
+      document.getElementById("galleryQrInput").click();
+    };
+
+    window.handleGalleryQrFile = async function(event) {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      if (!window.Html5Qrcode) {
+        return showAlert("QR scanner failed to load.");
+      }
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qrReaderBox");
+      }
+      try {
+        const decodedText = await html5QrCode.scanFile(file, true);
+        await handleScannedQrValue(decodedText);
+      } catch (err) {
+        showAlert(t("invalidMachineQr"), "err");
+      }
+    };
+
     function selectMachine(mId) {
       const cleanId = (mId || "").trim().toUpperCase();
-      if (!cleanId) return showAlert("درست QR کوڈ اسکین نہیں ہو سکا۔");
+      if (!cleanId) return showAlert(t("invalidMachineQr"), "err");
       activeMachineId = cleanId;
       localStorage.setItem("water_atm_last_machine", cleanId);
       document.getElementById("scanCard").classList.add("hidden");
@@ -532,7 +894,7 @@
       document.getElementById("liveDispenseCard").classList.add("hidden");
       updateMachineBanner();
       updateEstimate();
-      showAlert(`مشین ${cleanId} منتخب ہو گئی! اب مطلوبہ لیٹر لکھ کر سبمٹ کریں۔`, "ok");
+      showAlert(`Machine ${cleanId} selected.`, "ok");
     }
 
     window.changeMachineScan = function() {
@@ -570,19 +932,19 @@
       const pass2 = document.getElementById("regPass2").value;
 
       if (!name || phone.length < 10) {
-        return showAlert("براہِ کرم مکمل نام اور درست موبائل نمبر لکھیں۔");
+        return showAlert("Please enter full name and valid mobile number.");
       }
       if (!isStrongPassword(pass)) {
-        return showAlert("پاسورڈ کمزور ہے! کم از کم 8 حروف، بڑا حرف، چھوٹا حرف، عدد اور علامت (!@#$) شامل ہو۔");
+        return showAlert(t("passHint"));
       }
       if (pass !== pass2) {
-        return showAlert("دونوں پاسورڈ آپس میں میل نہیں کھاتے۔");
+        return showAlert("Passwords do not match.");
       }
 
       const userRef = doc(db, "users", phone);
       const snap = await getDoc(userRef);
       if (snap.exists()) {
-        return showAlert("اس موبائل نمبر پر پہلے ہی اکاؤنٹ موجود ہے۔");
+        return showAlert("Account already exists with this mobile number.");
       }
 
       const salt = crypto.randomUUID();
@@ -598,7 +960,7 @@
       });
 
       localStorage.setItem("water_atm_user", phone);
-      showAlert("اکاؤنٹ کامیابی سے بن گیا!", "ok");
+      showAlert("Account created successfully!", "ok");
       openDashboard(phone);
     };
 
@@ -607,19 +969,19 @@
       const pass = document.getElementById("loginPass").value;
 
       if (!phone || !pass) {
-        return showAlert("موبائل نمبر اور پاسورڈ دونوں لازمی ہیں۔");
+        return showAlert("Mobile number and password are required.");
       }
 
       const userRef = doc(db, "users", phone);
       const snap = await getDoc(userRef);
       if (!snap.exists()) {
-        return showAlert("یہ موبائل نمبر رجسٹرڈ نہیں ہے۔");
+        return showAlert("Mobile number is not registered.");
       }
 
       const data = snap.data();
       const checkHash = await hashPassword(pass, data.salt || "");
       if (checkHash !== data.passwordHash) {
-        return showAlert("غلط پاسورڈ! براہِ کرم اپنا درست پاسورڈ لکھیں۔");
+        return showAlert("Invalid password.");
       }
 
       currentUser = { id: snap.id, ...data };
@@ -694,24 +1056,24 @@
       const rate = machinesMap[activeMachineId]?.pricePerLiter ?? 5;
       const total = liters * rate;
       document.getElementById("estimateText").textContent =
-        `ریٹ: Rs. ${rate}/لیٹر | کل رقم: Rs. ${total.toFixed(2)}`;
+        `${t("ratePrefix")}: Rs. ${rate}/${t("perLiter")} | ${t("totalAmount")}: Rs. ${total.toFixed(2)}`;
     };
 
     window.startWaterDispense = async function() {
       if (!currentUser) return;
       if (!activeMachineId) {
-        return showAlert("پہلے مشین کا QR کوڈ اسکین کریں۔");
+        return showAlert(t("invalidMachineQr"), "err");
       }
       const liters = parseFloat(document.getElementById("litersInput").value);
       if (!liters || liters <= 0) {
-        return showAlert("براہِ کرم درست مقدار میں لیٹر لکھیں۔");
+        return showAlert("Please enter valid liters.");
       }
 
       const rate = machinesMap[activeMachineId]?.pricePerLiter ?? 5;
       const startBalance = Number(currentUser.balance || 0);
 
       if (startBalance < rate) {
-        return showAlert("آپ کا بیلنس ناکافی ہے۔ پہلے بیلنس کی درخواست بھیجیں۔");
+        return showAlert("Insufficient balance.");
       }
 
       const allowedLiters = Math.min(liters, Number((startBalance / rate).toFixed(2)));
@@ -739,7 +1101,7 @@
       document.getElementById("liveDispenseCard").classList.remove("hidden");
       document.getElementById("liveMachineId").textContent = activeMachineId;
       document.getElementById("liveTargetLiters").textContent = allowedLiters.toFixed(2);
-      showAlert(`مشین ${activeMachineId} پر لائیو پانی شروع ہو گیا ہے۔`, "ok");
+      showAlert(`Machine ${activeMachineId} live dispensing started.`, "ok");
 
       listenToLiveOrder(activeOrderId);
     };
@@ -823,7 +1185,7 @@
       document.getElementById("dispenseFormCard").classList.remove("hidden");
 
       showAlert(
-        `حساب مکمل: ${dispensed.toFixed(2)} لیٹر پانی نکلا، Rs. ${finalCost.toFixed(2)} کٹے، اور بقایا بیلنس Rs. ${finalRemaining.toFixed(2)} ہے۔`,
+        `${dispensed.toFixed(2)} L | Rs. ${finalCost.toFixed(2)} | Remaining: Rs. ${finalRemaining.toFixed(2)}`,
         "ok"
       );
     }
@@ -837,14 +1199,14 @@
         return;
       }
       try {
-        showAlert("اسکرین شاٹ کمپریس ہو کر ImgBB پر اپلوڈ ہو رہا ہے...", "ok");
+        showAlert("Compressing and uploading screenshot...", "ok");
         uploadedImageUrl = await compressAndUploadToImgBB(file, IMGBB_API_KEY);
         img.src = uploadedImageUrl;
         img.style.display = "block";
-        showAlert("اسکرین شاٹ لنک تیار ہو گیا ہے۔", "ok");
+        showAlert("Screenshot uploaded!", "ok");
       } catch (err) {
         img.style.display = "none";
-        showAlert(err.message || "اسکرین شاٹ اپلوڈ میں مسئلہ پیش آیا۔");
+        showAlert(err.message || "Upload failed.");
       }
     };
 
@@ -852,7 +1214,7 @@
       if (!currentUser) return;
       const amount = parseFloat(document.getElementById("reqAmount").value);
       const trxId = document.getElementById("reqTrx").value.trim();
-      if (!amount || amount <= 0) return showAlert("درست رقم لکھیں۔");
+      if (!amount || amount <= 0) return showAlert("Please enter a valid amount.");
 
       await addDoc(collection(db, "balanceRequests"), {
         userPhone: currentUser.phone,
@@ -869,7 +1231,7 @@
       document.getElementById("reqScreenshot").value = "";
       document.getElementById("screenshotPreview").style.display = "none";
       uploadedImageUrl = "";
-      showAlert("بیلنس کی درخواست، ٹرانزیکشن تفصیل اور اسکرین شاٹ لنک ایڈمن کو بھیج دی گئی ہے۔", "ok");
+      showAlert("Balance request sent to admin.", "ok");
     };
 
     function renderHistory(rows) {
@@ -878,7 +1240,7 @@
       const visibleRows = getVisibleOrdersForCustomer(phone, rows);
 
       if (!visibleRows.length) {
-        box.innerHTML = "کوئی ریکارڈ موجود نہیں۔";
+        box.innerHTML = t("noRecords");
         return;
       }
 
@@ -895,25 +1257,30 @@
             <div class="hist-strip-header" onclick="toggleHistStrip('${hId}')">
               <div>
                 <div class="hist-strip-main">
-                  مشین: ${r.machineId || "-"} | ${litersVal} L | رقم: Rs. ${costVal} | بقایا: Rs. ${remVal}
+                  ${r.machineId || "-"} | ${litersVal} L | Rs. ${costVal} | Rem: Rs. ${remVal}
                 </div>
                 <div class="hist-strip-sub">${dtText}</div>
               </div>
-              <span>${isOpen ? "▲" : "▼"}</span>
+              <span style="font-weight:800;color:#0369a1;">${isOpen ? "▲" : "▼"}</span>
             </div>
-            <div id="hbody_${hId}" class="hist-strip-body ${isOpen ? "" : "hidden"}">
-              <div><strong>تاریخ و وقت:</strong> ${dtText}</div>
-              <div><strong>مشین نمبر:</strong> ${r.machineId || "-"}</div>
-              <div><strong>پانی بھرا گیا:</strong> ${litersVal} لیٹر</div>
-              <div><strong>رقم (کتنے کا پانی بھرا گیا):</strong> Rs. ${costVal}</div>
-              <div><strong>بقایا رقم:</strong> Rs. ${remVal}</div>
-              <div><strong>اسٹیٹس:</strong> ${r.status || "-"}</div>
+            <div id="hbody_${hId}" class="receipt-box ${isOpen ? "" : "hidden"}">
+              <div class="receipt-banner">
+                <span>🧾 ${t("receiptTitle")}</span>
+                <span>#${String(hId).slice(0, 6).toUpperCase()}</span>
+              </div>
+              <div class="receipt-row"><span class="receipt-key">${t("dateTime")}</span><span class="receipt-val">${dtText}</span></div>
+              <div class="receipt-row"><span class="receipt-key">${t("machineNo")}</span><span class="receipt-val">${r.machineId || "-"}</span></div>
+              <div class="receipt-row"><span class="receipt-key">${t("litersFilled")}</span><span class="receipt-val">${litersVal} L</span></div>
+              <div class="receipt-row"><span class="receipt-key">${t("amountCharged")}</span><span class="receipt-val" style="color:#b91c1c;">Rs. ${costVal}</span></div>
+              <div class="receipt-row"><span class="receipt-key">${t("remBalance")}</span><span class="receipt-val" style="color:#15803d;">Rs. ${remVal}</span></div>
+              <div class="receipt-row"><span class="receipt-key">${t("status")}</span><span class="receipt-val">${r.status || "-"}</span></div>
             </div>
           </div>
         `;
       }).join("");
     }
 
+    setLanguage(currentLang);
     const savedPhone = localStorage.getItem("water_atm_user");
     if (savedPhone) openDashboard(savedPhone);
   </script>
