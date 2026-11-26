@@ -31,7 +31,6 @@
       padding: 13px 14px;
     }
 
-    /* Top Header with Round Logo + Live Date & Time + Red Title & Side Lang Buttons */
     .top-brand-card {
       background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
       border-radius: 18px;
@@ -151,6 +150,26 @@
       border: 2px solid #0284c7;
       display: inline-block;
     }
+    .timer-pill {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      margin: 8px 0;
+      text-align: center;
+    }
+    .sensor-pill {
+      background: #eff6ff;
+      border: 1px solid #93c5fd;
+      color: #1e3a8a;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      margin: 8px 0;
+      text-align: center;
+    }
 
     .install-banner {
       background: #fffbeb;
@@ -225,7 +244,6 @@
       margin-top: 4px;
     }
 
-    /* Colorful History Strip & Receipt Design */
     .hist-strip {
       border: 1px solid #bae6fd;
       border-radius: 14px;
@@ -291,7 +309,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- TOP BRAND HEADER: LIVE DATE + ROUND LOGO + LIVE TIME + LANG BUTTONS ON RED TITLE ROW -->
+    <!-- TOP BRAND HEADER -->
     <div class="top-brand-card">
       <div class="logo-clock-row">
         <div class="side-clock-box">
@@ -320,7 +338,7 @@
       </div>
     </div>
 
-    <!-- INSTALL / ADD TO HOME SCREEN PROMPT -->
+    <!-- INSTALL PROMPT -->
     <div id="installPromptCard" class="install-banner hidden">
       <div class="install-title" id="installTitle">📲 Save App to Home Screen</div>
       <div style="font-size:13.5px;color:#334155;" id="installDesc">
@@ -372,7 +390,7 @@
         <button id="btnLogout" class="secondary" onclick="logoutUser()">Logout</button>
       </div>
 
-      <!-- STEP 1: ALWAYS STARTS ON QR SCAN PAGE ON OPEN / REFRESH / STOP / REOPEN -->
+      <!-- STEP 1: SCAN QR -->
       <div id="scanCard" class="card">
         <h3 id="hScanQr">Scan Machine QR Code</h3>
         <p id="pScanHint" style="margin:0 0 8px;font-size:14px;color:#475569;">Scan the QR code attached on the water machine.</p>
@@ -383,7 +401,7 @@
         <div id="qrReaderBox" style="margin-top:10px;"></div>
       </div>
 
-      <!-- STEP 2A: QR PREVIEW + BLINKING CONFIRM SCAN BUTTON (SHOWN BEFORE LITERS STEP) -->
+      <!-- STEP 2A: QR PREVIEW + BLINKING CONFIRM SCAN -->
       <div id="confirmScanCard" class="card hidden">
         <h3 id="hConfirmScan">Confirm Scanned QR</h3>
         <div class="machine-badge">
@@ -399,13 +417,27 @@
         <button id="btnChangeQrFromConfirm" class="secondary" onclick="resetToScanPage()">Scan Another QR</button>
       </div>
 
-      <!-- STEP 2B: AFTER SCAN CONFIRMED -> ENTER LITERS & PRESS START MACHINE -->
+      <!-- STEP 2B: 30s LINKING / LIGHT ON WAITING CARD -->
+      <div id="linkingWaitCard" class="card hidden">
+        <h3 id="hLinkingMachine">Linking App & Machine</h3>
+        <div class="machine-badge">
+          <span id="lblLinkingMachine">Machine</span>: <span id="linkingMachineLabel">-</span>
+        </div>
+        <div class="sensor-pill" id="lblLightOnStatus">💡 Machine light turned ON. Waiting for app & machine link...</div>
+        <div class="timer-pill" id="linkTimerText">⏱️ Connecting within 30s: 30s left</div>
+        <button id="btnCancelLink" class="secondary" onclick="resetToScanPage()">Cancel / Scan Again</button>
+      </div>
+
+      <!-- STEP 2C: START MACHINE + 30s BOTTLE SENSOR TIMER CARD -->
       <div id="dispenseFormCard" class="card hidden">
         <h3 id="hGetWater">Get Water</h3>
         <div class="machine-badge">
-          <span id="lblConfirmedMachine">Confirmed Machine</span>: <span id="confirmedMachineLabel">-</span>
+          <span id="lblConfirmedMachine">Linked Machine</span>: <span id="confirmedMachineLabel">-</span>
           <span id="confirmedMachineLoc" style="font-weight:500;"></span>
         </div>
+
+        <div class="timer-pill" id="bottleTimerText">🍼 Place bottle within 30s: 30s left</div>
+        <div class="sensor-pill" id="bottleSensorStatus">🔍 Bottle Sensor: Waiting for bottle...</div>
 
         <input type="number" id="litersInput" min="0.5" step="0.5" placeholder="How many liters of water? (e.g. 5)" oninput="updateEstimate()" />
         <p id="estimateText" style="margin:8px 0;font-weight:700;color:#0b5ed7;">Rate: Rs. 5/Liter | Total Amount: Rs. 0.00</p>
@@ -423,6 +455,8 @@
             <span id="lblLiveTarget">Target</span>: <strong id="liveTargetLiters">0</strong> L |
             <span id="lblLiveStatus">Status</span>: <strong id="liveStatusText">running</strong>
           </div>
+
+          <div class="sensor-pill" id="liveFlowSensorText">🌊 Flow Sensor: Dispensing water & counting liters...</div>
 
           <div class="live-grid">
             <div class="live-stat">
@@ -508,12 +542,23 @@
         btnStartCam: "📷 Scan QR with Camera", btnPickGallery: "🖼️ Select QR from Gallery", stopScan: "Stop Scanner",
         hConfirmScan: "Confirm Scanned QR", selectedMachine: "Selected Machine",
         btnConfirmScan: "Confirm Scan",
-        hGetWater: "Get Water", confirmedMachine: "Confirmed Machine",
+        hLinkingMachine: "Linking App & Machine", linkingMachine: "Machine",
+        lightOnStatus: "💡 Machine light ON. Linking app & machine (30s)...",
+        linkTimerPrefix: "⏱️ Connecting within 30s", secLeft: "s left",
+        btnCancelLink: "Cancel / Scan Again",
+        linkFailedRetry: "Try again! Could not connect app & machine within 30 seconds.",
+        linkProblemMsg: "Problem: Machine is offline or faulty! Try again.",
+        hGetWater: "Get Water", confirmedMachine: "Linked Machine",
+        bottleTimerPrefix: "🍼 Place bottle within 30s",
+        bottleSensorWaiting: "🔍 Bottle Sensor: Place bottle on machine...",
+        bottleSensorDetected: "✅ Bottle Sensor: Bottle detected! Machine starting...",
+        bottleTimeoutErr: "Try again! Bottle was not placed within 30 seconds.",
         litersPlaceholder: "How many liters of water? (e.g. 5)",
         ratePrefix: "Rate", perLiter: "Liter", totalAmount: "Total Amount",
         btnStartMachine: "Start Machine",
         btnChangeQr: "Scan Another QR",
         hLiveWater: "🚰 Water Dispensing — Live Counting", liveMachine: "Machine", liveTarget: "Target", liveStatus: "Status",
+        liveFlowSensor: "🌊 Flow Sensor: Dispensing water & stopping automatically on completion.",
         liveLiters: "Water Going", liveCost: "Amount Going", liveRem: "Remaining Balance", stopBtn: "Stop Water / Finish",
         balReqStrip: "Send Balance Request to Admin", reqAmount: "Enter balance amount (Rs.)",
         reqTrx: "Payment Transaction ID or Note",
@@ -523,7 +568,7 @@
         amountCharged: "Amount Charged", remBalance: "Remaining Balance", dateTime: "Date & Time", status: "Status",
         invalidMachineQr: "Invalid QR code! Only valid water machine QR codes are accepted.",
         machineSignalProblem: "Problem: No signal from machine or machine is faulty! Starting again from QR scan.",
-        machineFaultyStatus: "Problem: Machine is offline or faulty! Please scan QR again."
+        machineFaultyStatus: "Problem: Machine is offline or faulty! Try again."
       },
       ur: {
         dir: "rtl", lang: "ur",
@@ -543,12 +588,23 @@
         btnStartCam: "📷 کیمرہ سے QR کوڈ اسکین کریں", btnPickGallery: "🖼️ گیلری سے QR تصویر منتخب کریں", stopScan: "اسکین بند کریں",
         hConfirmScan: "اسکین شدہ QR کنفرم کریں", selectedMachine: "منتخب مشین",
         btnConfirmScan: "اسکین کنفرم کریں",
-        hGetWater: "پانی حاصل کریں", confirmedMachine: "کنفرم شدہ مشین",
+        hLinkingMachine: "ایپ اور مشین کا لنک", linkingMachine: "مشین",
+        lightOnStatus: "💡 مشین کی لائٹ آن ہو گئی۔ ایپ اور مشین آپس میں لنک ہو رہے ہیں (30 سیکنڈ)...",
+        linkTimerPrefix: "⏱️ 30 سیکنڈ کے اندر کنیکٹ ہو جائے", secLeft: "سیکنڈ باقی",
+        btnCancelLink: "منسوخ کریں / دوبارہ اسکین",
+        linkFailedRetry: "دوبارہ کوشش کرے! 30 سیکنڈ کے اندر ایپ اور مشین کنیکٹ نہیں ہو سکے۔",
+        linkProblemMsg: "مسئلہ: مشین کا سگنل نہیں مل رہا یا مشین خراب ہے! دوبارہ کوشش کرے۔",
+        hGetWater: "پانی حاصل کریں", confirmedMachine: "کنیکٹ شدہ مشین",
+        bottleTimerPrefix: "🍼 30 سیکنڈ کے اندر بوتل رکھے",
+        bottleSensorWaiting: "🔍 بوتل سینسر: مشین پر بوتل رکھے...",
+        bottleSensorDetected: "✅ بوتل سینسر: بوتل آ گئی! سینسر کے آرڈر سے مشین چل رہی ہے...",
+        bottleTimeoutErr: "دوبارہ کوشش کرے! 30 سیکنڈ کے اندر مشین پر بوتل نہیں رکھی گئی۔",
         litersPlaceholder: "کتنے لیٹر پانی چاہیے؟ (مثلاً 5)",
         ratePrefix: "ریٹ", perLiter: "لیٹر", totalAmount: "کل رقم",
         btnStartMachine: "سٹارٹ کرے مشین",
         btnChangeQr: "دوسرا QR اسکین کریں",
         hLiveWater: "🚰 پانی جاری ہے — لائیو کاؤنٹنگ", liveMachine: "مشین", liveTarget: "مطلوبہ", liveStatus: "اسٹیٹس",
+        liveFlowSensor: "🌊 فلو سینسر: پانی بھر رہا ہے اور مکمل ہوتے ہی خود کار بند ہو جائے گا۔",
         liveLiters: "پانی جا رہا ہے", liveCost: "رقم جا رہی ہے", liveRem: "بقایا بیلنس", stopBtn: "پانی روکیں / حساب مکمل کریں",
         balReqStrip: "ایڈمن کو بیلنس کی درخواست بھیجیں", reqAmount: "کتنے روپے بیلنس چاہیے؟",
         reqTrx: "ادائیگی کی ٹرانزیکشن ID یا نوٹ",
@@ -558,7 +614,7 @@
         amountCharged: "رقم (کتنے کا پانی بھرا گیا)", remBalance: "بقایا رقم", dateTime: "تاریخ و وقت", status: "اسٹیٹس",
         invalidMachineQr: "غلط QR کوڈ! صرف واٹر مشین کا درست QR کوڈ ہی قبول ہوگا۔",
         machineSignalProblem: "مسئلہ: مشین کا سگنل نہیں مل رہا یا مشین خراب ہے! دوبارہ اسکین سے شروع کیا جا رہا ہے۔",
-        machineFaultyStatus: "مسئلہ: مشین خراب یا آف لائن ہے! دوبارہ QR اسکین کریں۔"
+        machineFaultyStatus: "مسئلہ: مشین خراب یا آف لائن ہے! دوبارہ کوشش کرے۔"
       }
     };
 
@@ -598,6 +654,29 @@
     }
     updateLiveClock();
     setInterval(updateLiveClock, 1000);
+
+    let linkSecondsLeft = 30;
+    let bottleSecondsLeft = 30;
+    let linkInterval = null;
+    let bottleInterval = null;
+    let unsubMachineLink = null;
+    let bottleDetectedFlag = false;
+
+    function updateLinkTimerText() {
+      document.getElementById("linkTimerText").textContent =
+        `${t("linkTimerPrefix")}: ${linkSecondsLeft} ${t("secLeft")}`;
+    }
+
+    function updateBottleTimerText() {
+      document.getElementById("bottleTimerText").textContent =
+        `${t("bottleTimerPrefix")}: ${bottleSecondsLeft} ${t("secLeft")}`;
+    }
+
+    function clearStepTimers() {
+      if (linkInterval) { clearInterval(linkInterval); linkInterval = null; }
+      if (bottleInterval) { clearInterval(bottleInterval); bottleInterval = null; }
+      if (unsubMachineLink) { unsubMachineLink(); unsubMachineLink = null; }
+    }
 
     window.setLanguage = function(lang) {
       currentLang = lang === "ur" ? "ur" : "en";
@@ -644,6 +723,11 @@
       document.getElementById("btnConfirmScan").textContent = t("btnConfirmScan");
       document.getElementById("btnChangeQrFromConfirm").textContent = t("btnChangeQr");
 
+      document.getElementById("hLinkingMachine").textContent = t("hLinkingMachine");
+      document.getElementById("lblLinkingMachine").textContent = t("linkingMachine");
+      document.getElementById("lblLightOnStatus").textContent = t("lightOnStatus");
+      document.getElementById("btnCancelLink").textContent = t("btnCancelLink");
+
       document.getElementById("hGetWater").textContent = t("hGetWater");
       document.getElementById("lblConfirmedMachine").textContent = t("confirmedMachine");
       document.getElementById("litersInput").placeholder = t("litersPlaceholder");
@@ -654,6 +738,7 @@
       document.getElementById("lblLiveMachine").textContent = t("liveMachine");
       document.getElementById("lblLiveTarget").textContent = t("liveTarget");
       document.getElementById("lblLiveStatus").textContent = t("liveStatus");
+      document.getElementById("liveFlowSensorText").textContent = t("liveFlowSensor");
       document.getElementById("lblLiveLiters").textContent = t("liveLiters");
       document.getElementById("lblLiveCost").textContent = t("liveCost");
       document.getElementById("lblLiveRem").textContent = t("liveRem");
@@ -667,6 +752,8 @@
       document.getElementById("hHistory").textContent = t("hHistory");
 
       updateLiveClock();
+      updateLinkTimerText();
+      updateBottleTimerText();
       updateEstimate();
       renderHistory(latestOrders);
     };
@@ -801,13 +888,19 @@
       const key = getZeroBalanceCycleKey(phone);
       const zeroSinceRaw = localStorage.getItem(key);
 
+      let filtered = rows.filter(r => {
+        const liters = Number(r.dispensedLiters ?? r.targetLiters ?? 0);
+        const st = String(r.status || "").toLowerCase();
+        return liters > 0 || st === "running" || st === "completed" || st === "stopped_by_user";
+      });
+
       if (bal <= 0.009 && zeroSinceRaw) {
         const zeroSince = Number(zeroSinceRaw);
         if (zeroSince > 0 && (Date.now() - zeroSince) >= TWENTY_FOUR_HOURS_MS) {
-          return rows.filter(r => getOrderMs(r) > zeroSince);
+          filtered = filtered.filter(r => getOrderMs(r) > zeroSince);
         }
       }
-      return rows;
+      return filtered;
     }
 
     window.toggleHistStrip = function(id) {
@@ -974,6 +1067,7 @@
     };
 
     function showQrConfirmStep(mId, previewUrl = "") {
+      clearStepTimers();
       const cleanId = (mId || "").trim().toUpperCase();
       if (!cleanId) return showAlert(t("invalidMachineQr"), "err");
       activeMachineId = cleanId;
@@ -990,14 +1084,26 @@
       }
 
       document.getElementById("scanCard").classList.add("hidden");
+      document.getElementById("linkingWaitCard").classList.add("hidden");
       document.getElementById("dispenseFormCard").classList.add("hidden");
       document.getElementById("liveDispenseCard").classList.add("hidden");
       document.getElementById("confirmScanCard").classList.remove("hidden");
       updateMachineBanner();
-      showAlert(`QR (${cleanId}) detected. Press Confirm Scan to continue.`, "ok");
+      showAlert(`QR (${cleanId}) detected. Press Confirm Scan to turn on light & link.`, "ok");
     }
 
-    window.confirmScanStep = function() {
+    async function turnOffMachineLightIfPossible(mId) {
+      if (!mId) return;
+      try {
+        await setDoc(doc(db, "machines", mId), {
+          lightOn: false,
+          linkRequested: false
+        }, { merge: true });
+      } catch (_) {}
+    }
+
+    window.confirmScanStep = async function() {
+      clearStepTimers();
       if (!activeMachineId) {
         resetToScanPage();
         return showAlert(t("invalidMachineQr"), "err");
@@ -1006,21 +1112,104 @@
         resetToScanPage();
         return showAlert(t("machineFaultyStatus"), "err");
       }
+
       scanConfirmed = true;
       document.getElementById("confirmScanCard").classList.add("hidden");
-      document.getElementById("dispenseFormCard").classList.remove("hidden");
-      document.getElementById("litersInput").value = "";
-      updateEstimate();
-      showAlert(`Scan confirmed for ${activeMachineId}. Enter liters and press Start Machine.`, "ok");
+      document.getElementById("dispenseFormCard").classList.add("hidden");
+      document.getElementById("liveDispenseCard").classList.add("hidden");
+      document.getElementById("linkingWaitCard").classList.remove("hidden");
+      document.getElementById("linkingMachineLabel").textContent = activeMachineId;
+
+      linkSecondsLeft = 30;
+      updateLinkTimerText();
+      document.getElementById("lblLightOnStatus").textContent = t("lightOnStatus");
+
+      const linkStartMs = Date.now();
+      try {
+        await setDoc(doc(db, "machines", activeMachineId), {
+          lightOn: true,
+          linkRequested: true,
+          linkStatus: "linking",
+          linkedByPhone: currentUser?.phone || null,
+          linkRequestedAt: linkStartMs
+        }, { merge: true });
+      } catch (_) {}
+
+      let linkedSuccessfully = false;
+      const moveToGetWaterStep = () => {
+        if (linkedSuccessfully) return;
+        linkedSuccessfully = true;
+        if (linkInterval) { clearInterval(linkInterval); linkInterval = null; }
+        if (unsubMachineLink) { unsubMachineLink(); unsubMachineLink = null; }
+
+        document.getElementById("linkingWaitCard").classList.add("hidden");
+        document.getElementById("dispenseFormCard").classList.remove("hidden");
+        document.getElementById("litersInput").value = "";
+        updateEstimate();
+        startBottleSensor30sTimer();
+      };
+
+      unsubMachineLink = onSnapshot(doc(db, "machines", activeMachineId), (snap) => {
+        if (!snap.exists() || linkedSuccessfully) return;
+        const md = snap.data();
+        const st = String(md.status || md.machineStatus || "").toLowerCase();
+        if (["faulty", "fault", "offline", "error", "broken", "disabled"].includes(st) || md.isFaulty === true) {
+          resetToScanPage();
+          showAlert(t("linkProblemMsg"), "err");
+          return;
+        }
+        const linkedAt = Number(md.linkedAt || md.lastPingAt || md.heartbeatAt || 0);
+        if (md.linkStatus === "connected" || md.connected === true || linkedAt >= linkStartMs) {
+          moveToGetWaterStep();
+        }
+      });
+
+      linkInterval = setInterval(async () => {
+        if (linkedSuccessfully) return;
+        linkSecondsLeft -= 1;
+        updateLinkTimerText();
+
+        if (linkSecondsLeft <= 0) {
+          await turnOffMachineLightIfPossible(activeMachineId);
+          resetToScanPage();
+          showAlert(t("linkFailedRetry"), "err");
+        }
+      }, 1000);
     };
 
+    function startBottleSensor30sTimer() {
+      if (bottleInterval) { clearInterval(bottleInterval); bottleInterval = null; }
+      bottleDetectedFlag = false;
+      bottleSecondsLeft = 30;
+      updateBottleTimerText();
+      document.getElementById("bottleSensorStatus").textContent = t("bottleSensorWaiting");
+
+      bottleInterval = setInterval(async () => {
+        if (bottleDetectedFlag) return;
+        bottleSecondsLeft -= 1;
+        updateBottleTimerText();
+
+        if (bottleSecondsLeft <= 0) {
+          await turnOffMachineLightIfPossible(activeMachineId);
+          resetToScanPage();
+          showAlert(t("bottleTimeoutErr"), "err");
+        }
+      }, 1000);
+    }
+
     window.resetToScanPage = function() {
+      clearStepTimers();
+      const prevMachine = activeMachineId;
       activeMachineId = "";
       scanConfirmed = false;
+      bottleDetectedFlag = false;
+      if (prevMachine) turnOffMachineLightIfPossible(prevMachine);
+
       document.getElementById("litersInput").value = "";
       document.getElementById("scannedQrPreviewImg").src = "";
       document.getElementById("scannedQrPreviewWrap").classList.add("hidden");
       document.getElementById("confirmScanCard").classList.add("hidden");
+      document.getElementById("linkingWaitCard").classList.add("hidden");
       document.getElementById("dispenseFormCard").classList.add("hidden");
       document.getElementById("liveDispenseCard").classList.add("hidden");
       document.getElementById("scanCard").classList.remove("hidden");
@@ -1119,8 +1308,6 @@
       document.getElementById("authSection").classList.add("hidden");
       document.getElementById("dashSection").classList.remove("hidden");
       loadMachines();
-
-      // Always start on QR scan page on open / refresh / reopen
       resetToScanPage();
 
       if (unsubUser) unsubUser();
@@ -1149,6 +1336,7 @@
 
     window.logoutUser = async function() {
       await stopQrScanner();
+      clearStepTimers();
       if (unsubUser) unsubUser();
       if (unsubOrders) unsubOrders();
       if (unsubActiveOrder) unsubActiveOrder();
@@ -1167,11 +1355,22 @@
         qs.forEach(d => {
           machinesMap[d.id.toUpperCase()] = { id: d.id, ...d.data() };
         });
+
         if (activeMachineId) {
+          const mData = machinesMap[activeMachineId];
           if (!checkMachineHealthBeforeProceed(activeMachineId)) {
             resetToScanPage();
             showAlert(t("machineFaultyStatus"), "err");
             return;
+          }
+          if (mData && (mData.bottleDetected === true || mData.hasBottle === true) && !document.getElementById("dispenseFormCard").classList.contains("hidden") && !bottleDetectedFlag) {
+            bottleDetectedFlag = true;
+            if (bottleInterval) { clearInterval(bottleInterval); bottleInterval = null; }
+            document.getElementById("bottleSensorStatus").textContent = t("bottleSensorDetected");
+            const litersVal = parseFloat(document.getElementById("litersInput").value);
+            if (litersVal && litersVal > 0) {
+              startWaterDispense(true);
+            }
           }
           updateMachineBanner();
           updateEstimate();
@@ -1187,7 +1386,7 @@
         `${t("ratePrefix")}: Rs. ${rate}/${t("perLiter")} | ${t("totalAmount")}: Rs. ${total.toFixed(2)}`;
     };
 
-    window.startWaterDispense = async function() {
+    window.startWaterDispense = async function(triggeredByBottleSensor = false) {
       if (!currentUser) return;
       if (!activeMachineId || !scanConfirmed) {
         resetToScanPage();
@@ -1210,9 +1409,23 @@
         return showAlert("Insufficient balance.");
       }
 
+      if (bottleInterval) { clearInterval(bottleInterval); bottleInterval = null; }
+      bottleDetectedFlag = true;
+      document.getElementById("bottleSensorStatus").textContent = t("bottleSensorDetected");
+
       const allowedLiters = Math.min(liters, Number((startBalance / rate).toFixed(2)));
       isFinalizing = false;
       lastHeartbeat = Date.now();
+
+      try {
+        await setDoc(doc(db, "machines", activeMachineId), {
+          lightOn: true,
+          bottleDetected: true,
+          sensorOrder: "START_WATER",
+          targetLiters: allowedLiters,
+          valveOpen: true
+        }, { merge: true });
+      } catch (_) {}
 
       const orderDoc = await addDoc(collection(db, "dispenseOrders"), {
         userPhone: currentUser.phone,
@@ -1224,6 +1437,8 @@
         dispensedLiters: 0,
         liveCost: 0,
         remainingBalance: startBalance,
+        bottleDetected: true,
+        sensorOrder: "START_WATER",
         status: "running",
         stopReason: null,
         lastUpdateAt: Date.now(),
@@ -1235,7 +1450,12 @@
       document.getElementById("liveDispenseCard").classList.remove("hidden");
       document.getElementById("liveMachineId").textContent = activeMachineId;
       document.getElementById("liveTargetLiters").textContent = allowedLiters.toFixed(2);
-      showAlert(`Machine ${activeMachineId} started.`, "ok");
+      showAlert(
+        triggeredByBottleSensor
+          ? `${t("bottleSensorDetected")} (${activeMachineId})`
+          : `Machine ${activeMachineId} started.`,
+        "ok"
+      );
 
       listenToLiveOrder(activeOrderId);
     };
@@ -1250,7 +1470,8 @@
         activeOrderData = d;
         lastHeartbeat = Date.now();
 
-        const dispensed = Math.min(Number(d.dispensedLiters || 0), Number(d.targetLiters || 0));
+        const target = Number(d.targetLiters || 0);
+        const dispensed = Math.min(Number(d.dispensedLiters || 0), target);
         const rate = Number(d.ratePerLiter || 5);
         const startBal = Number(d.startBalance || 0);
         const currentCost = Number((dispensed * rate).toFixed(2));
@@ -1261,8 +1482,9 @@
         document.getElementById("liveRemainingBalance").textContent = remBal.toFixed(2);
         document.getElementById("liveStatusText").textContent = d.status || "running";
 
-        if ((d.status === "running") && dispensed >= Number(d.targetLiters || 0) && Number(d.targetLiters || 0) > 0) {
-          await finalizeDispense(orderId, d, "completed", false);
+        const flowDone = d.flowCompleted === true || d.flowSensorDone === true || (target > 0 && dispensed >= target);
+        if ((d.status === "running") && flowDone) {
+          await finalizeDispense(orderId, { ...d, dispensedLiters: target }, "completed", false);
         } else if (d.status !== "running" && !isFinalizing) {
           const isFault = ["faulty", "error", "machine_fault", "no_signal"].includes(String(d.status || "").toLowerCase());
           await finalizeDispense(orderId, d, d.status || "stopped", isFault);
@@ -1296,11 +1518,23 @@
       const finalCost = Number((dispensed * rate).toFixed(2));
       const finalRemaining = Math.max(0, Number((startBal - finalCost).toFixed(2)));
 
+      if (activeMachineId) {
+        try {
+          await setDoc(doc(db, "machines", activeMachineId), {
+            valveOpen: false,
+            lightOn: false,
+            bottleDetected: false,
+            sensorOrder: "STOP_WATER"
+          }, { merge: true });
+        } catch (_) {}
+      }
+
       await updateDoc(doc(db, "dispenseOrders", orderId), {
         dispensedLiters: dispensed,
         cost: finalCost,
         liveCost: finalCost,
         remainingBalance: finalRemaining,
+        valveOpen: false,
         status: finalStatus,
         endedAt: serverTimestamp()
       });
