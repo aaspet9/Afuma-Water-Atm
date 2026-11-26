@@ -3,33 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>سمارٹ واٹر اے ٹی ایم</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <title>ایڈمن پینل — سمارٹ واٹر اے ٹی ایم</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { margin: 0; background: #eef4f8; color: #162433; }
-    .container { max-width: 520px; margin: 20px auto; padding: 16px; }
+    .container { max-width: 820px; margin: 20px auto; padding: 16px; }
     .card { background: #fff; border-radius: 14px; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
     h1, h2, h3 { margin-top: 0; color: #0b5ed7; }
-    input, button, label { width: 100%; margin: 6px 0; border-radius: 9px; font-size: 15px; }
-    input, button { padding: 11px 12px; border: 1px solid #cbd5e1; }
+    input, button, label { width: 100%; margin: 6px 0; border-radius: 9px; font-size: 14px; }
+    input, button { padding: 10px 12px; border: 1px solid #cbd5e1; }
     button { background: #0b5ed7; color: #fff; border: none; font-weight: 600; cursor: pointer; }
     button:hover { background: #094bb0; }
-    button.secondary { background: #475569; }
     button.success { background: #15803d; }
     button.danger { background: #b91c1c; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-    .tabs button { background: #e2e8f0; color: #1e293b; }
-    .tabs button.active { background: #0b5ed7; color: #fff; }
-    .balance-box { background: linear-gradient(135deg, #0b5ed7, #0284c7); color: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .balance-val { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    button.small { width: auto; padding: 7px 12px; margin: 4px 2px 0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    .item-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin: 10px 0; background: #f8fafc; }
     .msg { padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 14px; display: none; }
     .msg.err { display: block; background: #fee2e2; color: #991b1b; }
     .msg.ok { display: block; background: #dcfce7; color: #166534; }
-    .hist-item { border-bottom: 1px solid #e2e8f0; padding: 8px 0; font-size: 14px; }
-    .hist-item:last-child { border-bottom: none; }
     .hidden { display: none; }
-    .preview-img { max-width: 100%; max-height: 180px; border-radius: 8px; margin-top: 8px; display: none; border: 1px solid #cbd5e1; }
+    .req-img { max-width: 220px; max-height: 220px; border-radius: 8px; margin-top: 8px; border: 1px solid #cbd5e1; display: block; }
+    .qr-box { background: #fff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; margin-top: 10px; display: inline-block; text-align: center; }
 
     .strip-btn {
       display: flex;
@@ -44,161 +41,151 @@
       cursor: pointer;
       margin: 0;
     }
+    .strip-body { padding-top: 12px; }
 
-    .machine-badge {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e3a8a;
-      padding: 10px 12px;
+    .row-strip {
+      border: 1px solid #cbd5e1;
       border-radius: 10px;
-      font-weight: 700;
-      margin-bottom: 10px;
+      margin: 8px 0;
+      background: #f8fafc;
+      overflow: hidden;
     }
-
-    .live-box {
-      background: #f0fdf4;
-      border: 2px solid #16a34a;
-      border-radius: 12px;
-      padding: 16px;
-    }
-    .live-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .row-strip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       gap: 10px;
-      margin: 12px 0;
+      padding: 11px 13px;
+      background: #f1f5f9;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
     }
-    .live-stat {
+    .row-strip-header:hover { background: #e2e8f0; }
+    .row-strip-body {
+      padding: 11px 13px;
       background: #fff;
-      border: 1px solid #bbf7d0;
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      font-size: 13px;
     }
-    .live-num {
-      font-size: 22px;
-      font-weight: 800;
-      color: #15803d;
-      margin-top: 4px;
+    .sub-strip {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin: 6px 0;
+      background: #f8fafc;
+      overflow: hidden;
     }
+    .sub-strip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 11px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .sub-strip-header:hover { background: #eef2f6; }
+    .sub-strip-body {
+      padding: 9px 11px;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12.5px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    .badge.ok { background: #dcfce7; color: #166534; }
+    .badge.warn { background: #fef3c7; color: #92400e; }
+    .badge.err { background: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card" style="text-align:center;">
-      <h1>💧 سمارٹ واٹر اے ٹی ایم</h1>
-      <p style="margin:0;color:#475569;">مشین کا QR کوڈ اسکین کریں اور لائیو پانی حاصل کریں</p>
+      <h1>🛠️ ایڈمن پینل — سمارٹ واٹر اے ٹی ایم</h1>
+      <p style="margin:0;color:#475569;">بیلنس درخواستیں، دکاندار پے آؤٹ، مشین QR کوڈز اور صارفین کا کنٹرول</p>
     </div>
 
     <div id="alertBox" class="msg"></div>
 
-    <!-- AUTH SECTION -->
-    <div id="authSection" class="card">
-      <div class="tabs">
-        <button id="tabLogin" class="active" onclick="switchTab('login')">لاگ ان</button>
-        <button id="tabSignup" onclick="switchTab('signup')">نیا اکاؤنٹ</button>
-      </div>
-
-      <div id="loginForm">
-        <h3>لاگ ان کریں</h3>
-        <input type="tel" id="loginPhone" placeholder="موبائل نمبر (مثلاً 03001234567)" />
-        <input type="password" id="loginPass" placeholder="پاسورڈ" />
-        <button onclick="loginUser()">لاگ ان</button>
-      </div>
-
-      <div id="signupForm" class="hidden">
-        <h3>نیا صارف رجسٹر کریں</h3>
-        <input type="text" id="regName" placeholder="پورا نام (لازمی)" />
-        <input type="tel" id="regPhone" placeholder="موبائل نمبر (لازمی، مثلاً 03001234567)" />
-        <input type="password" id="regPass" placeholder="مضبوط پاسورڈ بنائیں" />
-        <input type="password" id="regPass2" placeholder="پاسورڈ دوبارہ لکھیں" />
-        <small style="color:#475569;display:block;margin-bottom:6px;">
-          پاسورڈ کم از کم 8 حروف کا ہو جس میں بڑا حرف، چھوٹا حرف، عدد اور علامت (!@#$) شامل ہو۔
-        </small>
-        <button class="success" onclick="signupUser()">اکاؤنٹ بنائیں</button>
-      </div>
+    <div id="adminLoginCard" class="card" style="max-width:420px;margin:0 auto 14px;">
+      <h3>ایڈمن لاگ ان</h3>
+      <input type="password" id="adminPassInput" placeholder="ایڈمن پاسورڈ لکھیں" />
+      <button onclick="adminLogin()">لاگ ان کریں</button>
     </div>
 
-    <!-- DASHBOARD SECTION -->
-    <div id="dashSection" class="hidden">
+    <div id="adminPanel" class="hidden">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <strong>ایڈمن سیشن فعال ہے</strong>
+        <button class="danger small" onclick="adminLogout()">لاگ آؤٹ</button>
+      </div>
+
       <div class="card">
-        <div class="balance-box">
-          <div>خوش آمدید، <strong id="uName"></strong> (<span id="uPhone"></span>)</div>
-          <div style="margin-top:8px;font-size:14px;opacity:0.9;">موجودہ بقایا بیلنس</div>
-          <div class="balance-val">Rs. <span id="uBalance">0.00</span></div>
+        <h3>صارفین کی بیلنس درخواستیں (Pending Requests)</h3>
+        <div id="requestsList">لوڈ ہو رہا ہے...</div>
+      </div>
+
+      <div class="card">
+        <h3>دکانداروں کی بنی ہوئی رقم کی درخواستیں (Send Payment)</h3>
+        <div id="payoutRequestsList">لوڈ ہو رہا ہے...</div>
+      </div>
+
+      <div class="card">
+        <h3>مشین، دکاندار پرافٹ اور الگ QR کوڈ جنریٹ کریں</h3>
+        <div class="grid-2">
+          <input type="text" id="mIdInput" placeholder="مشین ID (مثلاً M01)" />
+          <input type="text" id="mLocInput" placeholder="مقام / دکان کا نام (مثلاً دلاور علی)" />
+          <input type="number" id="mRateInput" step="0.1" placeholder="فی لیٹر ریٹ (مثلاً 4)" />
+          <input type="number" id="mProfitInput" step="0.1" placeholder="دکاندار فی لیٹر پرافٹ (مثلاً 1)" />
         </div>
-        <button class="secondary" onclick="logoutUser()">لاگ آؤٹ</button>
-      </div>
+        <input type="tel" id="mShopPhoneInput" placeholder="دکاندار کا موبائل نمبر (مثلاً 03001234567)" />
+        <button class="success" onclick="saveMachine()">مشین محفوظ کریں اور QR کوڈ بنائیں</button>
 
-      <!-- STEP 1: SCAN MACHINE QR CODE -->
-      <div id="scanCard" class="card">
-        <h3>مشین کا QR کوڈ اسکین کریں</h3>
-        <p style="margin:0 0 8px;font-size:14px;color:#475569;">پانی لینے کے لیے مشین پر لگا QR کوڈ اسکین کریں۔</p>
-        <button onclick="startQrScanner()">📷 کیمرہ سے QR کوڈ اسکین کریں</button>
-        <button id="stopScanBtn" class="secondary hidden" onclick="stopQrScanner()">اسکین بند کریں</button>
-        <div id="qrReaderBox" style="margin-top:10px;"></div>
-      </div>
-
-      <!-- STEP 2: DISPENSE FORM CARD (OPENS AFTER QR SCAN OR ?machine=...) -->
-      <div id="dispenseFormCard" class="card hidden">
-        <h3>پانی حاصل کریں</h3>
-        <div class="machine-badge">
-          منتخب مشین: <span id="scannedMachineLabel">-</span>
-          <span id="scannedMachineLoc" style="font-weight:500;"></span>
-        </div>
-
-        <input type="number" id="litersInput" min="0.5" step="0.5" placeholder="کتنے لیٹر پانی چاہیے؟ (مثلاً 5)" oninput="updateEstimate()" />
-        <p id="estimateText" style="margin:8px 0;font-weight:700;color:#0b5ed7;">ریٹ: Rs. 5/لیٹر | کل رقم: Rs. 0.00</p>
-        <button class="success" onclick="startWaterDispense()">سبمٹ کریں / پانی شروع کریں</button>
-        <button class="secondary" onclick="changeMachineScan()">دوسرا QR اسکین کریں</button>
-      </div>
-
-      <!-- STEP 3: LIVE DISPENSING CARD -->
-      <div id="liveDispenseCard" class="card hidden">
-        <div class="live-box">
-          <h3 style="color:#15803d;margin-bottom:6px;">🚰 پانی جاری ہے — لائیو کاؤنٹنگ</h3>
-          <div style="font-size:14px;color:#334155;">
-            مشین: <strong id="liveMachineId">-</strong> | مطلوبہ: <strong id="liveTargetLiters">0</strong> لیٹر | اسٹیٹس: <strong id="liveStatusText">running</strong>
-          </div>
-
-          <div class="live-grid">
-            <div class="live-stat">
-              <div style="font-size:13px;color:#475569;">پانی جا رہا ہے</div>
-              <div class="live-num"><span id="liveLiters">0.00</span> L</div>
-            </div>
-            <div class="live-stat">
-              <div style="font-size:13px;color:#475569;">رقم جا رہی ہے</div>
-              <div class="live-num">Rs. <span id="liveCost">0.00</span></div>
-            </div>
-          </div>
-
-          <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:10px;">
-            بقایا بیلنس: Rs. <span id="liveRemainingBalance">0.00</span>
-          </div>
-
-          <button id="stopBtn" class="danger" onclick="stopWaterDispense('stopped_by_user')">پانی روکیں / حساب مکمل کریں</button>
+        <div id="qrGeneratorResult" class="hidden" style="margin-top:12px;">
+          <div><strong>جنریٹ شدہ QR کوڈ:</strong> <span id="qrMachineTitle"></span></div>
+          <div id="qrCodeCanvasBox" class="qr-box"></div>
+          <div id="qrLinkText" style="font-size:12px;color:#475569;word-break:break-all;margin-top:6px;"></div>
+          <button class="small" onclick="downloadQrCode()">QR کوڈ ڈاؤن لوڈ کریں</button>
         </div>
       </div>
 
-      <!-- BALANCE REQUEST STRIP -->
       <div class="card" style="padding:10px;">
-        <div class="strip-btn" onclick="toggleBalanceStrip()">
-          <span>ایڈمن کو بیلنس کی درخواست بھیجیں</span>
-          <span id="stripArrow">▼</span>
+        <div class="strip-btn" onclick="toggleElement('shopStripBody', 'shopStripArrow')">
+          <span>🏪 دکانداروں کا بیلنس، پرافٹ اور مشین QR لسٹ</span>
+          <span id="shopStripArrow">▼</span>
         </div>
-        <div id="balanceRequestBody" class="hidden" style="padding-top:12px;">
-          <input type="number" id="reqAmount" min="10" placeholder="کتنے روپے بیلنس چاہیے؟" />
-          <input type="text" id="reqTrx" placeholder="ادائیگی کی ٹرانزیکشن ID یا نوٹ" />
-          <label style="display:block;font-size:14px;color:#334155;">ادائیگی کا اسکرین شاٹ (100–200 KB کمپریس ہو کر لنک سیو ہوگا):</label>
-          <input type="file" id="reqScreenshot" accept="image/*" onchange="previewScreenshot()" />
-          <img id="screenshotPreview" class="preview-img" alt="اسکرین شاٹ پریویو" />
-          <button onclick="sendBalanceRequest()">درخواست بھیجیں</button>
+        <div id="shopStripBody" class="strip-body hidden">
+          <input type="text" id="shopSearchInput" placeholder="دکاندار کا موبائل نمبر یا نام لکھ کر سرچ کریں..." oninput="renderShopkeepers()" />
+          <div id="shopkeepersList">لوڈ ہو رہا ہے...</div>
         </div>
       </div>
 
-      <!-- HISTORY -->
-      <div class="card">
-        <h3>پانی لینے کی تفصیل اور بقایا بیلنس</h3>
-        <div id="historyList">کوئی ریکارڈ موجود نہیں۔</div>
+      <div class="card" style="padding:10px;">
+        <div class="strip-btn" onclick="toggleElement('userStripBody', 'userStripArrow')">
+          <span>👤 صارفین (کسٹمرز) کا مکمل ڈیٹا اور سرچ</span>
+          <span id="userStripArrow">▼</span>
+        </div>
+        <div id="userStripBody" class="strip-body hidden">
+          <input type="tel" id="userSearchInput" placeholder="کسٹمر کا موبائل نمبر یا نام لکھ کر سرچ کریں..." oninput="renderCustomers()" />
+          <div id="customersList">لوڈ ہو رہا ہے...</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:10px;">
+        <div class="strip-btn" onclick="toggleElement('ordersStripBody', 'ordersStripArrow')">
+          <span>💧 حالیہ پانی کے آرڈرز (پٹیوں میں)</span>
+          <span id="ordersStripArrow">▼</span>
+        </div>
+        <div id="ordersStripBody" class="strip-body">
+          <div id="ordersList">لوڈ ہو رہا ہے...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -206,8 +193,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, doc, getDoc, setDoc, updateDoc, addDoc,
-      collection, query, where, onSnapshot, serverTimestamp
+      getFirestore, collection, doc, setDoc, updateDoc,
+      onSnapshot, serverTimestamp, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -222,21 +209,18 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const ADMIN_PASS = "921533082022";
     const IMGBB_API_KEY = "E08b8ba508ad2bfe6d3c2a783a81b832";
 
-    let currentUser = null;
-    let machinesMap = {};
-    let activeMachineId = "";
-    let unsubUser = null;
-    let unsubOrders = null;
-    let unsubActiveOrder = null;
-    let uploadedImageUrl = "";
-    let activeOrderId = null;
-    let activeOrderData = null;
-    let lastHeartbeat = Date.now();
-    let outageWatcher = null;
-    let isFinalizing = false;
-    let html5QrCode = null;
+    let allRequests = [];
+    let allPayoutRequests = [];
+    let allMachines = [];
+    let allUsers = [];
+    let allOrders = [];
+    const settledOrderIds = new Set();
+    const openIds = new Set();
+    const payoutProofMap = {};
+    let currentQrMachineId = "";
 
     function showAlert(text, type = "err") {
       const box = document.getElementById("alertBox");
@@ -248,14 +232,52 @@
       return (raw || "").replace(/\D/g, "");
     }
 
-    function isStrongPassword(pass) {
-      return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(pass);
+    function getCustomerAppUrlForMachine(mId) {
+      const base = window.location.href.replace(/admin\.html.*$/i, "index.html");
+      const sep = base.includes("?") ? "&" : "?";
+      return `${base}${sep}machine=${encodeURIComponent(mId)}`;
     }
 
-    async function hashPassword(password, salt) {
-      const enc = new TextEncoder().encode(`${salt}:${password}`);
-      const buf = await crypto.subtle.digest("SHA-256", enc);
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    window.generateMachineQr = function(mId) {
+      const cleanId = (mId || "").trim().toUpperCase();
+      if (!cleanId) return;
+      currentQrMachineId = cleanId;
+      const qrUrl = getCustomerAppUrlForMachine(cleanId);
+      const box = document.getElementById("qrCodeCanvasBox");
+      box.innerHTML = "";
+      new QRCode(box, {
+        text: qrUrl,
+        width: 180,
+        height: 180
+      });
+      document.getElementById("qrMachineTitle").textContent = cleanId;
+      document.getElementById("qrLinkText").textContent = qrUrl;
+      document.getElementById("qrGeneratorResult").classList.remove("hidden");
+    };
+
+    window.downloadQrCode = function() {
+      const box = document.getElementById("qrCodeCanvasBox");
+      const canvas = box.querySelector("canvas");
+      const img = box.querySelector("img");
+      const dataUrl = canvas ? canvas.toDataURL("image/png") : (img ? img.src : "");
+      if (!dataUrl) return;
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `WaterATM_${currentQrMachineId || "QR"}.png`;
+      a.click();
+    };
+
+    function formatTime(ts) {
+      if (!ts) return "وقت دستیاب نہیں";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      if (Number.isNaN(d.getTime())) return "وقت دستیاب نہیں";
+      return d.toLocaleString("ur-PK", {
+        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+    }
+
+    function getImageSrc(obj) {
+      return obj?.imageUrl || obj?.proofUrl || obj?.screenshot || "";
     }
 
     async function compressAndUploadToImgBB(file, apiKey = IMGBB_API_KEY) {
@@ -281,7 +303,7 @@
       }
 
       const form = new FormData();
-      form.append("image", blob, "screenshot.jpg");
+      form.append("image", blob, "proof.jpg");
       const resp = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`, {
         method: "POST",
         body: form
@@ -291,414 +313,585 @@
       return data.data.url;
     }
 
-    function extractMachineIdFromScan(decodedText) {
-      const raw = (decodedText || "").trim();
-      try {
-        const url = new URL(raw);
-        const paramM = url.searchParams.get("machine");
-        if (paramM) return paramM.trim().toUpperCase();
-      } catch (_) {}
-      const match = raw.match(/machine=([A-Za-z0-9_-]+)/i);
-      if (match) return match[1].trim().toUpperCase();
-      return raw.toUpperCase();
-    }
-
-    window.startQrScanner = async function() {
-      if (!window.Html5Qrcode) {
-        return showAlert("QR اسکینر لوڈ نہیں ہو سکا۔ انٹرنیٹ چیک کریں۔");
-      }
-      document.getElementById("stopScanBtn").classList.remove("hidden");
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("qrReaderBox");
-      }
-      try {
-        await html5QrCode.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 220, height: 220 } },
-          async (decodedText) => {
-            const mId = extractMachineIdFromScan(decodedText);
-            await stopQrScanner();
-            selectMachine(mId);
-          },
-          () => {}
-        );
-      } catch (err) {
-        showAlert("کیمرہ شروع نہیں ہو سکا۔ براہِ کرم کیمرہ کی اجازت دیں۔");
-      }
-    };
-
-    window.stopQrScanner = async function() {
-      document.getElementById("stopScanBtn").classList.add("hidden");
-      if (html5QrCode && html5QrCode.isScanning) {
-        try { await html5QrCode.stop(); } catch (_) {}
-      }
-      document.getElementById("qrReaderBox").innerHTML = "";
-    };
-
-    function selectMachine(mId) {
-      const cleanId = (mId || "").trim().toUpperCase();
-      if (!cleanId) return showAlert("درست QR کوڈ اسکین نہیں ہو سکا۔");
-      activeMachineId = cleanId;
-      document.getElementById("scanCard").classList.add("hidden");
-      document.getElementById("dispenseFormCard").classList.remove("hidden");
-      document.getElementById("liveDispenseCard").classList.add("hidden");
-      updateMachineBanner();
-      updateEstimate();
-      showAlert(`مشین ${cleanId} منتخب ہو گئی! اب مطلوبہ لیٹر لکھ کر سبمٹ کریں۔`, "ok");
-    }
-
-    window.changeMachineScan = function() {
-      activeMachineId = "";
-      document.getElementById("dispenseFormCard").classList.add("hidden");
-      document.getElementById("scanCard").classList.remove("hidden");
-    };
-
-    function updateMachineBanner() {
-      document.getElementById("scannedMachineLabel").textContent = activeMachineId || "-";
-      const loc = machinesMap[activeMachineId]?.location;
-      document.getElementById("scannedMachineLoc").textContent = loc ? ` (${loc})` : "";
-    }
-
-    window.toggleBalanceStrip = function() {
-      const body = document.getElementById("balanceRequestBody");
-      const arrow = document.getElementById("stripArrow");
+    window.toggleElement = function(bodyId, arrowId) {
+      const body = document.getElementById(bodyId);
+      const arrow = document.getElementById(arrowId);
       const isHidden = body.classList.contains("hidden");
       body.classList.toggle("hidden", !isHidden);
-      arrow.textContent = isHidden ? "▲" : "▼";
+      if (arrow) arrow.textContent = isHidden ? "▲" : "▼";
     };
 
-    window.switchTab = function(tab) {
-      document.getElementById("tabLogin").classList.toggle("active", tab === "login");
-      document.getElementById("tabSignup").classList.toggle("active", tab === "signup");
-      document.getElementById("loginForm").classList.toggle("hidden", tab !== "login");
-      document.getElementById("signupForm").classList.toggle("hidden", tab !== "signup");
+    window.toggleRowStrip = function(key) {
+      if (openIds.has(key)) {
+        openIds.delete(key);
+      } else {
+        openIds.add(key);
+      }
+      const body = document.getElementById(`body_${key}`);
+      const arrow = document.getElementById(`arrow_${key}`);
+      if (body) body.classList.toggle("hidden", !openIds.has(key));
+      if (arrow) arrow.textContent = openIds.has(key) ? "▲" : "▼";
     };
 
-    window.signupUser = async function() {
-      const name = document.getElementById("regName").value.trim();
-      const phone = normalizePhone(document.getElementById("regPhone").value);
-      const pass = document.getElementById("regPass").value;
-      const pass2 = document.getElementById("regPass2").value;
-
-      if (!name || phone.length < 10) {
-        return showAlert("براہِ کرم مکمل نام اور درست موبائل نمبر لکھیں۔");
-      }
-      if (!isStrongPassword(pass)) {
-        return showAlert("پاسورڈ کمزور ہے! کم از کم 8 حروف، بڑا حرف، چھوٹا حرف، عدد اور علامت (!@#$) شامل ہو۔");
-      }
-      if (pass !== pass2) {
-        return showAlert("دونوں پاسورڈ آپس میں میل نہیں کھاتے۔");
-      }
-
-      const userRef = doc(db, "users", phone);
-      const snap = await getDoc(userRef);
-      if (snap.exists()) {
-        return showAlert("اس موبائل نمبر پر پہلے ہی اکاؤنٹ موجود ہے۔");
-      }
-
-      const salt = crypto.randomUUID();
-      const passwordHash = await hashPassword(pass, salt);
-
-      await setDoc(userRef, {
-        name,
-        phone,
-        salt,
-        passwordHash,
-        balance: 0,
-        createdAt: serverTimestamp()
-      });
-
-      localStorage.setItem("water_atm_user", phone);
-      showAlert("اکاؤنٹ کامیابی سے بن گیا!", "ok");
-      openDashboard(phone);
+    window.adminLogin = function() {
+      const p = document.getElementById("adminPassInput").value;
+      if (p !== ADMIN_PASS) return showAlert("غلط ایڈمن پاسورڈ!");
+      sessionStorage.setItem("water_atm_admin", "1");
+      showAdminPanel();
     };
 
-    window.loginUser = async function() {
-      const phone = normalizePhone(document.getElementById("loginPhone").value);
-      const pass = document.getElementById("loginPass").value;
-
-      if (!phone || !pass) {
-        return showAlert("موبائل نمبر اور پاسورڈ دونوں لازمی ہیں۔");
-      }
-
-      const userRef = doc(db, "users", phone);
-      const snap = await getDoc(userRef);
-      if (!snap.exists()) {
-        return showAlert("یہ موبائل نمبر رجسٹرڈ نہیں ہے۔");
-      }
-
-      const data = snap.data();
-      const checkHash = await hashPassword(pass, data.salt || "");
-      if (checkHash !== data.passwordHash) {
-        return showAlert("غلط پاسورڈ! براہِ کرم اپنا درست پاسورڈ لکھیں۔");
-      }
-
-      currentUser = { id: snap.id, ...data };
-      localStorage.setItem("water_atm_user", phone);
-      openDashboard(phone);
+    window.adminLogout = function() {
+      sessionStorage.removeItem("water_atm_admin");
+      document.getElementById("adminPanel").classList.add("hidden");
+      document.getElementById("adminLoginCard").classList.remove("hidden");
     };
 
-    function openDashboard(phone) {
-      document.getElementById("authSection").classList.add("hidden");
-      document.getElementById("dashSection").classList.remove("hidden");
-      loadMachines();
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlMachine = urlParams.get("machine");
-      if (urlMachine) {
-        selectMachine(urlMachine);
-      }
-
-      if (unsubUser) unsubUser();
-      unsubUser = onSnapshot(doc(db, "users", phone), (snap) => {
-        if (snap.exists()) {
-          currentUser = { id: snap.id, ...snap.data() };
-          document.getElementById("uName").textContent = currentUser.name;
-          document.getElementById("uPhone").textContent = currentUser.phone;
-          document.getElementById("uBalance").textContent = Number(currentUser.balance || 0).toFixed(2);
-        }
-      });
-
-      if (unsubOrders) unsubOrders();
-      const q = query(collection(db, "dispenseOrders"), where("userPhone", "==", phone));
-      unsubOrders = onSnapshot(q, (qs) => {
-        const rows = [];
-        qs.forEach(d => rows.push({ id: d.id, ...d.data() }));
-        rows.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        renderHistory(rows);
-      });
+    function showAdminPanel() {
+      document.getElementById("adminLoginCard").classList.add("hidden");
+      document.getElementById("adminPanel").classList.remove("hidden");
+      listenAll();
     }
 
-    window.logoutUser = async function() {
-      await stopQrScanner();
-      if (unsubUser) unsubUser();
-      if (unsubOrders) unsubOrders();
-      if (unsubActiveOrder) unsubActiveOrder();
-      if (outageWatcher) clearInterval(outageWatcher);
-      currentUser = null;
-      activeMachineId = "";
-      localStorage.removeItem("water_atm_user");
-      document.getElementById("dashSection").classList.add("hidden");
-      document.getElementById("authSection").classList.remove("hidden");
-    };
+    function listenAll() {
+      onSnapshot(collection(db, "balanceRequests"), (qs) => {
+        allRequests = [];
+        qs.forEach(d => allRequests.push({ id: d.id, ...d.data() }));
+        allRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        renderRequests();
+        renderCustomers();
+      });
 
-    function loadMachines() {
+      onSnapshot(collection(db, "shopkeeperPayoutRequests"), (qs) => {
+        allPayoutRequests = [];
+        qs.forEach(d => allPayoutRequests.push({ id: d.id, ...d.data() }));
+        allPayoutRequests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        renderPayoutRequests();
+        renderShopkeepers();
+      });
+
       onSnapshot(collection(db, "machines"), (qs) => {
-        machinesMap = {};
+        allMachines = [];
+        qs.forEach(d => allMachines.push({ id: d.id.toUpperCase(), ...d.data() }));
+        renderShopkeepers();
+      });
+
+      onSnapshot(collection(db, "users"), (qs) => {
+        allUsers = [];
+        qs.forEach(d => allUsers.push({ id: d.id, ...d.data() }));
+        renderShopkeepers();
+        renderCustomers();
+      });
+
+      onSnapshot(collection(db, "dispenseOrders"), (qs) => {
+        allOrders = [];
         qs.forEach(d => {
-          machinesMap[d.id.toUpperCase()] = { id: d.id, ...d.data() };
+          const item = { id: d.id, ...d.data() };
+          allOrders.push(item);
+          maybeCreditShopkeeperProfit(item);
         });
-        if (activeMachineId) {
-          updateMachineBanner();
-          updateEstimate();
-        }
+        allOrders.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        renderOrders();
+        renderShopkeepers();
+        renderCustomers();
       });
     }
 
-    window.updateEstimate = function() {
-      const liters = parseFloat(document.getElementById("litersInput").value) || 0;
-      const rate = machinesMap[activeMachineId]?.pricePerLiter ?? 5;
-      const total = liters * rate;
-      document.getElementById("estimateText").textContent =
-        `ریٹ: Rs. ${rate}/لیٹر | کل رقم: Rs. ${total.toFixed(2)}`;
-    };
+    async function maybeCreditShopkeeperProfit(order) {
+      if (!order || !order.id || order.profitCredited) return;
+      const doneStatuses = ["completed", "stopped_by_user", "stopped_power_or_machine", "stopped"];
+      if (!doneStatuses.includes(order.status)) return;
+      if (settledOrderIds.has(order.id)) return;
 
-    window.startWaterDispense = async function() {
-      if (!currentUser) return;
-      if (!activeMachineId) {
-        return showAlert("پہلے مشین کا QR کوڈ اسکین کریں۔");
-      }
-      const liters = parseFloat(document.getElementById("litersInput").value);
-      if (!liters || liters <= 0) {
-        return showAlert("براہِ کرم درست مقدار میں لیٹر لکھیں۔");
-      }
+      const liters = Number(order.dispensedLiters || 0);
+      if (liters <= 0) return;
 
-      const rate = machinesMap[activeMachineId]?.pricePerLiter ?? 5;
-      const startBalance = Number(currentUser.balance || 0);
+      const mId = (order.machineId || "").toUpperCase();
+      const machine = allMachines.find(m => m.id === mId);
+      const profitPerLiter = Number(machine?.shopkeeperProfitPerLiter || 0);
+      const shopPhone = normalizePhone(machine?.shopkeeperPhone || "");
+      const profitAmount = Number((liters * profitPerLiter).toFixed(2));
 
-      if (startBalance < rate) {
-        return showAlert("آپ کا بیلنس ناکافی ہے۔ پہلے بیلنس کی درخواست بھیجیں۔");
-      }
+      if (!shopPhone || profitAmount <= 0) return;
+      settledOrderIds.add(order.id);
 
-      const allowedLiters = Math.min(liters, Number((startBalance / rate).toFixed(2)));
-      isFinalizing = false;
-      lastHeartbeat = Date.now();
-
-      const orderDoc = await addDoc(collection(db, "dispenseOrders"), {
-        userPhone: currentUser.phone,
-        userName: currentUser.name,
-        machineId: activeMachineId,
-        targetLiters: allowedLiters,
-        ratePerLiter: rate,
-        startBalance,
-        dispensedLiters: 0,
-        liveCost: 0,
-        remainingBalance: startBalance,
-        status: "running",
-        stopReason: null,
-        lastUpdateAt: Date.now(),
-        createdAt: serverTimestamp()
-      });
-
-      activeOrderId = orderDoc.id;
-      document.getElementById("dispenseFormCard").classList.add("hidden");
-      document.getElementById("liveDispenseCard").classList.remove("hidden");
-      document.getElementById("liveMachineId").textContent = activeMachineId;
-      document.getElementById("liveTargetLiters").textContent = allowedLiters.toFixed(2);
-      showAlert(`مشین ${activeMachineId} پر لائیو پانی شروع ہو گیا ہے۔`, "ok");
-
-      listenToLiveOrder(activeOrderId);
-    };
-
-    function listenToLiveOrder(orderId) {
-      if (unsubActiveOrder) unsubActiveOrder();
-      if (outageWatcher) clearInterval(outageWatcher);
-
-      unsubActiveOrder = onSnapshot(doc(db, "dispenseOrders", orderId), async (snap) => {
-        if (!snap.exists()) return;
-        const d = snap.data();
-        activeOrderData = d;
-        lastHeartbeat = Date.now();
-
-        const dispensed = Math.min(Number(d.dispensedLiters || 0), Number(d.targetLiters || 0));
-        const rate = Number(d.ratePerLiter || 5);
-        const startBal = Number(d.startBalance || 0);
-        const currentCost = Number((dispensed * rate).toFixed(2));
-        const remBal = Math.max(0, Number((startBal - currentCost).toFixed(2)));
-
-        document.getElementById("liveLiters").textContent = dispensed.toFixed(2);
-        document.getElementById("liveCost").textContent = currentCost.toFixed(2);
-        document.getElementById("liveRemainingBalance").textContent = remBal.toFixed(2);
-        document.getElementById("liveStatusText").textContent = d.status || "running";
-
-        if ((d.status === "running") && dispensed >= Number(d.targetLiters || 0) && Number(d.targetLiters || 0) > 0) {
-          await finalizeDispense(orderId, d, "completed");
-        } else if (d.status !== "running" && !isFinalizing) {
-          await finalizeDispense(orderId, d, d.status || "stopped");
-        }
-      });
-
-      outageWatcher = setInterval(async () => {
-        if (!activeOrderId || isFinalizing) return;
-        const staleForMs = Date.now() - lastHeartbeat;
-        if (staleForMs > 8000 && activeOrderData) {
-          await finalizeDispense(activeOrderId, activeOrderData, "stopped_power_or_machine");
-        }
-      }, 2000);
-    }
-
-    window.stopWaterDispense = async function(reason = "stopped_by_user") {
-      if (!activeOrderId || !activeOrderData || isFinalizing) return;
-      await finalizeDispense(activeOrderId, activeOrderData, reason);
-    };
-
-    async function finalizeDispense(orderId, d, finalStatus) {
-      if (isFinalizing) return;
-      isFinalizing = true;
-
-      if (unsubActiveOrder) { unsubActiveOrder(); unsubActiveOrder = null; }
-      if (outageWatcher) { clearInterval(outageWatcher); outageWatcher = null; }
-
-      const dispensed = Math.min(Number(d.dispensedLiters || 0), Number(d.targetLiters || 0));
-      const rate = Number(d.ratePerLiter || 5);
-      const startBal = Number(d.startBalance || 0);
-      const finalCost = Number((dispensed * rate).toFixed(2));
-      const finalRemaining = Math.max(0, Number((startBal - finalCost).toFixed(2)));
-
-      await updateDoc(doc(db, "dispenseOrders", orderId), {
-        dispensedLiters: dispensed,
-        cost: finalCost,
-        liveCost: finalCost,
-        remainingBalance: finalRemaining,
-        status: finalStatus,
-        endedAt: serverTimestamp()
-      });
-
-      await updateDoc(doc(db, "users", currentUser.phone), {
-        balance: finalRemaining
-      });
-
-      activeOrderId = null;
-      activeOrderData = null;
-
-      document.getElementById("litersInput").value = "";
-      updateEstimate();
-
-      document.getElementById("liveDispenseCard").classList.add("hidden");
-      document.getElementById("dispenseFormCard").classList.remove("hidden");
-
-      showAlert(
-        `حساب مکمل: ${dispensed.toFixed(2)} لیٹر پانی نکلا، Rs. ${finalCost.toFixed(2)} کٹے، اور بقایا بیلنس Rs. ${finalRemaining.toFixed(2)} ہے۔`,
-        "ok"
-      );
-    }
-
-    window.previewScreenshot = async function() {
-      const file = document.getElementById("reqScreenshot").files[0];
-      const img = document.getElementById("screenshotPreview");
-      uploadedImageUrl = "";
-      if (!file) {
-        img.style.display = "none";
-        return;
-      }
       try {
-        showAlert("اسکرین شاٹ کمپریس ہو کر ImgBB پر اپلوڈ ہو رہا ہے...", "ok");
-        uploadedImageUrl = await compressAndUploadToImgBB(file, IMGBB_API_KEY);
-        img.src = uploadedImageUrl;
-        img.style.display = "block";
-        showAlert("اسکرین شاٹ لنک تیار ہو گیا ہے۔", "ok");
-      } catch (err) {
-        img.style.display = "none";
-        showAlert(err.message || "اسکرین شاٹ اپلوڈ میں مسئلہ پیش آیا۔");
+        await runTransaction(db, async (tx) => {
+          const ordRef = doc(db, "dispenseOrders", order.id);
+          const ordSnap = await tx.get(ordRef);
+          if (!ordSnap.exists() || ordSnap.data().profitCredited) return;
+
+          const shopRef = doc(db, "users", shopPhone);
+          const shopSnap = await tx.get(shopRef);
+
+          const prevProfit = shopSnap.exists() ? Number(shopSnap.data().shopkeeperProfit || 0) : 0;
+          const prevLiters = shopSnap.exists() ? Number(shopSnap.data().shopkeeperLiters || 0) : 0;
+
+          if (shopSnap.exists()) {
+            tx.update(shopRef, {
+              shopkeeperProfit: Number((prevProfit + profitAmount).toFixed(2)),
+              shopkeeperLiters: Number((prevLiters + liters).toFixed(2))
+            });
+          } else {
+            tx.set(shopRef, {
+              name: machine?.location || `دکاندار ${shopPhone}`,
+              phone: shopPhone,
+              balance: 0,
+              shopkeeperProfit: profitAmount,
+              shopkeeperLiters: liters,
+              createdAt: serverTimestamp()
+            });
+          }
+
+          tx.update(ordRef, {
+            profitCredited: true,
+            shopkeeperPhone: shopPhone,
+            shopkeeperProfitEarned: profitAmount
+          });
+        });
+      } catch (e) {
+        settledOrderIds.delete(order.id);
       }
-    };
+    }
 
-    window.sendBalanceRequest = async function() {
-      if (!currentUser) return;
-      const amount = parseFloat(document.getElementById("reqAmount").value);
-      const trxId = document.getElementById("reqTrx").value.trim();
-      if (!amount || amount <= 0) return showAlert("درست رقم لکھیں۔");
-
-      await addDoc(collection(db, "balanceRequests"), {
-        userPhone: currentUser.phone,
-        userName: currentUser.name,
-        amount,
-        trxId,
-        imageUrl: uploadedImageUrl || null,
-        status: "pending",
-        createdAt: serverTimestamp()
-      });
-
-      document.getElementById("reqAmount").value = "";
-      document.getElementById("reqTrx").value = "";
-      document.getElementById("reqScreenshot").value = "";
-      document.getElementById("screenshotPreview").style.display = "none";
-      uploadedImageUrl = "";
-      showAlert("بیلنس کی درخواست، ٹرانزیکشن تفصیل اور اسکرین شاٹ لنک ایڈمن کو بھیج دی گئی ہے۔", "ok");
-    };
-
-    function renderHistory(rows) {
-      const box = document.getElementById("historyList");
-      if (!rows.length) {
-        box.innerHTML = "کوئی ریکارڈ موجود نہیں۔";
+    function renderRequests() {
+      const box = document.getElementById("requestsList");
+      const pending = allRequests.filter(x => x.status === "pending");
+      if (!pending.length) {
+        box.innerHTML = "کوئی نئی بیلنس درخواست زیرِ التواء نہیں ہے۔";
         return;
       }
-      box.innerHTML = rows.map(r => {
-        const litersVal = Number(r.dispensedLiters ?? r.targetLiters ?? 0).toFixed(2);
-        const costVal = Number(r.cost ?? r.liveCost ?? 0).toFixed(2);
-        const remVal = Number(r.remainingBalance ?? 0).toFixed(2);
+      box.innerHTML = pending.map(r => {
+        const imgSrc = getImageSrc(r);
         return `
-          <div class="hist-item">
-            <div><strong>مشین:</strong> ${r.machineId || "-"} | <strong>پانی:</strong> ${litersVal} لیٹر</div>
-            <div><strong>رقم:</strong> Rs. ${costVal} | <strong>بقایا بیلنس:</strong> Rs. ${remVal}</div>
-            <div style="color:#475569;font-size:12px;">اسٹیٹس: ${r.status || "-"}</div>
+          <div class="item-box">
+            <div><strong>صارف:</strong> ${r.userName || "-"} (${r.userPhone})</div>
+            <div><strong>مطلوبہ رقم:</strong> Rs. ${Number(r.amount || 0).toFixed(2)} | <strong>Trx ID:</strong> ${r.trxId || "-"}</div>
+            ${imgSrc ? `<img src="${imgSrc}" class="req-img" alt="اسکرین شاٹ" />` : ""}
+            <div style="margin-top:8px;">
+              <button class="success small" onclick="approveRequest('${r.id}', '${r.userPhone}', ${Number(r.amount || 0)})">منظور کریں</button>
+              <button class="danger small" onclick="rejectRequest('${r.id}')">مسترد کریں</button>
+            </div>
           </div>
         `;
       }).join("");
     }
 
-    const savedPhone = localStorage.getItem("water_atm_user");
-    if (savedPhone) openDashboard(savedPhone);
+    window.onPayoutProofChange = async function(reqId, inputEl) {
+      const file = inputEl.files[0];
+      const prevEl = document.getElementById(`payoutPrev_${reqId}`);
+      if (!file) {
+        delete payoutProofMap[reqId];
+        if (prevEl) prevEl.style.display = "none";
+        return;
+      }
+      try {
+        showAlert("اسکرین شاٹ کمپریس ہو کر ImgBB پر اپلوڈ ہو رہا ہے...", "ok");
+        const url = await compressAndUploadToImgBB(file, IMGBB_API_KEY);
+        payoutProofMap[reqId] = url;
+        if (prevEl) {
+          prevEl.src = url;
+          prevEl.style.display = "block";
+        }
+        showAlert("اسکرین شاٹ لنک تیار ہو گیا ہے۔", "ok");
+      } catch (err) {
+        showAlert(err.message || "اسکرین شاٹ اپلوڈ میں مسئلہ پیش آیا۔");
+      }
+    };
+
+    function renderPayoutRequests() {
+      const box = document.getElementById("payoutRequestsList");
+      const pending = allPayoutRequests.filter(x => x.status === "pending");
+      if (!pending.length) {
+        box.innerHTML = "دکانداروں کی طرف سے کوئی نئی رقم کی درخواست نہیں ہے۔";
+        return;
+      }
+      box.innerHTML = pending.map(r => {
+        const shopPhone = normalizePhone(r.shopkeeperPhone || r.phone || "");
+        const reqAmt = Number(r.amount || 0);
+        const existingProof = payoutProofMap[r.id] || "";
+        return `
+          <div class="item-box">
+            <div><strong>دکاندار:</strong> ${r.shopkeeperName || r.name || "-"} (${shopPhone})</div>
+            <div><strong>بنی ہوئی رقم کی درخواست:</strong> Rs. ${reqAmt.toFixed(2)} | <strong>اکاؤنٹ/نوٹ:</strong> ${r.accountInfo || r.note || "-"}</div>
+            <div><strong>وقت:</strong> ${formatTime(r.createdAt)}</div>
+            <input type="text" id="sendTrx_${r.id}" placeholder="بھیجی گئی رقم کی ٹرانزیکشن ID لکھیں" />
+            <label style="font-size:13px;color:#334155;">ادائیگی کا اسکرین شاٹ (100–200 KB کمپریس ہو کر لنک سیو ہوگا):</label>
+            <input type="file" accept="image/*" onchange="onPayoutProofChange('${r.id}', this)" />
+            <img id="payoutPrev_${r.id}" src="${existingProof}" class="req-img" style="${existingProof ? "" : "display:none;"}" alt="پیمنٹ ثبوت" />
+            <div style="margin-top:8px;">
+              <button class="success small" onclick="sendShopkeeperPayment('${r.id}', '${shopPhone}', ${reqAmt})">Send Payment (پیمنٹ بھیجیں)</button>
+              <button class="danger small" onclick="rejectPayoutRequest('${r.id}')">مسترد کریں</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.sendShopkeeperPayment = async function(reqId, shopPhone, reqAmount) {
+      const cleanPhone = normalizePhone(shopPhone);
+      const sentTrxId = (document.getElementById(`sendTrx_${reqId}`)?.value || "").trim();
+      const proofUrl = payoutProofMap[reqId] || "";
+
+      if (!sentTrxId) {
+        return showAlert("براہِ کرم بھیجی گئی رقم کی ٹرانزیکشن ID لکھیں۔");
+      }
+
+      try {
+        await runTransaction(db, async (tx) => {
+          const reqRef = doc(db, "shopkeeperPayoutRequests", reqId);
+          const reqSnap = await tx.get(reqRef);
+          if (!reqSnap.exists() || reqSnap.data().status !== "pending") {
+            throw new Error("یہ درخواست پہلے ہی مکمل ہو چکی ہے۔");
+          }
+
+          const shopRef = doc(db, "users", cleanPhone);
+          const shopSnap = await tx.get(shopRef);
+          const currentProfit = shopSnap.exists() ? Number(shopSnap.data().shopkeeperProfit || 0) : 0;
+          const payAmt = Number(reqAmount || reqSnap.data().amount || 0);
+          const newProfit = Math.max(0, Number((currentProfit - payAmt).toFixed(2)));
+
+          if (shopSnap.exists()) {
+            tx.update(shopRef, { shopkeeperProfit: newProfit });
+          }
+
+          tx.update(reqRef, {
+            status: "paid",
+            sentTrxId,
+            sentProofUrl: proofUrl || null,
+            paidAmount: payAmt,
+            remainingProfit: newProfit,
+            paidAt: serverTimestamp()
+          });
+        });
+
+        delete payoutProofMap[reqId];
+        showAlert(`دکاندار (${cleanPhone}) کو Rs. ${Number(reqAmount).toFixed(2)} پیمنٹ، ٹرانزیکشن ID اور اسکرین شاٹ لنک بھیج دیا گیا۔`, "ok");
+      } catch (err) {
+        showAlert(err.message || "پیمنٹ بھیجنے میں مسئلہ پیش آیا۔");
+      }
+    };
+
+    window.rejectPayoutRequest = async function(reqId) {
+      await updateDoc(doc(db, "shopkeeperPayoutRequests", reqId), {
+        status: "rejected",
+        rejectedAt: serverTimestamp()
+      });
+      delete payoutProofMap[reqId];
+      showAlert("دکاندار کی درخواست مسترد کر دی گئی۔", "ok");
+    };
+
+    window.approveRequest = async function(reqId, phone, amount) {
+      const cleanPhone = normalizePhone(phone);
+      try {
+        await runTransaction(db, async (tx) => {
+          const reqRef = doc(db, "balanceRequests", reqId);
+          const reqSnap = await tx.get(reqRef);
+          if (!reqSnap.exists() || reqSnap.data().status !== "pending") {
+            throw new Error("یہ درخواست پہلے ہی پراسیس ہو چکی ہے۔");
+          }
+
+          const userRef = doc(db, "users", cleanPhone);
+          const userSnap = await tx.get(userRef);
+          if (!userSnap.exists()) throw new Error("صارف کا اکاؤنٹ نہیں ملا۔");
+
+          const currentBal = Number(userSnap.data().balance || 0);
+          const newBal = Number((currentBal + Number(amount)).toFixed(2));
+
+          tx.update(userRef, { balance: newBal });
+          tx.update(reqRef, { status: "approved", approvedAt: serverTimestamp() });
+        });
+        showAlert(`Rs. ${Number(amount).toFixed(2)} بیلنس ${cleanPhone} کے اکاؤنٹ میں شامل کر دیا گیا۔`, "ok");
+      } catch (e) {
+        showAlert(e.message || "منظوری میں مسئلہ پیش آیا۔");
+      }
+    };
+
+    window.rejectRequest = async function(reqId) {
+      await updateDoc(doc(db, "balanceRequests", reqId), {
+        status: "rejected",
+        rejectedAt: serverTimestamp()
+      });
+      showAlert("درخواست مسترد کر دی گئی۔", "ok");
+    };
+
+    window.saveMachine = async function() {
+      const mId = document.getElementById("mIdInput").value.trim().toUpperCase();
+      const location = document.getElementById("mLocInput").value.trim();
+      const pricePerLiter = parseFloat(document.getElementById("mRateInput").value) || 5;
+      const shopkeeperProfitPerLiter = parseFloat(document.getElementById("mProfitInput").value) || 0;
+      const shopkeeperPhone = normalizePhone(document.getElementById("mShopPhoneInput").value);
+
+      if (!mId) return showAlert("مشین ID لکھیں (مثلاً M01)۔");
+
+      await setDoc(doc(db, "machines", mId), {
+        machineId: mId,
+        location,
+        pricePerLiter,
+        shopkeeperProfitPerLiter,
+        shopkeeperPhone,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      generateMachineQr(mId);
+      showAlert(`مشین ${mId} محفوظ ہو گئی اور اس کا الگ QR کوڈ تیار ہو گیا ہے۔`, "ok");
+    };
+
+    function renderShopkeepers() {
+      const box = document.getElementById("shopkeepersList");
+      const q = (document.getElementById("shopSearchInput")?.value || "").trim().toLowerCase();
+      const qDigits = normalizePhone(q);
+
+      const mapByKey = {};
+
+      allMachines.forEach(m => {
+        const sp = normalizePhone(m.shopkeeperPhone || "");
+        const key = sp || `MACHINE_${m.id}`;
+        if (!mapByKey[key]) {
+          mapByKey[key] = {
+            key,
+            phone: sp,
+            name: m.location || "دکاندار",
+            machines: [],
+            profitEarned: 0,
+            litersDispensed: 0
+          };
+        }
+        mapByKey[key].machines.push(m);
+      });
+
+      allUsers.forEach(u => {
+        const up = normalizePhone(u.phone || u.id);
+        const hasShopFlag = Number(u.shopkeeperProfit || 0) > 0 || !!mapByKey[up];
+        if (hasShopFlag) {
+          if (!mapByKey[up]) {
+            mapByKey[up] = {
+              key: up,
+              phone: up,
+              name: u.name || "دکاندار",
+              machines: [],
+              profitEarned: 0,
+              litersDispensed: 0
+            };
+          }
+          if (u.name) mapByKey[up].name = u.name;
+          mapByKey[up].profitEarned = Number(u.shopkeeperProfit || 0);
+          mapByKey[up].litersDispensed = Number(u.shopkeeperLiters || 0);
+        }
+      });
+
+      const list = Object.values(mapByKey).filter(s => {
+        if (!q) return true;
+        const phoneMatch = qDigits && (s.phone || "").includes(qDigits);
+        const nameMatch = (s.name || "").toLowerCase().includes(q);
+        const machineMatch = s.machines.some(m =>
+          (m.id || "").toLowerCase().includes(q) || (m.location || "").toLowerCase().includes(q)
+        );
+        return phoneMatch || nameMatch || machineMatch;
+      });
+
+      if (!list.length) {
+        box.innerHTML = "کوئی دکاندار ریکارڈ نہیں ملا۔";
+        return;
+      }
+
+      box.innerHTML = list.map(s => {
+        const stripKey = `shop_${s.key.replace(/[^a-zA-Z0-9_]/g, "_")}`;
+        const isOpen = openIds.has(stripKey);
+        const shopPayouts = allPayoutRequests.filter(p => normalizePhone(p.shopkeeperPhone || p.phone || "") === s.phone);
+
+        const machineStrips = s.machines.length
+          ? s.machines.map(m => {
+              const mKey = `sm_${stripKey}_${m.id}`;
+              const mOpen = openIds.has(mKey);
+              return `
+                <div class="sub-strip">
+                  <div class="sub-strip-header" onclick="toggleRowStrip('${mKey}')">
+                    <span>مشین ${m.id} — ${m.location || "بغیر نام"}</span>
+                    <span id="arrow_${mKey}">${mOpen ? "▲" : "▼"}</span>
+                  </div>
+                  <div id="body_${mKey}" class="sub-strip-body ${mOpen ? "" : "hidden"}">
+                    <div>ریٹ: <strong>Rs. ${m.pricePerLiter ?? 5}/L</strong></div>
+                    <div>دکاندار پرافٹ: <strong>Rs. ${m.shopkeeperProfitPerLiter ?? 0}/L</strong></div>
+                    <div>دکاندار نمبر: <strong>${m.shopkeeperPhone || "-"}</strong></div>
+                    <button class="small" onclick="generateMachineQr('${m.id}')">اس مشین کا QR کوڈ دکھائیں</button>
+                  </div>
+                </div>
+              `;
+            }).join("")
+          : "<div style='color:#64748b;'>کوئی مشین منسلک نہیں۔</div>";
+
+        const payoutHistoryHtml = shopPayouts.length
+          ? shopPayouts.map(p => {
+              const proofSrc = getImageSrc(p);
+              return `
+                <div style="margin:6px 0;padding:7px;background:#fff;border-radius:6px;border:1px solid #e2e8f0;">
+                  <div>رقم: <strong>Rs. ${Number(p.amount || 0).toFixed(2)}</strong> | <span class="badge ${p.status === "paid" ? "ok" : p.status === "rejected" ? "err" : "warn"}">${p.status || "pending"}</span></div>
+                  <div>Sent Trx ID: <strong>${p.sentTrxId || "-"}</strong> | وقت: ${formatTime(p.paidAt || p.createdAt)}</div>
+                  ${proofSrc ? `<img src="${proofSrc}" class="req-img" alt="پیمنٹ اسکرین شاٹ" />` : ""}
+                </div>
+              `;
+            }).join("")
+          : "<div style='color:#64748b;'>کوئی پے آؤٹ ریکارڈ نہیں۔</div>";
+
+        return `
+          <div class="row-strip">
+            <div class="row-strip-header" onclick="toggleRowStrip('${stripKey}')">
+              <div>
+                <div>${s.name || "-"} | ${s.phone || "-"}</div>
+                <div style="font-size:12.5px;font-weight:500;color:#334155;margin-top:2px;">
+                  بقایا پرافٹ: <strong>Rs. ${Number(s.profitEarned || 0).toFixed(2)}</strong> |
+                  کل پانی: <strong>${Number(s.litersDispensed || 0).toFixed(2)} L</strong>
+                </div>
+              </div>
+              <span id="arrow_${stripKey}">${isOpen ? "▲" : "▼"}</span>
+            </div>
+            <div id="body_${stripKey}" class="row-strip-body ${isOpen ? "" : "hidden"}">
+              <div><strong>مشینیں:</strong>${machineStrips}</div>
+              <div style="margin-top:8px;"><strong>پیمنٹ کی درخواستیں و ثبوت:</strong>${payoutHistoryHtml}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderCustomers() {
+      const box = document.getElementById("customersList");
+      const q = (document.getElementById("userSearchInput")?.value || "").trim().toLowerCase();
+      const qDigits = normalizePhone(q);
+
+      const filtered = allUsers.filter(u => {
+        if (!q) return true;
+        const p = normalizePhone(u.phone || u.id);
+        const phoneMatch = qDigits && p.includes(qDigits);
+        const nameMatch = (u.name || "").toLowerCase().includes(q);
+        return phoneMatch || nameMatch;
+      });
+
+      if (!filtered.length) {
+        box.innerHTML = "کوئی صارف ریکارڈ نہیں ملا۔";
+        return;
+      }
+
+      box.innerHTML = filtered.map(u => {
+        const p = normalizePhone(u.phone || u.id);
+        const custKey = `cust_${p || u.id}`;
+        const isOpen = openIds.has(custKey);
+
+        const userReqs = allRequests.filter(r => normalizePhone(r.userPhone) === p);
+        const userOrders = allOrders.filter(o => normalizePhone(o.userPhone) === p);
+
+        const totalApprovedPayment = userReqs
+          .filter(r => r.status === "approved")
+          .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+
+        const totalWaterLiters = userOrders
+          .reduce((sum, o) => sum + Number(o.dispensedLiters ?? o.targetLiters ?? 0), 0);
+
+        const totalSpentOnWater = userOrders
+          .reduce((sum, o) => sum + Number(o.cost ?? o.liveCost ?? 0), 0);
+
+        const reqStrips = userReqs.length
+          ? userReqs.map((r, idx) => {
+              const rKey = `cr_${custKey}_${r.id || idx}`;
+              const rOpen = openIds.has(rKey);
+              const imgSrc = getImageSrc(r);
+              return `
+                <div class="sub-strip">
+                  <div class="sub-strip-header" onclick="toggleRowStrip('${rKey}')">
+                    <span>پیمنٹ: Rs. ${Number(r.amount || 0).toFixed(2)} | ${formatTime(r.createdAt)}</span>
+                    <span class="badge ${r.status === "approved" ? "ok" : r.status === "rejected" ? "err" : "warn"}">${r.status || "pending"}</span>
+                  </div>
+                  <div id="body_${rKey}" class="sub-strip-body ${rOpen ? "" : "hidden"}">
+                    <div><strong>Trx ID:</strong> ${r.trxId || "-"}</div>
+                    <div><strong>اسٹیٹس:</strong> ${r.status || "pending"}</div>
+                    ${imgSrc ? `<img src="${imgSrc}" class="req-img" alt="اسکرین شاٹ" />` : ""}
+                  </div>
+                </div>
+              `;
+            }).join("")
+          : "<div style='color:#64748b;'>کوئی پیمنٹ درخواست نہیں۔</div>";
+
+        const orderStrips = userOrders.length
+          ? userOrders.map((o, idx) => {
+              const oKey = `co_${custKey}_${o.id || idx}`;
+              const oOpen = openIds.has(oKey);
+              const litersVal = Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2);
+              const costVal = Number(o.cost ?? o.liveCost ?? 0).toFixed(2);
+              const remVal = Number(o.remainingBalance ?? 0).toFixed(2);
+              return `
+                <div class="sub-strip">
+                  <div class="sub-strip-header" onclick="toggleRowStrip('${oKey}')">
+                    <span>مشین ${o.machineId || "-"} | ${litersVal} L | ${formatTime(o.createdAt)}</span>
+                    <span class="badge">${o.status || "-"}</span>
+                  </div>
+                  <div id="body_${oKey}" class="sub-strip-body ${oOpen ? "" : "hidden"}">
+                    <div><strong>وقت:</strong> ${formatTime(o.createdAt)}</div>
+                    <div><strong>پانی لیا:</strong> ${litersVal} لیٹر | <strong>رقم:</strong> Rs. ${costVal}</div>
+                    <div><strong>بقایا بیلنس:</strong> Rs. ${remVal}</div>
+                    <div><strong>اسٹیٹس / تفصیل:</strong> ${o.status || "-"}${o.endedAt ? " (ختم: " + formatTime(o.endedAt) + ")" : ""}</div>
+                  </div>
+                </div>
+              `;
+            }).join("")
+          : "<div style='color:#64748b;'>ابھی تک کوئی پانی نہیں لیا۔</div>";
+
+        return `
+          <div class="row-strip">
+            <div class="row-strip-header" onclick="toggleRowStrip('${custKey}')">
+              <div>
+                <div>${u.name || "-"} | ${p}</div>
+                <div style="font-size:12.5px;font-weight:500;color:#334155;margin-top:2px;">
+                  بیلنس: <strong>Rs. ${Number(u.balance || 0).toFixed(2)}</strong> |
+                  کل پانی: <strong>${totalWaterLiters.toFixed(2)} L</strong>
+                </div>
+              </div>
+              <span id="arrow_${custKey}">${isOpen ? "▲" : "▼"}</span>
+            </div>
+            <div id="body_${custKey}" class="row-strip-body ${isOpen ? "" : "hidden"}">
+              <div style="margin-bottom:8px;">
+                <strong>منظور شدہ پیمنٹ:</strong> Rs. ${totalApprovedPayment.toFixed(2)} |
+                <strong>کل خرچ رقم:</strong> Rs. ${totalSpentOnWater.toFixed(2)}
+              </div>
+              <div style="margin-top:6px;"><strong>پیمنٹ درخواستیں و اسکرین شاٹ:</strong>${reqStrips}</div>
+              <div style="margin-top:8px;"><strong>پانی لینے کی پٹیاں (وقت و تفصیل):</strong>${orderStrips}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderOrders() {
+      const box = document.getElementById("ordersList");
+      if (!allOrders.length) {
+        box.innerHTML = "کوئی آرڈر موجود نہیں۔";
+        return;
+      }
+      box.innerHTML = allOrders.slice(0, 40).map((o, idx) => {
+        const key = `ord_${o.id || idx}`;
+        const isOpen = openIds.has(key);
+        const litersVal = Number(o.dispensedLiters ?? o.targetLiters ?? 0).toFixed(2);
+        const costVal = Number(o.cost ?? o.liveCost ?? 0).toFixed(2);
+        const remVal = Number(o.remainingBalance ?? 0).toFixed(2);
+        return `
+          <div class="row-strip">
+            <div class="row-strip-header" onclick="toggleRowStrip('${key}')">
+              <span>مشین ${o.machineId || "-"} | ${o.userPhone || "-"} | ${litersVal} L | ${formatTime(o.createdAt)}</span>
+              <span class="badge">${o.status || "-"}</span>
+            </div>
+            <div id="body_${key}" class="row-strip-body ${isOpen ? "" : "hidden"}">
+              <div><strong>صارف:</strong> ${o.userName || "-"} (${o.userPhone || "-"})</div>
+              <div><strong>مشین:</strong> ${o.machineId || "-"} | <strong>وقت:</strong> ${formatTime(o.createdAt)}</div>
+              <div><strong>پانی لیا:</strong> ${litersVal} لیٹر | <strong>رقم:</strong> Rs. ${costVal} | <strong>بقایا:</strong> Rs. ${remVal}</div>
+              <div><strong>اسٹیٹس:</strong> ${o.status || "-"}${o.endedAt ? " (ختم: " + formatTime(o.endedAt) + ")" : ""}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    if (sessionStorage.getItem("water_atm_admin") === "1") {
+      showAdminPanel();
+    }
   </script>
 </body>
 </html>
